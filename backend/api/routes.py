@@ -45,7 +45,24 @@ class ChatRequest(BaseModel):
 @app.get("/api/health")
 async def health():
     return {"status": "ok", "version": "3.0.0"}
-
+@app.get("/api/players/search")
+async def search_players(q: str = ""):
+    if len(q) < 2:
+        return {"players": []}
+    try:
+        s = get_settings()
+        async with httpx.AsyncClient() as c:
+            r = await c.get(
+                f"{s.bdl_base_url}/players",
+                headers={"Authorization": s.bdl_api_key},
+                params={"search": q, "per_page": 10},
+                timeout=10.0,
+            )
+            data = r.json()
+        players = [p["first_name"] + " " + p["last_name"] for p in data.get("data", [])]
+        return {"players": players}
+    except Exception as e:
+        return {"players": []}
 
 # ── Player ─────────────────────────────────────────────────────────────────
 
