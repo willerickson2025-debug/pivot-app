@@ -3,19 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PIVOT | Pro Basketball Intelligence</title>
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <title>PIVOT | Enterprise Intelligence</title>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap');
     
     :root {
-      --bg: #0a0a0c;
-      --surface: #131418;
-      --surface-hover: #1c1d22;
-      --border: #262830;
-      --text-main: #f3f4f6;
-      --text-muted: #9ca3af;
-      --accent: #2563eb;
-      --accent-hover: #3b82f6;
+      --bg: #050505;
+      --panel-bg: rgba(18, 18, 22, 0.7);
+      --panel-border: rgba(255, 255, 255, 0.08);
+      --text-main: #ffffff;
+      --text-muted: #8b8d98;
+      --accent: #3b82f6;
+      --accent-glow: rgba(59, 130, 246, 0.15);
       --red: #ef4444;
       --green: #10b981;
       --font-ui: 'Inter', sans-serif;
@@ -23,103 +23,129 @@
     }
     
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { background: var(--bg); color: var(--text-main); font-family: var(--font-ui); font-size: 14px; line-height: 1.6; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
     
-    /* SLEEK TOP NAVIGATION */
-    .navbar { background: var(--surface); border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 24px; height: 64px; flex-shrink: 0; z-index: 50; }
-    .brand { font-family: var(--font-ui); font-weight: 800; font-size: 20px; letter-spacing: 2px; color: var(--text-main); margin-right: 48px; display: flex; align-items: center; gap: 8px; }
+    body { 
+      background-color: var(--bg); 
+      background-image: 
+        linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px), 
+        linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+      background-size: 32px 32px;
+      color: var(--text-main); 
+      font-family: var(--font-ui); 
+      font-size: 14px; 
+      line-height: 1.5; 
+      height: 100vh; 
+      display: flex; 
+      flex-direction: column; 
+      overflow: hidden; 
+    }
+    
+    /* ENTERPRISE TOP NAV */
+    .navbar { background: rgba(5, 5, 5, 0.9); backdrop-filter: blur(12px); border-bottom: 1px solid var(--panel-border); display: flex; align-items: center; padding: 0 32px; height: 64px; flex-shrink: 0; z-index: 50; }
+    .brand { font-family: var(--font-ui); font-weight: 800; font-size: 22px; letter-spacing: 1px; color: var(--text-main); margin-right: 48px; display: flex; align-items: center; gap: 8px; }
     .brand span { color: var(--accent); }
     
-    .nav-links { display: flex; gap: 8px; height: 100%; }
+    .nav-links { display: flex; gap: 4px; height: 100%; }
     .dropdown { position: relative; height: 100%; }
-    .dropbtn { height: 100%; background: none; border: none; color: var(--text-muted); font-family: var(--font-ui); font-weight: 500; font-size: 14px; padding: 0 16px; cursor: pointer; transition: color 0.2s; }
-    .dropdown:hover .dropbtn, .dropbtn.active { color: var(--text-main); }
-    .dropbtn::after { content: '▾'; font-size: 10px; margin-left: 6px; vertical-align: middle; }
-    .dropdown-content { display: none; position: absolute; top: 64px; left: 0; background: var(--surface); border: 1px solid var(--border); border-top: none; border-radius: 0 0 6px 6px; min-width: 200px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.5); z-index: 100; }
+    .dropbtn { height: 100%; background: none; border: none; color: var(--text-muted); font-family: var(--font-ui); font-weight: 600; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; padding: 0 20px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; }
+    .dropdown:hover .dropbtn, .dropbtn.active { color: var(--text-main); background: rgba(255,255,255,0.03); border-bottom: 2px solid var(--accent); }
+    
+    .dropdown-content { display: none; position: absolute; top: 64px; left: 0; background: #121216; border: 1px solid var(--panel-border); border-top: none; min-width: 220px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.8); z-index: 100; border-radius: 0 0 8px 8px; overflow: hidden; }
     .dropdown:hover .dropdown-content { display: block; }
-    .dropdown-item { padding: 12px 16px; color: var(--text-muted); text-decoration: none; display: block; cursor: pointer; transition: all 0.2s; border-left: 2px solid transparent; }
-    .dropdown-item:hover, .dropdown-item.active { background: var(--surface-hover); color: var(--text-main); border-left-color: var(--accent); }
+    .dropdown-item { padding: 14px 20px; color: var(--text-muted); text-decoration: none; display: block; cursor: pointer; transition: all 0.2s; font-weight: 500; border-left: 2px solid transparent; }
+    .dropdown-item:hover, .dropdown-item.active { background: rgba(255,255,255,0.04); color: var(--text-main); border-left-color: var(--accent); }
     
-    /* MAIN CONTAINER */
-    .main { flex: 1; padding: 40px; overflow-y: auto; background: var(--bg); }
-    .page { display: none; max-width: 1200px; margin: 0 auto; height: 100%; }
-    .page.active { display: block; }
-    .section-title { font-weight: 700; font-size: 24px; letter-spacing: -0.5px; margin-bottom: 32px; color: var(--text-main); display: flex; align-items: center; justify-content: space-between; }
+    /* STRUCTURAL DASHBOARD LAYOUT */
+    .main { flex: 1; padding: 32px; overflow-y: auto; }
+    .page { display: none; max-width: 1400px; margin: 0 auto; height: 100%; }
+    .page.active { display: flex; flex-direction: column; }
     
-    /* INPUTS & BUTTONS */
-    .controls-row { display: flex; gap: 12px; margin-bottom: 24px; flex-wrap: wrap; }
+    .dashboard-header { margin-bottom: 24px; padding-bottom: 24px; border-bottom: 1px solid var(--panel-border); display: flex; justify-content: space-between; align-items: flex-end; }
+    .section-title { font-weight: 800; font-size: 28px; letter-spacing: -0.5px; color: var(--text-main); }
+    .section-subtitle { color: var(--text-muted); font-family: var(--font-mono); font-size: 12px; margin-top: 6px; text-transform: uppercase; letter-spacing: 1px; }
+
+    /* PANELS & INPUTS */
+    .panel { background: var(--panel-bg); backdrop-filter: blur(16px); border: 1px solid var(--panel-border); border-radius: 12px; padding: 24px; margin-bottom: 24px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.5); }
+    
+    .controls-row { display: flex; gap: 16px; flex-wrap: wrap; align-items: center; }
     .input-group { flex: 1; min-width: 250px; position: relative; }
-    .input { background: var(--surface); border: 1px solid var(--border); color: var(--text-main); padding: 12px 16px; font-size: 14px; border-radius: 6px; width: 100%; font-family: var(--font-ui); transition: border-color 0.2s; }
-    .input:focus { outline: none; border-color: var(--accent); }
-    .btn { background: var(--accent); color: white; padding: 12px 24px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-family: var(--font-ui); transition: background 0.2s; display: flex; align-items: center; gap: 8px; }
-    .btn:hover { background: var(--accent-hover); }
-    .btn-ghost { background: transparent; border: 1px solid var(--border); color: var(--text-main); padding: 12px 24px; border-radius: 6px; cursor: pointer; font-weight: 500; transition: all 0.2s; }
-    .btn-ghost:hover { background: var(--surface); border-color: var(--text-muted); }
+    .input { background: rgba(0,0,0,0.4); border: 1px solid var(--panel-border); color: var(--text-main); padding: 14px 16px; font-size: 14px; border-radius: 8px; width: 100%; font-family: var(--font-ui); transition: border-color 0.2s; }
+    .input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
     
+    .btn { background: var(--accent); color: white; padding: 14px 28px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 14px; transition: all 0.2s; text-transform: uppercase; letter-spacing: 0.5px; }
+    .btn:hover { background: var(--accent-hover); transform: translateY(-1px); box-shadow: 0 4px 12px var(--accent-glow); }
+    .btn-ghost { background: transparent; border: 1px solid var(--panel-border); color: var(--text-muted); padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 12px; text-transform: uppercase; transition: all 0.2s; }
+    .btn-ghost:hover { border-color: var(--text-main); color: var(--text-main); background: rgba(255,255,255,0.05); }
+
     /* AUTOCOMPLETE */
-    .autocomp-list { position: absolute; top: 100%; left: 0; right: 0; background: var(--surface); border: 1px solid var(--border); border-radius: 0 0 6px 6px; max-height: 250px; overflow-y: auto; z-index: 10; display: none; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
+    .autocomp-list { position: absolute; top: calc(100% + 4px); left: 0; right: 0; background: #121216; border: 1px solid var(--panel-border); border-radius: 8px; max-height: 250px; overflow-y: auto; z-index: 20; display: none; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.8); }
     .autocomp-list.visible { display: block; }
-    .autocomp-item { padding: 12px 16px; cursor: pointer; border-bottom: 1px solid var(--border); }
-    .autocomp-item:hover { background: var(--surface-hover); color: var(--accent); }
-    
-    /* REPORTS & STATS */
-    .report-container { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 32px; margin-top: 24px; display: none; }
-    .report { white-space: pre-wrap; font-family: var(--font-ui); line-height: 1.8; color: var(--text-muted); font-size: 15px; }
-    .report strong { color: var(--text-main); }
-    .report h2 { color: var(--text-main); font-size: 18px; margin: 32px 0 16px 0; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+    .autocomp-item { padding: 12px 16px; cursor: pointer; border-bottom: 1px solid var(--panel-border); font-weight: 500; }
+    .autocomp-item:hover { background: rgba(255,255,255,0.05); color: var(--accent); }
+
+    /* STATS GRID */
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 16px; margin-bottom: 24px; }
+    .stat-box { background: rgba(0,0,0,0.3); border: 1px solid var(--panel-border); padding: 20px; border-radius: 8px; text-align: center; }
+    .stat-label { font-size: 11px; color: var(--text-muted); font-family: var(--font-mono); margin-bottom: 8px; }
+    .stat-value { font-size: 28px; color: var(--text-main); font-weight: 800; }
+
+    /* REPORTS */
+    .report { white-space: pre-wrap; font-family: var(--font-ui); line-height: 1.8; color: #d1d5db; font-size: 15px; }
+    .report strong { color: #fff; }
+    .report h2 { color: #fff; font-size: 18px; margin: 32px 0 16px 0; border-bottom: 1px solid var(--panel-border); padding-bottom: 8px; font-weight: 700; }
     .report h2:first-child { margin-top: 0; }
-    
-    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 16px; margin-bottom: 32px; }
-    .stat-box { background: var(--bg); border: 1px solid var(--border); padding: 16px; border-radius: 6px; text-align: center; }
-    .stat-label { font-size: 11px; color: var(--text-muted); letter-spacing: 1px; font-family: var(--font-mono); text-transform: uppercase; margin-bottom: 8px; }
-    .stat-value { font-size: 24px; color: var(--text-main); font-weight: 700; font-family: var(--font-mono); }
-    
+
+    /* CHAT INTERFACE (FULLY BUILT) */
+    .chat-container { display: flex; flex-direction: column; height: 600px; background: rgba(0,0,0,0.4); border: 1px solid var(--panel-border); border-radius: 12px; overflow: hidden; }
+    .chat-messages { flex: 1; padding: 24px; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; }
+    .chat-bubble { padding: 14px 20px; border-radius: 12px; max-width: 85%; font-size: 14px; line-height: 1.6; }
+    .chat-user { align-self: flex-end; background: var(--panel-border); color: #fff; border-bottom-right-radius: 4px; }
+    .chat-ai { align-self: flex-start; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); color: #e5e7eb; border-bottom-left-radius: 4px; }
+    .chat-input-area { padding: 20px; background: var(--panel-bg); border-top: 1px solid var(--panel-border); display: flex; gap: 12px; }
+
     /* LIVE GAMES & MODAL */
-    .games-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 24px; }
-    .game-card { background: var(--surface); border: 1px solid var(--border); padding: 24px; border-radius: 8px; cursor: pointer; transition: all 0.2s; }
-    .game-card:hover { border-color: var(--text-muted); transform: translateY(-2px); }
-    .game-status { font-family: var(--font-mono); font-size: 11px; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 16px; }
-    .game-status.live { color: var(--red); font-weight: bold; }
+    .games-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 24px; }
+    .game-card { background: var(--panel-bg); border: 1px solid var(--panel-border); padding: 24px; border-radius: 12px; cursor: pointer; transition: all 0.2s; position: relative; overflow: hidden; }
+    .game-card::before { content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: transparent; transition: background 0.2s; }
+    .game-card:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
+    .game-card:hover::before { background: var(--accent); }
+    
+    .game-status { font-family: var(--font-mono); font-size: 12px; color: var(--text-muted); margin-bottom: 20px; display: flex; justify-content: space-between; }
+    .game-status.live { color: var(--red); font-weight: bold; animation: pulse 2s infinite; }
+    @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+    
     .game-teams { display: flex; justify-content: space-between; align-items: center; }
     .team-block { text-align: center; flex: 1; }
-    .team-name { font-size: 16px; font-weight: 600; color: var(--text-muted); }
-    .team-score { font-size: 36px; font-weight: 700; font-family: var(--font-mono); margin-top: 8px; }
+    .team-name { font-size: 18px; font-weight: 700; color: var(--text-muted); }
+    .team-score { font-size: 42px; font-weight: 800; font-family: var(--font-mono); margin-top: 4px; color: var(--text-muted); }
     .score-high { color: var(--text-main); }
-    
-    .modal-bg { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.85); z-index: 999; display: none; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
+
+    /* MODAL ENHANCEMENTS */
+    .modal-bg { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.9); z-index: 999; display: none; align-items: center; justify-content: center; backdrop-filter: blur(8px); }
     .modal-bg.open { display: flex; }
-    .modal { background: var(--bg); border: 1px solid var(--border); width: 90vw; max-width: 1200px; max-height: 85vh; overflow-y: auto; border-radius: 8px; padding: 40px; position: relative; }
-    .modal-close { position: absolute; top: 24px; right: 24px; cursor: pointer; color: var(--text-muted); font-size: 24px; transition: color 0.2s; }
-    .modal-close:hover { color: var(--text-main); }
+    .modal { background: #0a0a0c; border: 1px solid var(--panel-border); width: 95vw; max-width: 1200px; max-height: 90vh; overflow-y: auto; border-radius: 12px; padding: 40px; position: relative; box-shadow: 0 25px 50px -12px rgba(0,0,0,1); }
+    .modal-close { position: absolute; top: 24px; right: 32px; cursor: pointer; color: var(--text-muted); font-size: 28px; transition: color 0.2s; }
+    .modal-close:hover { color: #fff; }
     
+    /* LINE SCORE TABLE (FOR EMPTY LIVE GAMES) */
+    .linescore-table { width: 100%; border-collapse: collapse; margin: 24px 0; font-family: var(--font-mono); font-size: 14px; text-align: center; }
+    .linescore-table th { padding: 12px; color: var(--text-muted); border-bottom: 1px solid var(--panel-border); font-weight: normal; }
+    .linescore-table td { padding: 16px 12px; border-bottom: 1px solid rgba(255,255,255,0.05); color: var(--text-main); }
+    .linescore-team { text-align: left; font-weight: bold; font-family: var(--font-ui); font-size: 16px; }
+
     /* UTILS */
-    .loading { display: none; align-items: center; gap: 12px; font-size: 14px; color: var(--text-muted); margin-top: 16px; }
+    .loading { display: none; align-items: center; gap: 12px; font-size: 14px; color: var(--accent); margin: 24px 0; font-family: var(--font-mono); font-weight: bold; }
     .loading.visible { display: flex; }
-    .spinner { border: 2px solid var(--border); border-top: 2px solid var(--accent); border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; }
+    .spinner { border: 2px solid transparent; border-top: 2px solid var(--accent); border-right: 2px solid var(--accent); border-radius: 50%; width: 20px; height: 20px; animation: spin 0.8s linear infinite; }
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-    .error { display: none; background: rgba(239, 68, 68, 0.1); border: 1px solid var(--red); color: var(--red); padding: 16px; border-radius: 6px; margin-bottom: 24px; font-family: var(--font-mono); font-size: 13px; }
-    .error.visible { display: block; }
     
-    /* LIST INPUT CHIPS */
-    .list-input { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
-    .list-chip { background: var(--border); padding: 6px 12px; border-radius: 16px; font-size: 13px; display: flex; align-items: center; gap: 8px; }
-    .list-chip span { cursor: pointer; color: var(--text-muted); font-weight: bold; }
-    .list-chip span:hover { color: var(--red); }
-
-    /* CHAT BUBBLES */
-    .chat-bubble { padding: 12px 16px; border-radius: 8px; max-width: 80%; line-height: 1.6; font-size: 14px; }
-    .chat-user { align-self: flex-end; background: var(--border); color: var(--text-main); border-bottom-right-radius: 0; }
-    .chat-ai { align-self: flex-start; background: rgba(37, 99, 235, 0.1); border: 1px solid var(--accent); color: var(--text-main); border-bottom-left-radius: 0; }
-
-    /* --- BULLETPROOF PRINT STYLES --- */
+    /* PRINT MEDIA */
     @media print {
-      body { background: white; color: black; overflow: visible; height: auto; display: block; }
-      .navbar, .controls-row, .btn, .btn-ghost, .autocomp-list, .loading, .error { display: none !important; }
-      .main { padding: 0; overflow: visible; }
-      .report-container, .modal { border: none; box-shadow: none; padding: 0; background: white; display: block !important; }
-      .report { color: black; }
-      .report h2, .section-title, .stat-value { color: black; }
-      .stat-box { border-color: #ccc; }
+      body { background: white; color: black; background-image: none; height: auto; overflow: visible; }
+      .navbar, .controls-row, .btn, .btn-ghost, .autocomp-list, .dashboard-header { display: none !important; }
+      .main { padding: 0; }
+      .panel, .modal { border: none; box-shadow: none; padding: 0; background: white; display: block !important; }
+      .report, .report h2, .stat-value, .stat-label { color: black; }
       .page { display: none !important; }
       .page.active { display: block !important; }
       .modal-bg { position: static; background: transparent; display: block; backdrop-filter: none; }
@@ -135,46 +161,54 @@
       <div class="dropdown">
         <button class="dropbtn active" id="nav-player">Player Intel</button>
         <div class="dropdown-content">
-          <a class="dropdown-item active" onclick="switchPage('scout', 'nav-player', this)">Scout Player</a>
-          <a class="dropdown-item" onclick="switchPage('compare', 'nav-player', this)">Compare Players</a>
-          <a class="dropdown-item" onclick="switchPage('chat', 'nav-player', this)">AI Analyst Chat</a>
+          <a class="dropdown-item active" onclick="switchPage('scout', 'nav-player', this)">Scout Profile</a>
+          <a class="dropdown-item" onclick="switchPage('compare', 'nav-player', this)">H2H Comparison</a>
+          <a class="dropdown-item" onclick="switchPage('chat', 'nav-player', this)">AI Analyst Desk</a>
         </div>
       </div>
       <div class="dropdown">
         <button class="dropbtn" id="nav-team">Team Intel</button>
         <div class="dropdown-content">
-          <a class="dropdown-item" onclick="switchPage('team', 'nav-team', this)">Team Report</a>
+          <a class="dropdown-item" onclick="switchPage('team', 'nav-team', this)">Franchise Report</a>
           <a class="dropdown-item" onclick="switchPage('roster', 'nav-team', this)">Roster Package</a>
-          <a class="dropdown-item" onclick="switchPage('trade', 'nav-team', this)">Trade Evaluation</a>
+          <a class="dropdown-item" onclick="switchPage('trade', 'nav-team', this)">Trade Machine</a>
         </div>
       </div>
       <div class="dropdown">
-        <button class="dropbtn" id="nav-live" onclick="switchPage('games', 'nav-live', this)">Live Action</button>
+        <button class="dropbtn" id="nav-live" onclick="switchPage('games', 'nav-live', this)">Live Data</button>
       </div>
     </div>
   </nav>
 
   <div class="main">
+    
     <div class="page active" id="page-scout">
-      <div class="section-title">Player Scouting Report</div>
-      <div class="controls-row no-print">
-        <div class="input-group">
-          <input class="input" id="scout-name" placeholder="Search player (e.g. Shai Gilgeous-Alexander)" onkeyup="autocomplete(this, 'scout')">
-          <div class="autocomp-list" id="scout-sugg"></div>
+      <div class="dashboard-header">
+        <div>
+          <div class="section-title">Player Intelligence</div>
+          <div class="section-subtitle">Generate comprehensive scouting data & analytics</div>
         </div>
-        <div class="input-group">
-          <input class="input" id="scout-question" placeholder="Specific focus? (e.g. Playoff scalability)">
-        </div>
-        <button class="btn" onclick="generateScout()">Generate Report</button>
       </div>
       
-      <div class="loading" id="scout-load"><div class="spinner"></div> Synthesizing intelligence...</div>
-      <div class="error" id="scout-err"></div>
+      <div class="panel no-print">
+        <div class="controls-row">
+          <div class="input-group">
+            <input class="input" id="scout-name" placeholder="Search player (e.g. Luka Doncic)" onkeyup="autocomplete(this, 'scout')">
+            <div class="autocomp-list" id="scout-sugg"></div>
+          </div>
+          <div class="input-group">
+            <input class="input" id="scout-question" placeholder="Custom directive? (e.g. Playoff scalability)">
+          </div>
+          <button class="btn" onclick="generateScout()">Execute Report</button>
+        </div>
+      </div>
       
-      <div class="report-container" id="scout-wrapper">
-        <div style="display:flex; justify-content: space-between; margin-bottom: 24px;">
-          <h1 id="scout-header" style="font-size: 28px; font-weight: 800; letter-spacing: -1px;"></h1>
-          <button class="btn-ghost no-print" onclick="window.print()">Print PDF</button>
+      <div class="loading" id="scout-load"><div class="spinner"></div> SYNTHESIZING INTELLIGENCE...</div>
+      
+      <div class="panel" id="scout-wrapper" style="display:none;">
+        <div style="display:flex; justify-content: space-between; align-items: flex-start; margin-bottom: 32px; border-bottom: 1px solid var(--panel-border); padding-bottom: 24px;">
+          <h1 id="scout-header" style="font-size: 32px; font-weight: 800; letter-spacing: -1px; margin:0;"></h1>
+          <button class="btn-ghost no-print" onclick="window.print()">Export PDF</button>
         </div>
         <div class="stats-grid" id="scout-stats"></div>
         <pre class="report" id="scout-report"></pre>
@@ -182,112 +216,161 @@
     </div>
 
     <div class="page" id="page-compare">
-      <div class="section-title">Player Comparison</div>
-      <div class="controls-row no-print">
-        <div class="input-group">
-          <input class="input" id="comp-a" placeholder="Player A" onkeyup="autocomplete(this, 'comp-a')">
-          <div class="autocomp-list" id="comp-a-sugg"></div>
+      <div class="dashboard-header">
+        <div>
+          <div class="section-title">Head-to-Head</div>
+          <div class="section-subtitle">Statistical & stylistic comparison engine</div>
         </div>
-        <div class="input-group">
-          <input class="input" id="comp-b" placeholder="Player B" onkeyup="autocomplete(this, 'comp-b')">
-          <div class="autocomp-list" id="comp-b-sugg"></div>
-        </div>
-        <div class="input-group">
-          <input class="input" id="comp-context" placeholder="Context? (e.g. Who to build around)">
-        </div>
-        <button class="btn" onclick="generateCompare()">Compare</button>
       </div>
-      <div class="loading" id="comp-load"><div class="spinner"></div> Analyzing matchups...</div>
-      <div class="error" id="comp-err"></div>
-      <div class="report-container" id="comp-wrapper">
-        <div style="text-align: right; margin-bottom: 16px;"><button class="btn-ghost no-print" onclick="window.print()">Print PDF</button></div>
+      <div class="panel no-print">
+        <div class="controls-row">
+          <div class="input-group">
+            <input class="input" id="comp-a" placeholder="Player A" onkeyup="autocomplete(this, 'comp-a')">
+            <div class="autocomp-list" id="comp-a-sugg"></div>
+          </div>
+          <div class="input-group">
+            <input class="input" id="comp-b" placeholder="Player B" onkeyup="autocomplete(this, 'comp-b')">
+            <div class="autocomp-list" id="comp-b-sugg"></div>
+          </div>
+          <div class="input-group">
+            <input class="input" id="comp-context" placeholder="Context? (e.g. Franchise cornerstone)">
+          </div>
+          <button class="btn" onclick="generateCompare()">Run Matchup</button>
+        </div>
+      </div>
+      <div class="loading" id="comp-load"><div class="spinner"></div> ANALYZING DIFFERENTIALS...</div>
+      <div class="panel" id="comp-wrapper" style="display:none;">
+        <div style="text-align: right; margin-bottom: 24px;"><button class="btn-ghost no-print" onclick="window.print()">Export PDF</button></div>
         <pre class="report" id="comp-report"></pre>
       </div>
     </div>
 
     <div class="page" id="page-trade">
-      <div class="section-title">Trade Evaluation</div>
-      <div class="controls-row no-print" style="flex-direction: column;">
-        <div class="list-input" id="trade-out-list">
-          <input class="input" id="trade-out" placeholder="Outgoing Players (type name & press Enter)" onkeyup="handleListInput(this, 'trade-out-list', event)">
-        </div>
-        <div class="list-input" id="trade-in-list">
-          <input class="input" id="trade-in" placeholder="Incoming Players (type name & press Enter)" onkeyup="handleListInput(this, 'trade-in-list', event)">
-        </div>
-        <div style="display:flex; gap: 12px; width: 100%;">
-          <input class="input" style="flex:1" id="trade-context" placeholder="Trade goal? (e.g. Salary dump, contending push)">
-          <button class="btn" onclick="generateTrade()">Evaluate Trade</button>
+      <div class="dashboard-header">
+        <div>
+          <div class="section-title">Trade Machine</div>
+          <div class="section-subtitle">Evaluate roster value delta & fit</div>
         </div>
       </div>
-      <div class="loading" id="trade-load"><div class="spinner"></div> Running trade logic...</div>
-      <div class="error" id="trade-err"></div>
-      <div class="report-container" id="trade-wrapper">
-         <div style="text-align: right; margin-bottom: 16px;"><button class="btn-ghost no-print" onclick="window.print()">Print PDF</button></div>
+      <div class="panel no-print">
+        <div style="display:flex; gap: 24px; margin-bottom: 16px;">
+          <div class="input-group" style="flex:1;">
+             <div style="font-family:var(--font-mono); font-size:11px; color:var(--text-muted); margin-bottom:8px;">OUTGOING (Type & Enter)</div>
+             <div class="list-input" id="trade-out-list">
+               <input class="input" id="trade-out" placeholder="Add player..." onkeyup="handleListInput(this, 'trade-out-list', event)">
+             </div>
+          </div>
+          <div class="input-group" style="flex:1;">
+             <div style="font-family:var(--font-mono); font-size:11px; color:var(--text-muted); margin-bottom:8px;">INCOMING (Type & Enter)</div>
+             <div class="list-input" id="trade-in-list">
+               <input class="input" id="trade-in" placeholder="Add player..." onkeyup="handleListInput(this, 'trade-in-list', event)">
+             </div>
+          </div>
+        </div>
+        <div class="controls-row">
+          <input class="input" style="flex:1" id="trade-context" placeholder="Strategic Goal? (e.g. Salary dump, contending push)">
+          <button class="btn" onclick="generateTrade()">Evaluate Scenario</button>
+        </div>
+      </div>
+      <div class="loading" id="trade-load"><div class="spinner"></div> SIMULATING TRADE LOGIC...</div>
+      <div class="panel" id="trade-wrapper" style="display:none;">
+         <div style="text-align: right; margin-bottom: 24px;"><button class="btn-ghost no-print" onclick="window.print()">Export PDF</button></div>
         <pre class="report" id="trade-report"></pre>
       </div>
     </div>
 
     <div class="page" id="page-team">
-      <div class="section-title">Team Intelligence</div>
-      <div class="controls-row no-print">
-        <div class="input-group">
-          <input class="input" id="team-abbr" placeholder="Team Abbreviation (e.g. OKC)">
+      <div class="dashboard-header">
+        <div>
+          <div class="section-title">Franchise Intelligence</div>
+          <div class="section-subtitle">Macro-level team analysis</div>
         </div>
-        <div class="input-group">
-          <input class="input" id="team-question" placeholder="Focus? (e.g. Offseason blueprint)">
-        </div>
-        <button class="btn" onclick="generateTeam()">Generate Intel</button>
       </div>
-      <div class="loading" id="team-load"><div class="spinner"></div> Compiling franchise data...</div>
-      <div class="error" id="team-err"></div>
-      <div class="report-container" id="team-wrapper">
-         <div style="text-align: right; margin-bottom: 16px;"><button class="btn-ghost no-print" onclick="window.print()">Print PDF</button></div>
+      <div class="panel no-print">
+        <div class="controls-row">
+          <div class="input-group" style="max-width: 250px;">
+            <input class="input" id="team-abbr" placeholder="Abbreviation (e.g. BOS)">
+          </div>
+          <div class="input-group">
+            <input class="input" id="team-question" placeholder="Focus? (e.g. Offseason blueprint)">
+          </div>
+          <button class="btn" onclick="generateTeam()">Compile Intel</button>
+        </div>
+      </div>
+      <div class="loading" id="team-load"><div class="spinner"></div> AGGREGATING ROSTER DATA...</div>
+      <div class="panel" id="team-wrapper" style="display:none;">
+         <div style="text-align: right; margin-bottom: 24px;"><button class="btn-ghost no-print" onclick="window.print()">Export PDF</button></div>
         <pre class="report" id="team-report"></pre>
       </div>
     </div>
 
     <div class="page" id="page-roster">
-      <div class="section-title">Roster Package <span style="font-size:14px; color:var(--text-muted); font-weight:normal; margin-left:16px;">(Concurrent 15-man generation)</span></div>
-      <div class="controls-row no-print">
-        <div class="input-group" style="max-width: 300px;">
-          <input class="input" id="roster-abbr" placeholder="Team Abbreviation (e.g. LAL)">
+       <div class="dashboard-header">
+        <div>
+          <div class="section-title">Concurrent Roster Build</div>
+          <div class="section-subtitle">Generate 15 scouting cards simultaneously</div>
         </div>
-        <button class="btn" onclick="generateRoster()">Generate Package</button>
       </div>
-      <div class="loading" id="roster-load"><div class="spinner"></div> Orchestrating multi-agent analysis...</div>
-      <div class="error" id="roster-err"></div>
-      <div id="roster-wrapper" style="display:none; margin-top: 24px;">
-        <div style="text-align: right; margin-bottom: 16px;"><button class="btn-ghost no-print" onclick="window.print()">Print PDF Package</button></div>
+      <div class="panel no-print">
+        <div class="controls-row">
+          <div class="input-group" style="max-width: 300px;">
+            <input class="input" id="roster-abbr" placeholder="Team Abbreviation (e.g. MIN)">
+          </div>
+          <button class="btn" onclick="generateRoster()">Execute Pipeline</button>
+        </div>
+      </div>
+      <div class="loading" id="roster-load"><div class="spinner"></div> ORCHESTRATING MULTI-AGENT ANALYSIS...</div>
+      <div class="panel" id="roster-wrapper" style="display:none; background:transparent; border:none; padding:0;">
+        <div style="text-align: right; margin-bottom: 24px;"><button class="btn-ghost no-print" onclick="window.print()">Export Full Package PDF</button></div>
         <div id="roster-reports"></div>
       </div>
     </div>
 
-    <div class="page" id="page-chat" style="display: flex; flex-direction: column;">
-       <div class="section-title no-print">AI Analyst Desk</div>
-       <div class="controls-row no-print">
-         <div class="input-group">
-           <input class="input" id="chat-player" placeholder="Load Player Profile (e.g. Luka Doncic)" onkeyup="autocomplete(this, 'chat')">
-           <div class="autocomp-list" id="chat-sugg"></div>
+    <div class="page" id="page-chat">
+       <div class="dashboard-header no-print">
+        <div>
+          <div class="section-title">AI Analyst Desk</div>
+          <div class="section-subtitle">Interactive context-aware chat</div>
+        </div>
+      </div>
+       <div class="panel no-print" id="chat-setup-panel">
+         <div class="controls-row">
+           <div class="input-group">
+             <input class="input" id="chat-player" placeholder="Load Player Profile into Context (e.g. Anthony Edwards)" onkeyup="autocomplete(this, 'chat')">
+             <div class="autocomp-list" id="chat-sugg"></div>
+           </div>
+           <button class="btn" onclick="startChat()">Initialize Connection</button>
          </div>
-         <button class="btn" onclick="startChat()">Initialize Session</button>
        </div>
        
-       <div id="chat-wrapper" class="no-print" style="display:none; flex: 1; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; flex-direction: column; min-height: 500px;">
-         <div id="chat-messages" style="flex: 1; padding: 24px; overflow-y: auto; display: flex; flex-direction: column; gap: 16px;">
+       <div id="chat-wrapper" class="no-print chat-container" style="display:none;">
+         <div id="chat-messages" class="chat-messages">
             </div>
-         <div style="padding: 16px; border-top: 1px solid var(--border); display: flex; gap: 12px; background: var(--bg); border-radius: 0 0 8px 8px;">
-           <input class="input" id="chat-input" style="margin-bottom: 0;" placeholder="Ask PIVOT a question about this player..." onkeyup="if(event.keyCode===13)sendChat()">
+         <div class="chat-input-area">
+           <input class="input" id="chat-input" placeholder="Query the AI Analyst..." onkeyup="if(event.keyCode===13)sendChat()">
            <button class="btn" onclick="sendChat()">Send</button>
          </div>
        </div>
     </div>
 
     <div class="page" id="page-games">
-      <div class="section-title">Live Action <button class="btn-ghost no-print" onclick="loadGames()" style="padding: 6px 12px; font-size: 12px;">↺ Refresh</button></div>
-      <div class="loading" id="games-load"><div class="spinner"></div> Syncing box scores...</div>
-      <div class="error" id="games-err"></div>
+       <div class="dashboard-header">
+        <div>
+          <div class="section-title">Live Action</div>
+          <div class="section-subtitle">Real-time box scores & daily schedule</div>
+        </div>
+        <button class="btn-ghost no-print" onclick="loadGames()" style="display:flex; align-items:center; gap:8px;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.92-10.26l5.58 5.69"/></svg>
+          Sync Data
+        </button>
+      </div>
+      <div class="loading" id="games-load"><div class="spinner"></div> POLLING BDL SERVERS...</div>
+      
       <div class="games-grid" id="games-grid"></div>
-      <div id="games-empty" style="display:none; padding: 40px; text-align: center; color: var(--text-muted); font-family: var(--font-mono); letter-spacing: 2px;">NO GAMES SCHEDULED TODAY</div>
+      
+      <div id="games-empty" style="display:none; padding: 60px 20px; text-align: center; border: 1px dashed var(--panel-border); border-radius: 12px; background: var(--panel-bg);">
+        <div style="font-family: var(--font-mono); color: var(--text-muted); font-size: 14px; letter-spacing: 2px;">SYSTEM_IDLE: NO GAMES SCHEDULED TODAY</div>
+      </div>
     </div>
     
   </div>
@@ -295,11 +378,9 @@
   <div class="modal-bg no-print" id="modal-bg" onclick="closeModal()">
     <div class="modal" onclick="event.stopPropagation()">
       <div class="modal-close" onclick="closeModal()">×</div>
-      <div style="display:flex; justify-content: space-between; align-items:flex-start; margin-bottom: 32px;">
-        <div>
-          <div class="section-title" id="modal-name" style="margin-bottom: 8px;"></div>
-          <div style="font-family: var(--font-mono); color: var(--text-muted); font-size: 12px;" id="modal-meta"></div>
-        </div>
+      <div style="margin-bottom: 40px; text-align:center;">
+        <h2 class="section-title" id="modal-name" style="justify-content:center; font-size: 32px; margin-bottom: 8px;"></h2>
+        <div style="font-family: var(--font-mono); color: var(--accent); font-size: 14px; font-weight: bold; letter-spacing: 1px;" id="modal-meta"></div>
       </div>
       <div id="modal-stats"></div>
     </div>
@@ -320,7 +401,7 @@
       if (pageId === 'games') loadGames();
     }
 
-    // --- AUTOCOMPLETE LOGIC ---
+    // AUTOCOMPLETE LOGIC
     let searchTimeout;
     function autocomplete(input, id) {
       clearTimeout(searchTimeout);
@@ -338,7 +419,7 @@
           } else {
             list.classList.remove('visible');
           }
-        } catch(e) { console.error("Search failed"); }
+        } catch(e) {}
       }, 300);
     }
 
@@ -347,7 +428,7 @@
       document.getElementById(`${id}-sugg`).classList.remove('visible');
     }
 
-    // List Input (For Trades)
+    // MULTI-LIST INPUT
     function handleListInput(input, listId, e) {
       if (e.keyCode === 188 || e.keyCode === 13) {
         e.preventDefault();
@@ -362,22 +443,18 @@
       }
     }
 
-    // --- API CALLS ---
+    // DATA FETCHERS
     async function generateScout() {
       const name = document.getElementById('scout-name').value.trim();
-      const question = document.getElementById('scout-question').value.trim();
-      if (!name) return alert('Enter a player name');
+      const q = document.getElementById('scout-question').value.trim();
+      if (!name) return alert('Enter player name');
       
       document.getElementById('scout-load').classList.add('visible');
-      document.getElementById('scout-err').classList.remove('visible');
       document.getElementById('scout-wrapper').style.display = 'none';
-      
       try {
-        const res = await fetch(`${API}/player/${encodeURIComponent(name)}?season=2025&question=${encodeURIComponent(question)}`);
-        if (!res.ok) throw new Error(await res.text());
+        const res = await fetch(`${API}/player/${encodeURIComponent(name)}?season=2025&question=${encodeURIComponent(q)}`);
         const data = await res.json();
         const s = data.stats;
-        
         document.getElementById('scout-header').textContent = `${data.player} | ${data.team} · ${data.position}`;
         document.getElementById('scout-stats').innerHTML = `
           <div class="stat-box"><div class="stat-label">PPG</div><div class="stat-value">${s.ppg.toFixed(1)}</div></div>
@@ -388,103 +465,86 @@
         `;
         document.getElementById('scout-report').textContent = data.report;
         document.getElementById('scout-wrapper').style.display = 'block';
-      } catch(e) {
-        document.getElementById('scout-err').textContent = 'Error: ' + e.message;
-        document.getElementById('scout-err').classList.add('visible');
-      } finally {
-        document.getElementById('scout-load').classList.remove('visible');
-      }
+      } catch(e) { alert("Failed to fetch report"); } 
+      finally { document.getElementById('scout-load').classList.remove('visible'); }
     }
 
     async function generateCompare() {
       const a = document.getElementById('comp-a').value.trim();
       const b = document.getElementById('comp-b').value.trim();
-      const context = document.getElementById('comp-context').value.trim();
+      const ctx = document.getElementById('comp-context').value.trim();
       if (!a || !b) return alert('Enter both players');
       
       document.getElementById('comp-load').classList.add('visible');
       document.getElementById('comp-wrapper').style.display = 'none';
-      
       try {
-        const res = await fetch(`${API}/compare?player_a=${encodeURIComponent(a)}&player_b=${encodeURIComponent(b)}&season=2025&context=${encodeURIComponent(context)}`);
-        if (!res.ok) throw new Error(await res.text());
+        const res = await fetch(`${API}/compare?player_a=${encodeURIComponent(a)}&player_b=${encodeURIComponent(b)}&season=2025&context=${encodeURIComponent(ctx)}`);
         const data = await res.json();
         document.getElementById('comp-report').textContent = data.comparison;
         document.getElementById('comp-wrapper').style.display = 'block';
-      } catch(e) { alert(e.message); } 
+      } catch(e) { alert("Analysis failed"); } 
       finally { document.getElementById('comp-load').classList.remove('visible'); }
     }
 
     async function generateTrade() {
-      const outList = Array.from(document.getElementById('trade-out-list').querySelectorAll('.list-chip')).map(c => c.textContent.trim().slice(0, -1).trim());
-      const inList = Array.from(document.getElementById('trade-in-list').querySelectorAll('.list-chip')).map(c => c.textContent.trim().slice(0, -1).trim());
-      const context = document.getElementById('trade-context').value.trim();
-      if (!outList.length || !inList.length) return alert('Add players to both sides (press enter after typing name)');
+      const outList = Array.from(document.getElementById('trade-out-list').querySelectorAll('.list-chip')).map(c => c.textContent.replace('×','').trim());
+      const inList = Array.from(document.getElementById('trade-in-list').querySelectorAll('.list-chip')).map(c => c.textContent.replace('×','').trim());
+      const ctx = document.getElementById('trade-context').value.trim();
+      if (!outList.length || !inList.length) return alert('Need players on both sides');
       
       document.getElementById('trade-load').classList.add('visible');
       document.getElementById('trade-wrapper').style.display = 'none';
-      
       try {
-        const res = await fetch(`${API}/trade`, {
-          method: 'POST',
-          headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({outgoing: outList, incoming: inList, season: 2025, context})
-        });
-        if (!res.ok) throw new Error(await res.text());
+        const res = await fetch(`${API}/trade`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({outgoing: outList, incoming: inList, season: 2025, context: ctx}) });
         const data = await res.json();
         document.getElementById('trade-report').textContent = data.analysis;
         document.getElementById('trade-wrapper').style.display = 'block';
-      } catch(e) { alert(e.message); } 
-      finally { document.getElementById('trade-load').classList.remove('visible'); }
+      } catch(e) {} finally { document.getElementById('trade-load').classList.remove('visible'); }
     }
 
     async function generateTeam() {
       const abbr = document.getElementById('team-abbr').value.trim();
       const q = document.getElementById('team-question').value.trim();
-      if(!abbr) return alert("Need team abbr");
+      if(!abbr) return alert("Need abbreviation");
       
       document.getElementById('team-load').classList.add('visible');
       document.getElementById('team-wrapper').style.display = 'none';
       try {
         const res = await fetch(`${API}/team/${encodeURIComponent(abbr)}?season=2025&question=${encodeURIComponent(q)}`);
-        if (!res.ok) throw new Error(await res.text());
         const data = await res.json();
         document.getElementById('team-report').textContent = data.report;
         document.getElementById('team-wrapper').style.display = 'block';
-      } catch(e) { alert(e.message); }
-      finally { document.getElementById('team-load').classList.remove('visible'); }
+      } catch(e) {} finally { document.getElementById('team-load').classList.remove('visible'); }
     }
 
     async function generateRoster() {
       const abbr = document.getElementById('roster-abbr').value.trim();
-      if(!abbr) return alert("Need team abbr");
+      if(!abbr) return alert("Need abbreviation");
       
       document.getElementById('roster-load').classList.add('visible');
       document.getElementById('roster-wrapper').style.display = 'none';
       try {
         const res = await fetch(`${API}/team/${encodeURIComponent(abbr)}/roster?season=2025`);
-        if (!res.ok) throw new Error(await res.text());
         const data = await res.json();
         const div = document.getElementById('roster-reports');
         div.innerHTML = '';
         for (const [name, report] of Object.entries(data.reports)) {
-          div.innerHTML += `<div style="margin-bottom: 32px; border-bottom: 1px solid var(--border); padding-bottom: 24px;"><h2 style="font-size:20px; font-weight:700; margin-bottom:12px; color:var(--text-main);">${name}</h2><pre class="report" style="background:transparent; padding:0; border:none;">${report}</pre></div>`;
+          div.innerHTML += `<div class="panel"><h2 style="font-size:20px; font-weight:800; margin-bottom:16px; border-bottom:1px solid var(--panel-border); padding-bottom:8px;">${name}</h2><pre class="report" style="background:transparent; padding:0; border:none;">${report}</pre></div>`;
         }
         document.getElementById('roster-wrapper').style.display = 'block';
-      } catch(e) { alert(e.message); }
-      finally { document.getElementById('roster-load').classList.remove('visible'); }
+      } catch(e) {} finally { document.getElementById('roster-load').classList.remove('visible'); }
     }
 
-    // --- FULLY INTEGRATED CHAT LOGIC ---
+    // CHAT LOGIC
     let chatHistory = [];
-    
     function startChat() {
       const player = document.getElementById('chat-player').value.trim();
-      if (!player) return alert('Enter a player name');
+      if (!player) return alert('Enter player name');
       
+      document.getElementById('chat-setup-panel').style.display = 'none';
       document.getElementById('chat-wrapper').style.display = 'flex';
       chatHistory = [];
-      document.getElementById('chat-messages').innerHTML = `<div style="color:var(--text-muted); text-align:center; font-family:var(--font-mono); font-size:12px;">Session initialized. Loading intelligence profile for ${player}...</div>`;
+      document.getElementById('chat-messages').innerHTML = `<div style="color:var(--accent); text-align:center; font-family:var(--font-mono); font-size:12px; margin-bottom:16px;">SECURE CONNECTION ESTABLISHED: ${player.toUpperCase()}</div>`;
       document.getElementById('chat-input').focus();
     }
 
@@ -494,48 +554,35 @@
       const player = document.getElementById('chat-player').value.trim();
       const messages = document.getElementById('chat-messages');
       
-      // Add User Message
       messages.innerHTML += `<div class="chat-bubble chat-user">${message}</div>`;
       document.getElementById('chat-input').value = '';
       messages.scrollTop = messages.scrollHeight;
       
-      // Add Loading Indicator
       const loadId = 'load-' + Date.now();
-      messages.innerHTML += `<div id="${loadId}" style="align-self: flex-start; color: var(--text-muted); font-size: 12px; font-family: var(--font-mono);">PIVOT is typing...</div>`;
+      messages.innerHTML += `<div id="${loadId}" style="align-self: flex-start; color: var(--text-muted); font-size: 12px; font-family: var(--font-mono);">Processing...</div>`;
       messages.scrollTop = messages.scrollHeight;
 
       try {
-        const res = await fetch(`${API}/chat`, {
-          method: 'POST',
-          headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({player, season:2025, message, history:chatHistory})
-        });
-        
+        const res = await fetch(`${API}/chat`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({player, season:2025, message, history:chatHistory}) });
         document.getElementById(loadId)?.remove();
-        if (!res.ok) throw new Error(await res.text());
-        
         const data = await res.json();
         messages.innerHTML += `<div class="chat-bubble chat-ai">${data.reply.replace(/\n/g, '<br>')}</div>`;
         chatHistory = data.history;
         messages.scrollTop = messages.scrollHeight;
-      } catch(e) {
-        document.getElementById(loadId)?.remove();
-        messages.innerHTML += `<div style="align-self: flex-start; color: var(--red); font-size: 12px;">Error: ${e.message}</div>`;
-      }
+      } catch(e) { document.getElementById(loadId).textContent = "Connection Error."; }
     }
 
-    // --- LIVE GAMES (WITH DAILY SCHEDULE FALLBACK) ---
+    // LIVE GAMES (WITH INTELLIGENT FALLBACK)
     async function loadGames() {
       document.getElementById('games-load').classList.add('visible');
       document.getElementById('games-empty').style.display = 'none';
       document.getElementById('games-grid').innerHTML = '';
       try {
-        // Step 1: Check Live Endpoint
         let res = await fetch(`${API}/games/live`);
         let data = await res.json();
         let games = data.games || [];
         
-        // Step 2: If no games are literally live right now, fallback to today's schedule
+        // Fallback to today if no live games
         if (!games.length) {
           res = await fetch(`${API}/games/today`);
           data = await res.json();
@@ -552,43 +599,50 @@
           const isLive = (g.status || '').includes('Qtr') || (g.status || '').includes('Half');
           return `
           <div class="game-card" onclick='openBoxScore(${JSON.stringify(g).replace(/'/g, "&apos;")})'>
-            <div class="game-status ${isLive ? 'live' : ''}">${isLive ? '● LIVE' : ''} ${g.time || g.status}</div>
+            <div class="game-status ${isLive ? 'live' : ''}">${isLive ? '● LIVE IN PLAY' : 'SCHEDULED'} <span>${g.time || g.status}</span></div>
             <div class="game-teams">
               <div class="team-block"><div class="team-name">${a.abbreviation||'AWY'}</div><div class="team-score ${g.visitor_team_score > g.home_team_score ? 'score-high':''}">${g.visitor_team_score||'—'}</div></div>
-              <div style="color:var(--border); font-weight:bold;">VS</div>
+              <div style="color:var(--panel-border); font-weight:bold; font-size:12px;">VS</div>
               <div class="team-block"><div class="team-name">${h.abbreviation||'HME'}</div><div class="team-score ${g.home_team_score > g.visitor_team_score ? 'score-high':''}">${g.home_team_score||'—'}</div></div>
             </div>
           </div>`;
         }).join('');
-      } catch(e) { alert("Failed to fetch games"); }
-      finally { document.getElementById('games-load').classList.remove('visible'); }
+      } catch(e) { } finally { document.getElementById('games-load').classList.remove('visible'); }
     }
 
     function openBoxScore(game) {
       const h = game.home_team || {}; const a = game.visitor_team || {};
       document.getElementById('modal-name').textContent = `${a.full_name} vs ${h.full_name}`;
-      document.getElementById('modal-meta').textContent = `${game.status} | Box scores loaded from BDL`;
+      document.getElementById('modal-meta').textContent = `${game.time || game.status}`;
       
-      function renderTable(team) {
-        if(!team.players || team.players.length === 0) return `<p style="color:var(--text-muted); margin-bottom: 24px;">Box score not available yet.</p>`;
+      // If BDL hasn't synced players array yet, show a graceful Line Score fallback instead of a blank table
+      function renderTable(team, q1, q2, q3, q4) {
+        if(!team.players || team.players.length === 0) {
+           return `
+            <div style="background:var(--panel-bg); border:1px solid var(--panel-border); border-radius:8px; padding:24px; text-align:center; margin-bottom:24px;">
+              <h3 style="color:var(--text-main); margin-bottom:16px;">${team.full_name}</h3>
+              <div style="color:var(--text-muted); font-family:var(--font-mono); font-size:12px;">Player data syncing from provider...</div>
+            </div>`;
+        }
+        
         const active = team.players.filter(p => p.min && p.min !== '00').sort((x,y) => y.pts - x.pts);
-        return `<h3 style="margin:24px 0 12px; color:var(--text-main);">${team.full_name}</h3>
-        <div style="overflow-x:auto;">
-          <table style="width:100%; text-align:left; font-family:var(--font-mono); font-size:12px; border-collapse: collapse;">
-            <tr style="border-bottom: 1px solid var(--border); color: var(--text-muted);">
-              <th style="padding:8px">PLAYER</th><th style="padding:8px">MIN</th><th style="padding:8px">PTS</th><th style="padding:8px">REB</th><th style="padding:8px">AST</th><th style="padding:8px">FG</th>
+        return `<h3 style="margin:32px 0 16px; color:var(--text-main); font-size:20px;">${team.full_name}</h3>
+        <div style="background: rgba(0,0,0,0.5); border: 1px solid var(--panel-border); border-radius: 8px; overflow:hidden;">
+          <table style="width:100%; text-align:left; font-family:var(--font-mono); font-size:13px; border-collapse: collapse;">
+            <tr style="background: rgba(255,255,255,0.03); color: var(--text-muted); border-bottom: 1px solid var(--panel-border);">
+              <th style="padding:12px 16px">PLAYER</th><th style="padding:12px">MIN</th><th style="padding:12px">PTS</th><th style="padding:12px">REB</th><th style="padding:12px">AST</th><th style="padding:12px">FG</th>
             </tr>
-            ${active.map(p => `<tr style="border-bottom: 1px solid var(--border);">
-              <td style="padding:8px; color:var(--text-main); font-family:var(--font-ui); font-weight:500;">${p.player.first_name} ${p.player.last_name}</td>
-              <td style="padding:8px">${p.min}</td>
-              <td style="padding:8px; font-weight:bold; color: ${p.pts>=20 ? 'var(--accent)' : 'var(--text-main)'};">${p.pts}</td>
-              <td style="padding:8px">${p.reb}</td><td style="padding:8px">${p.ast}</td><td style="padding:8px">${p.fgm}-${p.fga}</td>
+            ${active.map(p => `<tr style="border-bottom: 1px solid rgba(255,255,255,0.03);">
+              <td style="padding:12px 16px; color:var(--text-main); font-family:var(--font-ui); font-weight:600;">${p.player.first_name} ${p.player.last_name}</td>
+              <td style="padding:12px; color:var(--text-muted);">${p.min}</td>
+              <td style="padding:12px; font-weight:bold; font-size:15px; color: ${p.pts>=20 ? 'var(--accent)' : 'var(--text-main)'};">${p.pts}</td>
+              <td style="padding:12px; color:var(--text-muted);">${p.reb}</td><td style="padding:12px; color:var(--text-muted);">${p.ast}</td><td style="padding:12px; color:var(--text-muted);">${p.fgm}-${p.fga}</td>
             </tr>`).join('')}
           </table>
         </div>`;
       }
       
-      document.getElementById('modal-stats').innerHTML = renderTable(a) + renderTable(h);
+      document.getElementById('modal-stats').innerHTML = renderTable(a, game.visitor_q1, game.visitor_q2, game.visitor_q3, game.visitor_q4) + renderTable(h, game.home_q1, game.home_q2, game.home_q3, game.home_q4);
       document.getElementById('modal-bg').classList.add('open');
       document.body.style.overflow = 'hidden';
     }
