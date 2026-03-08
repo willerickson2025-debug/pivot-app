@@ -42,7 +42,7 @@
     
     /* MAIN CONTAINER */
     .main { flex: 1; padding: 40px; overflow-y: auto; background: var(--bg); }
-    .page { display: none; max-width: 1200px; margin: 0 auto; }
+    .page { display: none; max-width: 1200px; margin: 0 auto; height: 100%; }
     .page.active { display: block; }
     .section-title { font-weight: 700; font-size: 24px; letter-spacing: -0.5px; margin-bottom: 32px; color: var(--text-main); display: flex; align-items: center; justify-content: space-between; }
     
@@ -106,6 +106,11 @@
     .list-chip span { cursor: pointer; color: var(--text-muted); font-weight: bold; }
     .list-chip span:hover { color: var(--red); }
 
+    /* CHAT BUBBLES */
+    .chat-bubble { padding: 12px 16px; border-radius: 8px; max-width: 80%; line-height: 1.6; font-size: 14px; }
+    .chat-user { align-self: flex-end; background: var(--border); color: var(--text-main); border-bottom-right-radius: 0; }
+    .chat-ai { align-self: flex-start; background: rgba(37, 99, 235, 0.1); border: 1px solid var(--accent); color: var(--text-main); border-bottom-left-radius: 0; }
+
     /* --- BULLETPROOF PRINT STYLES --- */
     @media print {
       body { background: white; color: black; overflow: visible; height: auto; display: block; }
@@ -128,7 +133,7 @@
     <div class="brand">PIVOT <span>//</span></div>
     <div class="nav-links">
       <div class="dropdown">
-        <button class="dropbtn" id="nav-player">Player Intel</button>
+        <button class="dropbtn active" id="nav-player">Player Intel</button>
         <div class="dropdown-content">
           <a class="dropdown-item active" onclick="switchPage('scout', 'nav-player', this)">Scout Player</a>
           <a class="dropdown-item" onclick="switchPage('compare', 'nav-player', this)">Compare Players</a>
@@ -257,19 +262,34 @@
       </div>
     </div>
 
+    <div class="page" id="page-chat" style="display: flex; flex-direction: column;">
+       <div class="section-title no-print">AI Analyst Desk</div>
+       <div class="controls-row no-print">
+         <div class="input-group">
+           <input class="input" id="chat-player" placeholder="Load Player Profile (e.g. Luka Doncic)" onkeyup="autocomplete(this, 'chat')">
+           <div class="autocomp-list" id="chat-sugg"></div>
+         </div>
+         <button class="btn" onclick="startChat()">Initialize Session</button>
+       </div>
+       
+       <div id="chat-wrapper" class="no-print" style="display:none; flex: 1; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; flex-direction: column; min-height: 500px;">
+         <div id="chat-messages" style="flex: 1; padding: 24px; overflow-y: auto; display: flex; flex-direction: column; gap: 16px;">
+            </div>
+         <div style="padding: 16px; border-top: 1px solid var(--border); display: flex; gap: 12px; background: var(--bg); border-radius: 0 0 8px 8px;">
+           <input class="input" id="chat-input" style="margin-bottom: 0;" placeholder="Ask PIVOT a question about this player..." onkeyup="if(event.keyCode===13)sendChat()">
+           <button class="btn" onclick="sendChat()">Send</button>
+         </div>
+       </div>
+    </div>
+
     <div class="page" id="page-games">
       <div class="section-title">Live Action <button class="btn-ghost no-print" onclick="loadGames()" style="padding: 6px 12px; font-size: 12px;">↺ Refresh</button></div>
       <div class="loading" id="games-load"><div class="spinner"></div> Syncing box scores...</div>
       <div class="error" id="games-err"></div>
       <div class="games-grid" id="games-grid"></div>
-      <div id="games-empty" style="display:none; padding: 40px; text-align: center; color: var(--text-muted); font-family: var(--font-mono); letter-spacing: 2px;">NO GAMES TODAY</div>
+      <div id="games-empty" style="display:none; padding: 40px; text-align: center; color: var(--text-muted); font-family: var(--font-mono); letter-spacing: 2px;">NO GAMES SCHEDULED TODAY</div>
     </div>
     
-    <div class="page" id="page-chat">
-       <div class="section-title">AI Analyst Desk</div>
-       <p style="color:var(--text-muted)">Chat interface ready for integration.</p>
-    </div>
-
   </div>
 
   <div class="modal-bg no-print" id="modal-bg" onclick="closeModal()">
@@ -289,11 +309,9 @@
     const API = '/api';
 
     function switchPage(pageId, navId, el) {
-      // Hide all pages, show target
       document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
       document.getElementById(`page-${pageId}`).classList.add('active');
       
-      // Update nav styling
       document.querySelectorAll('.dropbtn').forEach(btn => btn.classList.remove('active'));
       document.querySelectorAll('.dropdown-item').forEach(item => item.classList.remove('active'));
       if(navId) document.getElementById(navId).classList.add('active');
@@ -321,17 +339,17 @@
             list.classList.remove('visible');
           }
         } catch(e) { console.error("Search failed"); }
-      }, 300); // 300ms debounce
+      }, 300);
     }
 
     function selectAuto(id, val) {
-      document.getElementById(`${id}-name` || id).value = val;
+      document.getElementById(`${id}-name` || id === 'chat' ? `${id}-player` : `${id}-name`).value = val;
       document.getElementById(`${id}-sugg`).classList.remove('visible');
     }
 
     // List Input (For Trades)
     function handleListInput(input, listId, e) {
-      if (e.keyCode === 188 || e.keyCode === 13) { // Comma or Enter
+      if (e.keyCode === 188 || e.keyCode === 13) {
         e.preventDefault();
         let val = input.value.replace(/,/g, '').trim();
         if (val) {
@@ -457,25 +475,88 @@
       finally { document.getElementById('roster-load').classList.remove('visible'); }
     }
 
+    // --- FULLY INTEGRATED CHAT LOGIC ---
+    let chatHistory = [];
+    
+    function startChat() {
+      const player = document.getElementById('chat-player').value.trim();
+      if (!player) return alert('Enter a player name');
+      
+      document.getElementById('chat-wrapper').style.display = 'flex';
+      chatHistory = [];
+      document.getElementById('chat-messages').innerHTML = `<div style="color:var(--text-muted); text-align:center; font-family:var(--font-mono); font-size:12px;">Session initialized. Loading intelligence profile for ${player}...</div>`;
+      document.getElementById('chat-input').focus();
+    }
+
+    async function sendChat() {
+      const message = document.getElementById('chat-input').value.trim();
+      if (!message) return;
+      const player = document.getElementById('chat-player').value.trim();
+      const messages = document.getElementById('chat-messages');
+      
+      // Add User Message
+      messages.innerHTML += `<div class="chat-bubble chat-user">${message}</div>`;
+      document.getElementById('chat-input').value = '';
+      messages.scrollTop = messages.scrollHeight;
+      
+      // Add Loading Indicator
+      const loadId = 'load-' + Date.now();
+      messages.innerHTML += `<div id="${loadId}" style="align-self: flex-start; color: var(--text-muted); font-size: 12px; font-family: var(--font-mono);">PIVOT is typing...</div>`;
+      messages.scrollTop = messages.scrollHeight;
+
+      try {
+        const res = await fetch(`${API}/chat`, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({player, season:2025, message, history:chatHistory})
+        });
+        
+        document.getElementById(loadId)?.remove();
+        if (!res.ok) throw new Error(await res.text());
+        
+        const data = await res.json();
+        messages.innerHTML += `<div class="chat-bubble chat-ai">${data.reply.replace(/\n/g, '<br>')}</div>`;
+        chatHistory = data.history;
+        messages.scrollTop = messages.scrollHeight;
+      } catch(e) {
+        document.getElementById(loadId)?.remove();
+        messages.innerHTML += `<div style="align-self: flex-start; color: var(--red); font-size: 12px;">Error: ${e.message}</div>`;
+      }
+    }
+
+    // --- LIVE GAMES (WITH DAILY SCHEDULE FALLBACK) ---
     async function loadGames() {
       document.getElementById('games-load').classList.add('visible');
       document.getElementById('games-empty').style.display = 'none';
       document.getElementById('games-grid').innerHTML = '';
       try {
-        const res = await fetch(`${API}/games/live`);
-        const data = await res.json();
-        if(!data.games || !data.games.length) { document.getElementById('games-empty').style.display = 'block'; return; }
+        // Step 1: Check Live Endpoint
+        let res = await fetch(`${API}/games/live`);
+        let data = await res.json();
+        let games = data.games || [];
         
-        document.getElementById('games-grid').innerHTML = data.games.map(g => {
+        // Step 2: If no games are literally live right now, fallback to today's schedule
+        if (!games.length) {
+          res = await fetch(`${API}/games/today`);
+          data = await res.json();
+          games = data.games || [];
+        }
+
+        if(!games.length) { 
+          document.getElementById('games-empty').style.display = 'block'; 
+          return; 
+        }
+        
+        document.getElementById('games-grid').innerHTML = games.map(g => {
           const h = g.home_team || {}; const a = g.visitor_team || {};
           const isLive = (g.status || '').includes('Qtr') || (g.status || '').includes('Half');
           return `
           <div class="game-card" onclick='openBoxScore(${JSON.stringify(g).replace(/'/g, "&apos;")})'>
             <div class="game-status ${isLive ? 'live' : ''}">${isLive ? '● LIVE' : ''} ${g.time || g.status}</div>
             <div class="game-teams">
-              <div class="team-block"><div class="team-name">${a.abbreviation||'AWY'}</div><div class="team-score ${g.visitor_team_score > g.home_team_score ? 'score-high':''}">${g.visitor_team_score||'-'}</div></div>
+              <div class="team-block"><div class="team-name">${a.abbreviation||'AWY'}</div><div class="team-score ${g.visitor_team_score > g.home_team_score ? 'score-high':''}">${g.visitor_team_score||'—'}</div></div>
               <div style="color:var(--border); font-weight:bold;">VS</div>
-              <div class="team-block"><div class="team-name">${h.abbreviation||'HME'}</div><div class="team-score ${g.home_team_score > g.visitor_team_score ? 'score-high':''}">${g.home_team_score||'-'}</div></div>
+              <div class="team-block"><div class="team-name">${h.abbreviation||'HME'}</div><div class="team-score ${g.home_team_score > g.visitor_team_score ? 'score-high':''}">${g.home_team_score||'—'}</div></div>
             </div>
           </div>`;
         }).join('');
@@ -489,7 +570,7 @@
       document.getElementById('modal-meta').textContent = `${game.status} | Box scores loaded from BDL`;
       
       function renderTable(team) {
-        if(!team.players) return '';
+        if(!team.players || team.players.length === 0) return `<p style="color:var(--text-muted); margin-bottom: 24px;">Box score not available yet.</p>`;
         const active = team.players.filter(p => p.min && p.min !== '00').sort((x,y) => y.pts - x.pts);
         return `<h3 style="margin:24px 0 12px; color:var(--text-main);">${team.full_name}</h3>
         <div style="overflow-x:auto;">
@@ -517,7 +598,6 @@
       document.body.style.overflow = 'auto';
     }
 
-    // Close autocomplete on outside click
     document.addEventListener('click', (e) => {
       if(!e.target.closest('.autocomp')) {
         document.querySelectorAll('.autocomp-list').forEach(l => l.classList.remove('visible'));
