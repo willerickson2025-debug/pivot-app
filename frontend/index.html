@@ -1,1429 +1,594 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PIVOT — NBA Intelligence</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-<style>
-:root {
-  --bg: #080808;
-  --surface: #111;
-  --surface2: #181818;
-  --surface3: #202020;
-  --border: #1e1e1e;
-  --border2: #2a2a2a;
-  --accent: #c8ff00;
-  --accent-dim: rgba(200,255,0,0.12);
-  --accent-glow: rgba(200,255,0,0.25);
-  --red: #ff4444;
-  --green: #00e676;
-  --blue: #4488ff;
-  --orange: #ff8c42;
-  --text: #f0f0f0;
-  --text2: #888;
-  --text3: #444;
-  --mono: 'DM Mono', monospace;
-  --sans: 'Inter', sans-serif;
-  --display: 'Bebas Neue', sans-serif;
-  --radius: 2px;
-}
-
-* { margin: 0; padding: 0; box-sizing: border-box; }
-html { scroll-behavior: smooth; }
-
-body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: var(--sans);
-  min-height: 100vh;
-  overflow-x: hidden;
-}
-
-/* Scanline overlay */
-body::after {
-  content: '';
-  position: fixed;
-  inset: 0;
-  background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px);
-  pointer-events: none;
-  z-index: 9999;
-}
-
-/* ── LAYOUT ── */
-.app { display: flex; height: 100vh; overflow: hidden; }
-
-/* ── SIDEBAR ── */
-.sidebar {
-  width: 220px;
-  min-width: 220px;
-  background: var(--surface);
-  border-right: 1px solid var(--border);
-  display: flex;
-  flex-direction: column;
-  padding: 0;
-  z-index: 100;
-}
-
-.logo-wrap {
-  padding: 28px 24px 20px;
-  border-bottom: 1px solid var(--border);
-}
-
-.logo {
-  font-family: var(--display);
-  font-size: 38px;
-  letter-spacing: 6px;
-  color: var(--accent);
-  line-height: 1;
-  text-shadow: 0 0 40px var(--accent-glow);
-}
-
-.logo-sub {
-  font-family: var(--mono);
-  font-size: 9px;
-  letter-spacing: 3px;
-  color: var(--text3);
-  text-transform: uppercase;
-  margin-top: 4px;
-}
-
-.nav { flex: 1; padding: 16px 0; }
-
-.nav-section {
-  font-family: var(--mono);
-  font-size: 9px;
-  letter-spacing: 3px;
-  color: var(--text3);
-  text-transform: uppercase;
-  padding: 16px 24px 8px;
-}
-
-.nav-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 24px;
-  cursor: pointer;
-  font-size: 13px;
-  color: var(--text2);
-  transition: all 0.15s;
-  border-left: 2px solid transparent;
-  font-weight: 400;
-}
-
-.nav-item:hover { color: var(--text); background: var(--surface2); }
-.nav-item.active { color: var(--accent); border-left-color: var(--accent); background: var(--accent-dim); }
-
-.nav-icon { font-size: 16px; width: 20px; text-align: center; }
-
-.sidebar-bottom {
-  padding: 16px 24px;
-  border-top: 1px solid var(--border);
-}
-
-.season-selector {
-  background: var(--surface2);
-  border: 1px solid var(--border2);
-  color: var(--text);
-  font-family: var(--mono);
-  font-size: 11px;
-  padding: 8px 12px;
-  width: 100%;
-  cursor: pointer;
-  outline: none;
-  letter-spacing: 1px;
-  appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23444'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 10px center;
-}
-
-.season-label {
-  font-family: var(--mono);
-  font-size: 9px;
-  letter-spacing: 2px;
-  color: var(--text3);
-  text-transform: uppercase;
-  margin-bottom: 6px;
-}
-
-/* ── MAIN CONTENT ── */
-.main {
-  flex: 1;
-  overflow-y: auto;
-  background: var(--bg);
-}
-
-.main::-webkit-scrollbar { width: 4px; }
-.main::-webkit-scrollbar-track { background: var(--bg); }
-.main::-webkit-scrollbar-thumb { background: var(--border2); }
-
-/* ── TOP BAR ── */
-.topbar {
-  position: sticky;
-  top: 0;
-  z-index: 50;
-  background: rgba(8,8,8,0.95);
-  backdrop-filter: blur(10px);
-  border-bottom: 1px solid var(--border);
-  padding: 16px 40px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.page-title {
-  font-family: var(--display);
-  font-size: 22px;
-  letter-spacing: 3px;
-  color: var(--text);
-}
-
-.topbar-right {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.live-badge {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-family: var(--mono);
-  font-size: 10px;
-  letter-spacing: 2px;
-  color: var(--green);
-  border: 1px solid var(--green);
-  padding: 4px 10px;
-}
-
-.live-dot {
-  width: 6px;
-  height: 6px;
-  background: var(--green);
-  border-radius: 50%;
-  animation: pulse 1.5s infinite;
-}
-
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.3; }
-}
-
-/* ── PAGE SECTIONS ── */
-.page { display: none; padding: 40px; }
-.page.active { display: block; }
-
-/* ── SEARCH BAR ── */
-.search-wrap {
-  display: flex;
-  gap: 12px;
-  margin-bottom: 32px;
-}
-
-.search-field {
-  flex: 1;
-  position: relative;
-}
-
-.search-field input {
-  width: 100%;
-  background: var(--surface);
-  border: 1px solid var(--border2);
-  color: var(--text);
-  padding: 14px 18px;
-  font-family: var(--sans);
-  font-size: 14px;
-  outline: none;
-  transition: border-color 0.2s, box-shadow 0.2s;
-}
-
-.search-field input:focus {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 1px var(--accent-dim), 0 0 20px var(--accent-dim);
-}
-
-.search-field input::placeholder { color: var(--text3); }
-
-.field-label {
-  font-family: var(--mono);
-  font-size: 9px;
-  letter-spacing: 2px;
-  color: var(--text3);
-  text-transform: uppercase;
-  margin-bottom: 6px;
-}
-
-/* ── BUTTONS ── */
-.btn {
-  font-family: var(--display);
-  font-size: 16px;
-  letter-spacing: 3px;
-  padding: 14px 32px;
-  background: var(--accent);
-  color: #000;
-  border: none;
-  cursor: pointer;
-  transition: all 0.15s;
-  white-space: nowrap;
-  flex-shrink: 0;
-  align-self: flex-end;
-}
-
-.btn:hover { filter: brightness(1.1); transform: translateY(-1px); box-shadow: 0 6px 20px var(--accent-glow); }
-.btn:active { transform: translateY(0); }
-.btn:disabled { background: var(--border2); color: var(--text3); cursor: not-allowed; transform: none; box-shadow: none; filter: none; }
-
-.btn-ghost {
-  background: transparent;
-  color: var(--text2);
-  border: 1px solid var(--border2);
-  font-size: 13px;
-  letter-spacing: 2px;
-  padding: 10px 20px;
-  font-family: var(--mono);
-  cursor: pointer;
-  transition: all 0.15s;
-  white-space: nowrap;
-}
-
-.btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
-.btn-ghost.active { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
-
-/* ── STAT CARDS ── */
-.stat-row {
-  display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  gap: 1px;
-  background: var(--border);
-  border: 1px solid var(--border);
-  margin-bottom: 32px;
-}
-
-.stat-card {
-  background: var(--surface);
-  padding: 20px;
-  text-align: center;
-}
-
-.stat-val {
-  font-family: var(--display);
-  font-size: 36px;
-  color: var(--accent);
-  line-height: 1;
-  margin-bottom: 4px;
-}
-
-.stat-lbl {
-  font-family: var(--mono);
-  font-size: 9px;
-  letter-spacing: 2px;
-  color: var(--text3);
-  text-transform: uppercase;
-}
-
-/* ── REPORT OUTPUT ── */
-.output-wrap {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  display: none;
-}
-
-.output-wrap.visible { display: block; }
-
-.output-header {
-  padding: 28px 32px;
-  border-bottom: 1px solid var(--border);
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 24px;
-}
-
-.player-name {
-  font-family: var(--display);
-  font-size: 48px;
-  letter-spacing: 4px;
-  line-height: 1;
-  color: var(--text);
-}
-
-.player-meta {
-  font-family: var(--mono);
-  font-size: 11px;
-  color: var(--text2);
-  letter-spacing: 2px;
-  margin-top: 8px;
-  text-transform: uppercase;
-}
-
-.report-body {
-  padding: 32px;
-  font-size: 14px;
-  line-height: 1.85;
-  color: #bbb;
-}
-
-.report-body h2 {
-  font-family: var(--display);
-  font-size: 18px;
-  letter-spacing: 3px;
-  color: var(--accent);
-  margin: 28px 0 12px;
-  padding-bottom: 8px;
-  border-bottom: 1px solid var(--border2);
-}
-
-.report-body h2:first-child { margin-top: 0; }
-
-.report-body strong { color: var(--text); font-weight: 600; }
-
-.report-body p { margin-bottom: 12px; }
-
-/* ── LOADING ── */
-.loading {
-  display: none;
-  align-items: center;
-  gap: 16px;
-  padding: 32px;
-  color: var(--text3);
-  font-family: var(--mono);
-  font-size: 11px;
-  letter-spacing: 3px;
-  text-transform: uppercase;
-}
-
-.loading.visible { display: flex; }
-
-.spinner {
-  width: 18px;
-  height: 18px;
-  border: 2px solid var(--border2);
-  border-top-color: var(--accent);
-  border-radius: 50%;
-  animation: spin 0.7s linear infinite;
-  flex-shrink: 0;
-}
-
-@keyframes spin { to { transform: rotate(360deg); } }
-
-/* ── ERROR ── */
-.error {
-  display: none;
-  padding: 14px 18px;
-  border: 1px solid var(--red);
-  color: var(--red);
-  font-family: var(--mono);
-  font-size: 11px;
-  letter-spacing: 1px;
-  margin-bottom: 20px;
-}
-
-.error.visible { display: block; }
-
-/* ── SECTION HEADER ── */
-.section-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 20px;
-}
-
-.section-title {
-  font-family: var(--mono);
-  font-size: 10px;
-  letter-spacing: 3px;
-  color: var(--text3);
-  text-transform: uppercase;
-}
-
-/* ── DIVIDER ── */
-.divider { height: 1px; background: var(--border); margin: 32px 0; }
-
-/* ── GRID ── */
-.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 20px; }
-.three-col { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
-
-/* ── TRADE INPUTS ── */
-.trade-side {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  padding: 24px;
-}
-
-.trade-side-title {
-  font-family: var(--mono);
-  font-size: 10px;
-  letter-spacing: 3px;
-  color: var(--text3);
-  text-transform: uppercase;
-  margin-bottom: 16px;
-}
-
-.player-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  min-height: 40px;
-  margin-bottom: 12px;
-}
-
-.tag {
-  background: var(--surface2);
-  border: 1px solid var(--border2);
-  padding: 6px 12px;
-  font-family: var(--mono);
-  font-size: 11px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: var(--text);
-}
-
-.tag-x { cursor: pointer; color: var(--text3); font-size: 14px; line-height: 1; }
-.tag-x:hover { color: var(--red); }
-
-.add-row { display: flex; gap: 8px; }
-
-/* ── ROSTER GRID ── */
-.roster-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 12px;
-  margin-top: 24px;
-}
-
-.roster-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  padding: 20px;
-  cursor: pointer;
-  transition: all 0.15s;
-  animation: fadeUp 0.3s ease forwards;
-  opacity: 0;
-}
-
-.roster-card:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.5); }
-
-@keyframes fadeUp {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.rc-name { font-family: var(--display); font-size: 20px; letter-spacing: 2px; margin-bottom: 4px; }
-.rc-meta { font-family: var(--mono); font-size: 9px; color: var(--text3); letter-spacing: 1px; margin-bottom: 14px; text-transform: uppercase; }
-.rc-stats { display: flex; gap: 14px; }
-.rc-stat-val { font-family: var(--display); font-size: 22px; color: var(--accent); line-height: 1; }
-.rc-stat-lbl { font-family: var(--mono); font-size: 9px; color: var(--text3); letter-spacing: 1px; }
-
-/* ── CHAT ── */
-.chat-container {
-  display: flex;
-  flex-direction: column;
-  height: calc(100vh - 200px);
-  min-height: 500px;
-}
-
-.chat-messages {
-  flex: 1;
-  overflow-y: auto;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-bottom: none;
-  padding: 24px;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.chat-messages::-webkit-scrollbar { width: 3px; }
-.chat-messages::-webkit-scrollbar-thumb { background: var(--border2); }
-
-.msg { max-width: 80%; }
-
-.msg-user { align-self: flex-end; }
-.msg-ai { align-self: flex-start; }
-
-.msg-label {
-  font-family: var(--mono);
-  font-size: 9px;
-  letter-spacing: 2px;
-  color: var(--text3);
-  text-transform: uppercase;
-  margin-bottom: 6px;
-}
-
-.msg-bubble {
-  padding: 14px 18px;
-  font-size: 13px;
-  line-height: 1.7;
-}
-
-.msg-user .msg-bubble {
-  background: var(--accent);
-  color: #000;
-  font-weight: 500;
-}
-
-.msg-ai .msg-bubble {
-  background: var(--surface2);
-  border: 1px solid var(--border2);
-  color: var(--text);
-}
-
-.chat-input-area {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  padding: 16px;
-  display: flex;
-  gap: 12px;
-}
-
-.chat-input-area input {
-  flex: 1;
-  background: var(--surface2);
-  border: 1px solid var(--border2);
-  color: var(--text);
-  padding: 12px 16px;
-  font-family: var(--sans);
-  font-size: 14px;
-  outline: none;
-}
-
-.chat-input-area input:focus { border-color: var(--accent); }
-
-/* ── GAMES ── */
-.games-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 16px;
-  margin-top: 24px;
-}
-
-.game-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  padding: 24px;
-}
-
-.game-status {
-  font-family: var(--mono);
-  font-size: 9px;
-  letter-spacing: 2px;
-  color: var(--green);
-  text-transform: uppercase;
-  margin-bottom: 16px;
-}
-
-.game-status.final { color: var(--text3); }
-
-.game-teams {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.game-team { text-align: center; }
-.game-team-name { font-family: var(--display); font-size: 24px; letter-spacing: 2px; }
-.game-team-score { font-family: var(--display); font-size: 48px; color: var(--accent); line-height: 1; }
-.game-vs { font-family: var(--mono); font-size: 12px; color: var(--text3); }
-
-/* ── COMPARE STATS TABLE ── */
-.compare-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-bottom: 24px;
-  font-family: var(--mono);
-  font-size: 12px;
-}
-
-.compare-table th {
-  padding: 12px 16px;
-  text-align: center;
-  font-size: 10px;
-  letter-spacing: 2px;
-  color: var(--text3);
-  text-transform: uppercase;
-  border-bottom: 1px solid var(--border);
-}
-
-.compare-table th:first-child { text-align: left; }
-
-.compare-table td {
-  padding: 10px 16px;
-  text-align: center;
-  border-bottom: 1px solid var(--border);
-  color: var(--text2);
-}
-
-.compare-table td:first-child { text-align: left; color: var(--text3); }
-.compare-table td.winner { color: var(--accent); font-weight: 500; }
-.compare-table tr:hover td { background: var(--surface2); }
-
-/* ── MODAL ── */
-.modal-bg {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.85);
-  backdrop-filter: blur(6px);
-  z-index: 1000;
-  display: none;
-  align-items: center;
-  justify-content: center;
-  padding: 40px;
-}
-
-.modal-bg.open { display: flex; }
-
-.modal {
-  background: var(--surface);
-  border: 1px solid var(--border2);
-  max-width: 860px;
-  width: 100%;
-  max-height: 85vh;
-  overflow-y: auto;
-  position: relative;
-}
-
-.modal::-webkit-scrollbar { width: 3px; }
-.modal::-webkit-scrollbar-thumb { background: var(--border2); }
-
-.modal-header {
-  padding: 28px 32px;
-  border-bottom: 1px solid var(--border);
-  position: sticky;
-  top: 0;
-  background: var(--surface);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.modal-close {
-  background: none;
-  border: none;
-  color: var(--text3);
-  font-size: 22px;
-  cursor: pointer;
-  font-family: var(--mono);
-  transition: color 0.15s;
-  padding: 0;
-}
-
-.modal-close:hover { color: var(--accent); }
-
-.modal-body { padding: 32px; }
-
-/* ── DASHBOARD ── */
-.dashboard-grid {
-  display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: 24px;
-  margin-bottom: 24px;
-}
-
-.dash-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  padding: 24px;
-}
-
-.dash-card-title {
-  font-family: var(--mono);
-  font-size: 9px;
-  letter-spacing: 3px;
-  color: var(--text3);
-  text-transform: uppercase;
-  margin-bottom: 20px;
-}
-
-.quick-search {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 20px;
-}
-
-.quick-search input {
-  flex: 1;
-  background: var(--surface2);
-  border: 1px solid var(--border2);
-  color: var(--text);
-  padding: 10px 14px;
-  font-size: 13px;
-  outline: none;
-}
-
-.quick-search input:focus { border-color: var(--accent); }
-
-.recent-list { display: flex; flex-direction: column; gap: 8px; }
-
-.recent-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px 14px;
-  background: var(--surface2);
-  cursor: pointer;
-  transition: all 0.15s;
-  font-size: 13px;
-}
-
-.recent-item:hover { border-left: 2px solid var(--accent); padding-left: 12px; }
-.recent-item-name { font-weight: 500; }
-.recent-item-team { font-family: var(--mono); font-size: 10px; color: var(--text3); }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PIVOT NBA Intelligence</title>
+  <style>
+    :root {
+      --surface: #0d0d0d;
+      --surface2: #1a1a1a;
+      --border: #2a2a2a;
+      --text: #e5e5e5;
+      --text2: #a5a5a5;
+      --text3: #6a6a6a;
+      --accent: #ff4d4d;
+      --red: #ff4d4d;
+      --green: #4dff4d;
+      --display: 'Arial Black', sans-serif;
+      --mono: 'Menlo', monospace;
+    }
+    * { box-sizing: border-box; margin:0; padding:0; }
+    body { background:var(--surface); color:var(--text); font-family:sans-serif; font-size:14px; line-height:1.6; height:100vh; display:flex; overflow:hidden; }
+    .sidebar { background:var(--surface2); width:240px; height:100vh; border-right:1px solid var(--border); padding:24px 0; position:fixed; z-index:2; transition:transform 0.3s; }
+    .sidebar-header { padding:0 32px 32px; font-family:var(--display); font-size:24px; letter-spacing:2px; color:var(--accent); }
+    .sidebar-item { padding:12px 32px; cursor:pointer; transition:background 0.2s; font-weight:500; color:var(--text2); }
+    .sidebar-item:hover { background:var(--surface); color:var(--text); }
+    .sidebar-item.active { color:var(--accent); background:var(--surface); border-right:2px solid var(--accent); }
+    .main { flex:1; padding:24px; overflow:auto; margin-left:240px; }
+    .hamburger { display:none; cursor:pointer; position:fixed; top:20px; left:20px; z-index:3; color:var(--text); font-size:24px; }
+    .close-sidebar { display:none; cursor:pointer; position:fixed; top:20px; right:20px; z-index:3; color:var(--text); font-size:24px; }
+    .section-title { font-family:var(--display); font-size:24px; letter-spacing:2px; margin-bottom:24px; color:var(--text); }
+    .input { background:var(--surface2); border:1px solid var(--border); color:var(--text); padding:12px; font-size:14px; border-radius:4px; width:100%; margin-bottom:16px; }
+    .btn { background:var(--accent); color:var(--surface); padding:12px 24px; border:none; border-radius:4px; cursor:pointer; font-weight:500; transition:background 0.2s; }
+    .btn:hover { background:#ff6666; }
+    .btn-ghost { background:none; border:1px solid var(--border); color:var(--text2); }
+    .btn-ghost:hover { border-color:var(--accent); color:var(--accent); }
+    .loading { display:none; align-items:center; gap:8px; font-size:12px; color:var(--text3); }
+    .loading.visible { display:flex; }
+    .spinner { border:2px solid var(--text3); border-top:2px solid var(--accent); border-radius:50%; width:16px; height:16px; animation:spin 1s linear infinite; }
+    @keyframes spin { 0% { transform:rotate(0deg); } 100% { transform:rotate(360deg); } }
+    .error { display:none; color:var(--red); font-size:12px; margin-bottom:16px; }
+    .error.visible { display:block; }
+    .report { background:var(--surface2); border:1px solid var(--border); padding:24px; border-radius:4px; white-space:pre-wrap; font-family:var(--mono); line-height:1.8; color:var(--text2); }
+    .report h2 { color:var(--text); font-size:16px; margin-top:32px; margin-bottom:8px; font-family:var(--display); letter-spacing:1px; }
+    .report h2:first-child { margin-top:0; }
+    .report strong { color:var(--text); }
+    .stats { display:flex; gap:16px; margin-bottom:24px; }
+    .stat { background:var(--surface2); padding:12px; border-radius:4px; border:1px solid var(--border); text-align:center; flex:1; }
+    .stat-label { font-size:12px; color:var(--text3); letter-spacing:1px; font-family:var(--mono); }
+    .stat-value { font-size:18px; color:var(--accent); font-weight:600; }
+    .dropdown { background:var(--surface2); border:1px solid var(--border); color:var(--text); padding:12px; border-radius:4px; width:100%; margin-bottom:16px; }
+    .games-grid { display:grid; gap:16px; }
+    .game-card { background:var(--surface2); border:1px solid var(--border); padding:24px; border-radius:4px; transition:transform 0.2s; }
+    .game-card:hover { transform:translateY(-2px); }
+    .game-status { font-family:var(--mono); font-size:12px; letter-spacing:1px; color:var(--text3); }
+    .final { color:var(--red); }
+    .game-teams { display:flex; align-items:center; justify-content:space-around; font-size:24px; font-weight:600; }
+    .game-vs { color:var(--text3); font-size:16px; margin:0 32px; }
+    .game-team-name { font-size:16px; color:var(--text3); }
+    .game-team-score { font-size:32px; }
+    .modal-bg { position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.9); z-index:100; display:none; align-items:center; justify-content:center; }
+    .modal-bg.open { display:flex; }
+    .modal { background:var(--surface); border:1px solid var(--border); width:80vw; max-width:1200px; max-height:80vh; overflow:auto; padding:32px; border-radius:4px; position:relative; }
+    .modal-close { position:absolute; top:16px; right:16px; cursor:pointer; color:var(--text3); font-size:24px; }
+    .modal-name { font-family:var(--display); font-size:24px; letter-spacing:2px; margin-bottom:8px; }
+    .modal-meta { font-family:var(--mono); font-size:12px; color:var(--text3); letter-spacing:1px; margin-bottom:32px; }
+    .modal-stats { display:grid; gap:32px; }
+    .red { color:var(--red); }
+    .green { color:var(--green); }
+    .print-btn { margin-bottom:16px; }
+    .autocomp { position:relative; }
+    .autocomp-list { position:absolute; background:var(--surface2); border:1px solid var(--border); width:100%; max-height:200px; overflow:auto; border-radius:0 0 4px 4px; display:none; z-index:10; }
+    .autocomp-list.visible { display:block; }
+    .autocomp-item { padding:12px; cursor:pointer; transition:background 0.2s; }
+    .autocomp-item:hover { background:var(--surface); }
+    .list-input { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px; }
+    .list-chip { background:var(--surface2); padding:6px 12px; border-radius:16px; border:1px solid var(--border); display:flex; align-items:center; gap:8px; }
+    .list-chip-remove { cursor:pointer; color:var(--text3); }
+    .list-chip-remove:hover { color:var(--red); }
+    @media (max-width:768px) {
+      .sidebar { transform:translateX(-100%); }
+      .sidebar.open { transform:translateX(0); }
+      .main { margin-left:0; }
+      .hamburger { display:block; }
+      .close-sidebar { display:block; }
+      .modal { width:95vw; padding:16px; }
+    }
+    @media print { .no-print { display:none; } body { background:white; color:black; } .report { background:white; border:none; } }
+  </style>
 </head>
 <body>
-
-<div class="app">
-
-  <!-- SIDEBAR -->
-  <div class="sidebar">
-    <div class="logo-wrap">
-      <div class="logo">PIVOT</div>
-      <div class="logo-sub">NBA Intelligence</div>
-    </div>
-    <nav class="nav">
-      <div class="nav-section">Analysis</div>
-      <div class="nav-item active" onclick="goTo('scout')">
-        <span class="nav-icon">◎</span> Scout Player
-      </div>
-      <div class="nav-item" onclick="goTo('compare')">
-        <span class="nav-icon">⇄</span> Compare
-      </div>
-      <div class="nav-item" onclick="goTo('trade')">
-        <span class="nav-icon">↔</span> Trade Analyzer
-      </div>
-      <div class="nav-item" onclick="goTo('team')">
-        <span class="nav-icon">◈</span> Team Report
-      </div>
-      <div class="nav-item" onclick="goTo('roster')">
-        <span class="nav-icon">⚡</span> Roster Package
-      </div>
-      <div class="nav-section">Intelligence</div>
-      <div class="nav-item" onclick="goTo('chat')">
-        <span class="nav-icon">◇</span> AI Analyst
-      </div>
-      <div class="nav-item" onclick="goTo('games')">
-        <span class="nav-icon">◉</span> Live Games
-      </div>
-    </nav>
-    <div class="sidebar-bottom">
-      <div class="season-label">Season</div>
-      <select class="season-selector" id="global-season">
-        <option value="2025">2025 — 26</option>
-        <option value="2024">2024 — 25</option>
-        <option value="2023">2023 — 24</option>
-      </select>
-    </div>
+  <div class="hamburger" onclick="toggleSidebar()">☰</div>
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-header">PIVOT</div>
+    <div class="sidebar-item active" onclick="switchPage('scout')">Scout Player</div>
+    <div class="sidebar-item" onclick="switchPage('compare')">Compare</div>
+    <div class="sidebar-item" onclick="switchPage('trade')">Trade Evaluation</div>
+    <div class="sidebar-item" onclick="switchPage('team')">Team Report</div>
+    <div class="sidebar-item" onclick="switchPage('roster')">Roster Package</div>
+    <div class="sidebar-item" onclick="switchPage('chat')">AI Analyst</div>
+    <div class="sidebar-item" onclick="switchPage('games')">Live Games</div>
   </div>
-
-  <!-- MAIN -->
+  <div class="close-sidebar" onclick="toggleSidebar()" style="display:none">×</div>
   <div class="main">
-
-    <!-- TOP BAR -->
-    <div class="topbar">
-      <div class="page-title" id="page-title">SCOUT PLAYER</div>
-      <div class="topbar-right">
-        <div class="live-badge"><div class="live-dot"></div>LIVE</div>
-      </div>
-    </div>
-
     <!-- SCOUT -->
-    <div class="page active" id="page-scout">
-      <div class="search-wrap">
-        <div class="search-field">
-          <div class="field-label">Player Name</div>
-          <input type="text" id="scout-name" placeholder="e.g. Shai Gilgeous-Alexander" onkeydown="if(event.key==='Enter')runScout()">
-        </div>
-        <div class="search-field" style="max-width:180px">
-          <div class="field-label">Question (optional)</div>
-          <input type="text" id="scout-q" placeholder="e.g. Trade value?">
-        </div>
-        <div style="align-self:flex-end">
-          <button class="btn" id="scout-btn" onclick="runScout()">Generate</button>
-        </div>
+    <div class="page" id="page-scout" style="display:block">
+      <div class="section-title">Scout Player</div>
+      <div class="autocomp">
+        <input class="input" id="scout-name" placeholder="Player Name" onkeyup="autocomplete(this, 'scout')">
+        <div class="autocomp-list" id="scout-sugg"></div>
       </div>
+      <input class="input" id="scout-question" placeholder="Question (optional) e.g. Trade value?">
+      <div style="display:flex;gap:8px">
+        <button class="btn" onclick="generateScout()">Generate</button>
+        <button class="btn-ghost" onclick="generateScout(true)">Force Refresh</button>
+      </div>
+      <div class="loading" id="scout-load"><div class="spinner"></div>Loading report...</div>
       <div class="error" id="scout-err"></div>
-      <div class="loading" id="scout-load"><div class="spinner"></div>Generating scouting report...</div>
-      <div class="output-wrap" id="scout-out">
-        <div class="output-header">
-          <div>
-            <div class="player-name" id="scout-pname"></div>
-            <div class="player-meta" id="scout-pmeta"></div>
-          </div>
-          <button class="btn-ghost" onclick="runScout(true)">↺ Refresh</button>
-        </div>
-        <div class="stat-row" id="scout-stats"></div>
-        <div class="report-body" id="scout-report"></div>
-      </div>
+      <div class="no-print" id="scout-stats" style="display:none"></div>
+      <button class="btn-ghost print-btn no-print" id="scout-print" style="display:none" onclick="printReport('scout')">Print PDF</button>
+      <pre class="report" id="scout-report" style="display:none"></pre>
     </div>
-
     <!-- COMPARE -->
-    <div class="page" id="page-compare">
-      <div class="two-col" style="margin-bottom:20px">
-        <div>
-          <div class="field-label">Player A</div>
-          <input type="text" class="search-field" id="cmp-a" placeholder="e.g. Luka Doncic" style="width:100%;background:var(--surface);border:1px solid var(--border2);color:var(--text);padding:14px 18px;font-size:14px;outline:none;">
-        </div>
-        <div>
-          <div class="field-label">Player B</div>
-          <input type="text" class="search-field" id="cmp-b" placeholder="e.g. Jayson Tatum" style="width:100%;background:var(--surface);border:1px solid var(--border2);color:var(--text);padding:14px 18px;font-size:14px;outline:none;">
-        </div>
+    <div class="page" id="page-compare" style="display:none">
+      <div class="section-title">Compare</div>
+      <div class="autocomp">
+        <input class="input" id="comp-a" placeholder="Player A" onkeyup="autocomplete(this, 'comp-a')">
+        <div class="autocomp-list" id="comp-a-sugg"></div>
       </div>
-      <div class="search-wrap">
-        <div class="search-field">
-          <div class="field-label">Context (optional)</div>
-          <input type="text" id="cmp-ctx" placeholder="e.g. Playoff performance, trade value, max contract">
-        </div>
-        <div style="align-self:flex-end">
-          <button class="btn" id="cmp-btn" onclick="runCompare()">Compare</button>
-        </div>
+      <div class="autocomp">
+        <input class="input" id="comp-b" placeholder="Player B" onkeyup="autocomplete(this, 'comp-b')">
+        <div class="autocomp-list" id="comp-b-sugg"></div>
       </div>
-      <div class="error" id="cmp-err"></div>
-      <div class="loading" id="cmp-load"><div class="spinner"></div>Running comparison analysis...</div>
-      <div class="output-wrap" id="cmp-out">
-        <div class="output-header">
-          <div class="player-name" id="cmp-title" style="font-size:32px"></div>
-        </div>
-        <div style="padding:0 32px 0">
-          <table class="compare-table" id="cmp-table"></table>
-        </div>
-        <div class="report-body" id="cmp-report"></div>
+      <input class="input" id="comp-context" placeholder="Context (optional) e.g. Playoff efficiency">
+      <div style="display:flex;gap:8px">
+        <button class="btn" onclick="generateCompare()">Generate</button>
+        <button class="btn-ghost" onclick="generateCompare(true)">Force Refresh</button>
       </div>
+      <div class="loading" id="comp-load"><div class="spinner"></div>Loading comparison...</div>
+      <div class="error" id="comp-err"></div>
+      <button class="btn-ghost print-btn no-print" id="comp-print" style="display:none" onclick="printReport('comp')">Print PDF</button>
+      <pre class="report" id="comp-report" style="display:none"></pre>
     </div>
-
     <!-- TRADE -->
-    <div class="page" id="page-trade">
-      <div class="two-col" style="margin-bottom:20px">
-        <div class="trade-side">
-          <div class="trade-side-title">⬆ Sending Out</div>
-          <div class="player-tags" id="out-tags"></div>
-          <div class="add-row">
-            <input type="text" id="out-input" placeholder="Add player..." style="flex:1;background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:10px 14px;font-size:13px;outline:none;" onkeydown="if(event.key==='Enter')addTag('out')">
-            <button class="btn-ghost" onclick="addTag('out')" style="padding:10px 16px">+</button>
-          </div>
-        </div>
-        <div class="trade-side">
-          <div class="trade-side-title">⬇ Receiving</div>
-          <div class="player-tags" id="in-tags"></div>
-          <div class="add-row">
-            <input type="text" id="in-input" placeholder="Add player..." style="flex:1;background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:10px 14px;font-size:13px;outline:none;" onkeydown="if(event.key==='Enter')addTag('in')">
-            <button class="btn-ghost" onclick="addTag('in')" style="padding:10px 16px">+</button>
-          </div>
-        </div>
+    <div class="page" id="page-trade" style="display:none">
+      <div class="section-title">Trade Evaluation</div>
+      <div class="list-input" id="trade-out-list">
+        <input class="input" id="trade-out" placeholder="Outgoing Players (comma separated)" onkeyup="handleListInput(this, 'trade-out-list', event)">
       </div>
-      <div class="search-wrap">
-        <div class="search-field">
-          <div class="field-label">Context (optional)</div>
-          <input type="text" id="trade-ctx" placeholder="e.g. We need rim protection, salary flexibility important">
-        </div>
-        <div style="align-self:flex-end">
-          <button class="btn" id="trade-btn" onclick="runTrade()">Evaluate Trade</button>
-        </div>
+      <div class="list-input" id="trade-in-list">
+        <input class="input" id="trade-in" placeholder="Incoming Players (comma separated)" onkeyup="handleListInput(this, 'trade-in-list', event)">
       </div>
+      <input class="input" id="trade-context" placeholder="Context (optional) e.g. Salary dump">
+      <div style="display:flex;gap:8px">
+        <button class="btn" onclick="generateTrade()">Generate</button>
+        <button class="btn-ghost" onclick="generateTrade(true)">Force Refresh</button>
+      </div>
+      <div class="loading" id="trade-load"><div class="spinner"></div>Loading analysis...</div>
       <div class="error" id="trade-err"></div>
-      <div class="loading" id="trade-load"><div class="spinner"></div>Evaluating trade proposal...</div>
-      <div class="output-wrap" id="trade-out">
-        <div class="output-header">
-          <div class="player-name" id="trade-title" style="font-size:28px"></div>
-        </div>
-        <div class="report-body" id="trade-report"></div>
-      </div>
+      <button class="btn-ghost print-btn no-print" id="trade-print" style="display:none" onclick="printReport('trade')">Print PDF</button>
+      <pre class="report" id="trade-report" style="display:none"></pre>
     </div>
-
     <!-- TEAM -->
-    <div class="page" id="page-team">
-      <div class="search-wrap">
-        <div class="search-field" style="max-width:200px">
-          <div class="field-label">Team Abbreviation</div>
-          <input type="text" id="team-abbr" placeholder="OKC, BOS, LAL..." onkeydown="if(event.key==='Enter')runTeam()">
-        </div>
-        <div class="search-field">
-          <div class="field-label">Question (optional)</div>
-          <input type="text" id="team-q" placeholder="e.g. How do they defend in the half court?">
-        </div>
-        <div style="align-self:flex-end">
-          <button class="btn" id="team-btn" onclick="runTeam()">Scout Team</button>
-        </div>
+    <div class="page" id="page-team" style="display:none">
+      <div class="section-title">Team Report</div>
+      <input class="input" id="team-abbr" placeholder="Team Abbreviation e.g. OKC">
+      <input class="input" id="team-question" placeholder="Question (optional) e.g. Half court defense">
+      <div style="display:flex;gap:8px">
+        <button class="btn" onclick="generateTeam()">Generate</button>
+        <button class="btn-ghost" onclick="generateTeam(true)">Force Refresh</button>
       </div>
+      <div class="loading" id="team-load"><div class="spinner"></div>Loading report...</div>
       <div class="error" id="team-err"></div>
-      <div class="loading" id="team-load"><div class="spinner"></div><span id="team-load-txt">Loading team...</span></div>
-      <div class="output-wrap" id="team-out">
-        <div class="output-header">
-          <div>
-            <div class="player-name" id="team-name"></div>
-            <div class="player-meta" id="team-meta"></div>
-          </div>
-        </div>
-        <div class="stat-row" id="team-leaders"></div>
-        <div class="report-body" id="team-report"></div>
-      </div>
+      <button class="btn-ghost print-btn no-print" id="team-print" style="display:none" onclick="printReport('team')">Print PDF</button>
+      <pre class="report" id="team-report" style="display:none"></pre>
     </div>
-
-    <!-- ROSTER PACKAGE -->
-    <div class="page" id="page-roster">
-      <div class="search-wrap">
-        <div class="search-field" style="max-width:200px">
-          <div class="field-label">Team Abbreviation</div>
-          <input type="text" id="roster-abbr" placeholder="OKC, BOS, LAL...">
-        </div>
-        <div style="align-self:flex-end">
-          <button class="btn" id="roster-btn" onclick="runRoster()">⚡ Generate All Reports</button>
-        </div>
+    <!-- ROSTER -->
+    <div class="page" id="page-roster" style="display:none">
+      <div class="section-title">Roster Package</div>
+      <input class="input" id="roster-abbr" placeholder="Team Abbreviation e.g. OKC">
+      <div style="display:flex;gap:8px">
+        <button class="btn" onclick="generateRoster()">Generate</button>
+        <button class="btn-ghost" onclick="generateRoster(true)">Force Refresh</button>
       </div>
-      <div style="margin-bottom:24px">
-        <p style="font-size:13px;color:var(--text3);line-height:1.6">Generates individual AI scouting reports for every player on the roster concurrently. <span style="color:var(--accent)">~10 seconds for 15 players.</span></p>
-      </div>
+      <div class="loading" id="roster-load"><div class="spinner"></div>Loading roster...</div>
       <div class="error" id="roster-err"></div>
-      <div class="loading" id="roster-load"><div class="spinner"></div><span id="roster-load-txt">Running concurrent pipeline...</span></div>
-      <div id="roster-results" style="display:none">
-        <div class="section-header">
-          <div class="section-title" id="roster-title"></div>
-        </div>
-        <div class="roster-grid" id="roster-grid"></div>
-      </div>
+      <button class="btn-ghost print-btn no-print" id="roster-print" style="display:none" onclick="printReport('roster')">Print PDF</button>
+      <div id="roster-reports" style="display:none"></div>
     </div>
-
     <!-- CHAT -->
-    <div class="page" id="page-chat">
-      <div class="search-wrap" style="margin-bottom:20px">
-        <div class="search-field">
-          <div class="field-label">Load Player</div>
-          <input type="text" id="chat-player" placeholder="Enter player name to start session..." onkeydown="if(event.key==='Enter')loadChat()">
-        </div>
-        <div style="align-self:flex-end">
-          <button class="btn" id="chat-load-btn" onclick="loadChat()">Load</button>
+    <div class="page" id="page-chat" style="display:none">
+      <div class="section-title">AI Analyst</div>
+      <div class="autocomp">
+        <input class="input" id="chat-player" placeholder="Player Name" onkeyup="autocomplete(this, 'chat')">
+        <div class="autocomp-list" id="chat-sugg"></div>
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:16px">
+        <button class="btn" onclick="startChat()">Start Session</button>
+      </div>
+      <div id="chat-session" style="display:none">
+        <div class="chat-messages" id="chat-messages"></div>
+        <div style="display:flex;gap:8px">
+          <input class="input" id="chat-input" placeholder="Ask about the player..." onkeyup="if(event.keyCode===13)sendChat()">
+          <button class="btn" onclick="sendChat()">Send</button>
         </div>
       </div>
-      <div class="error" id="chat-err"></div>
-      <div id="chat-ui" style="display:none">
-        <div style="margin-bottom:16px;display:flex;align-items:center;justify-content:space-between">
-          <div>
-            <div style="font-family:var(--display);font-size:28px;letter-spacing:3px" id="chat-pname"></div>
-            <div style="font-family:var(--mono);font-size:10px;color:var(--text3);letter-spacing:2px;margin-top:4px" id="chat-pmeta"></div>
-          </div>
-          <button class="btn-ghost" onclick="clearChat()">New Session</button>
-        </div>
-        <div class="chat-container">
-          <div class="chat-messages" id="chat-msgs"></div>
-          <div class="chat-input-area">
-            <input type="text" id="chat-input" placeholder="Ask anything about this player..." onkeydown="if(event.key==='Enter')sendChat()">
-            <button class="btn" id="chat-send" onclick="sendChat()">Send</button>
-          </div>
-        </div>
-      </div>
-      <div class="loading" id="chat-load"><div class="spinner"></div>Thinking...</div>
     </div>
-
     <!-- GAMES -->
-    <div class="page" id="page-games">
-      <div class="section-header">
-        <div class="section-title">Today's Games</div>
+    <div class="page" id="page-games" style="display:none">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px">
+        <div class="section-title">Live Games</div>
         <button class="btn-ghost" onclick="loadGames()">↺ Refresh</button>
       </div>
       <div class="loading" id="games-load"><div class="spinner"></div>Loading games...</div>
       <div class="error" id="games-err"></div>
       <div class="games-grid" id="games-grid"></div>
-      <div id="games-empty" style="display:none;padding:40px;text-align:center;color:var(--text3);font-family:var(--mono);font-size:12px;letter-spacing:2px">NO GAMES SCHEDULED TODAY</div>
-    </div>
-
-  </div>
-</div>
-
-<!-- MODAL -->
-<div class="modal-bg" id="modal-bg" onclick="closeModal(event)">
-  <div class="modal">
-    <div class="modal-header">
-      <div>
-        <div style="font-family:var(--display);font-size:36px;letter-spacing:3px" id="modal-name"></div>
-        <div style="font-family:var(--mono);font-size:10px;color:var(--text3);letter-spacing:2px;margin-top:6px" id="modal-meta"></div>
-      </div>
-      <button class="modal-close" onclick="closeModal()">✕</button>
-    </div>
-    <div class="modal-body">
-      <div class="stat-row" id="modal-stats" style="margin-bottom:24px"></div>
-      <div class="report-body" id="modal-report"></div>
+      <div id="games-empty" style="display:none;padding:40px;text-align:center;color:var(--text3);font-family:var(--mono);font-size:12px;letter-spacing:2px">NO GAMES TODAY</div>
     </div>
   </div>
-</div>
+  <!-- MODAL -->
+  <div class="modal-bg" id="modal-bg" onclick="closeModal()">
+    <div class="modal" onclick="event.stopPropagation()">
+      <div class="modal-close" onclick="closeModal()">×</div>
+      <div class="modal-name" id="modal-name"></div>
+      <div class="modal-meta" id="modal-meta"></div>
+      <div class="modal-stats" id="modal-stats"></div>
+      <button class="btn-ghost print-btn no-print" onclick="printModal()">Print PDF</button>
+    </div>
+  </div>
+  <script>
+    const API = '/api';
+    let chatHistory = [];
 
-<script>
-const API = 'http://localhost:8000/api';
-let tradeOut = [], tradeIn = [];
-let chatHistory = [], chatPlayer = null;
-
-// ── Navigation ─────────────────────────────────────────────────────────────
-const pageTitles = {
-  scout: 'SCOUT PLAYER', compare: 'HEAD-TO-HEAD COMPARE',
-  trade: 'TRADE ANALYZER', team: 'TEAM REPORT',
-  roster: 'ROSTER PACKAGE', chat: 'AI ANALYST', games: 'LIVE GAMES'
-};
-
-function goTo(page) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  document.getElementById('page-' + page).classList.add('active');
-  document.getElementById('page-title').textContent = pageTitles[page];
-  event.currentTarget.classList.add('active');
-  if (page === 'games') loadGames();
-}
-
-function getSeason() { return parseInt(document.getElementById('global-season').value); }
-
-// ── Helpers ────────────────────────────────────────────────────────────────
-function showLoad(id, txt) {
-  const el = document.getElementById(id + '-load');
-  if (txt && document.getElementById(id + '-load-txt')) document.getElementById(id + '-load-txt').textContent = txt;
-  el.classList.add('visible');
-  const err = document.getElementById(id + '-err');
-  if (err) err.classList.remove('visible');
-  const btn = document.getElementById(id + '-btn');
-  if (btn) btn.disabled = true;
-}
-
-function hideLoad(id) {
-  document.getElementById(id + '-load').classList.remove('visible');
-  const btn = document.getElementById(id + '-btn');
-  if (btn) btn.disabled = false;
-}
-
-function showErr(id, msg) {
-  const el = document.getElementById(id + '-err');
-  el.textContent = '⚠ ' + msg;
-  el.classList.add('visible');
-}
-
-function renderStats(id, stats) {
-  const fields = [
-    {k:'ppg',l:'PPG'},{k:'rpg',l:'RPG'},{k:'apg',l:'APG'},
-    {k:'fg_pct',l:'FG%',pct:true},{k:'ts_pct',l:'TS%',pct:true},{k:'gp',l:'GP',int:true}
-  ];
-  document.getElementById(id).innerHTML = fields.map(f => {
-    let v = stats[f.k];
-    const display = v == null || v === 0 && f.k !== 'gp' ? 'N/A'
-      : f.pct ? (v*100).toFixed(1)+'%'
-      : f.int ? parseInt(v)
-      : Number(v).toFixed(1);
-    return `<div class="stat-card"><div class="stat-val">${display}</div><div class="stat-lbl">${f.l}</div></div>`;
-  }).join('');
-}
-
-function renderReport(id, text) {
-  if (!text) return;
-  let html = text
-    .replace(/^## (.+)$/gm, '<h2>$1</h2>')
-    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-    .replace(/\*(.*?)\*/g, '<em>$1</em>')
-    .split('\n').filter(l => l.trim()).map(l => l.startsWith('<h2>') ? l : `<p>${l}</p>`).join('');
-  document.getElementById(id).innerHTML = html;
-}
-
-// ── Scout ──────────────────────────────────────────────────────────────────
-async function runScout(force = false) {
-  const name = document.getElementById('scout-name').value.trim();
-  const q = document.getElementById('scout-q').value.trim();
-  if (!name) return;
-  showLoad('scout');
-  try {
-    let url = `${API}/player/${encodeURIComponent(name)}?season=${getSeason()}${force?'&force=true':''}`;
-    if (q) url += `&question=${encodeURIComponent(q)}`;
-    const res = await fetch(url);
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.detail || 'Not found');
-    document.getElementById('scout-pname').textContent = data.player;
-    document.getElementById('scout-pmeta').textContent = `${data.team} · ${data.position} · ${getSeason()} SEASON`;
-    renderStats('scout-stats', data.stats);
-    renderReport('scout-report', data.report);
-    document.getElementById('scout-out').classList.add('visible');
-  } catch(e) { showErr('scout', e.message); }
-  finally { hideLoad('scout'); }
-}
-
-// ── Compare ────────────────────────────────────────────────────────────────
-async function runCompare() {
-  const a = document.getElementById('cmp-a').value.trim();
-  const b = document.getElementById('cmp-b').value.trim();
-  const ctx = document.getElementById('cmp-ctx').value.trim();
-  if (!a || !b) return;
-  showLoad('cmp');
-  try {
-    let url = `${API}/compare?player_a=${encodeURIComponent(a)}&player_b=${encodeURIComponent(b)}&season=${getSeason()}`;
-    if (ctx) url += `&context=${encodeURIComponent(ctx)}`;
-    const res = await fetch(url);
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.detail || 'Error');
-    document.getElementById('cmp-title').textContent = `${data.player_a}  vs  ${data.player_b}`;
-    const sa = data.stats_a, sb = data.stats_b;
-    const rows = [
-      ['Points',sa.ppg,sb.ppg],['Rebounds',sa.rpg,sb.rpg],['Assists',sa.apg,sb.apg],
-      ['FG%',sa.fg_pct,sb.fg_pct,true],['TS%',sa.ts_pct,sb.ts_pct,true]
-    ];
-    const fmt = (v, pct) => v == null ? 'N/A' : pct ? (v*100).toFixed(1)+'%' : Number(v).toFixed(1);
-    document.getElementById('cmp-table').innerHTML =
-      `<tr><th>STAT</th><th>${data.player_a.split(' ').pop()}</th><th>${data.player_b.split(' ').pop()}</th><th>EDGE</th></tr>` +
-      rows.map(([l,va,vb,pct])=>{
-        const aw = va > vb, bw = vb > va;
-        return `<tr><td>${l}</td><td class="${aw?'winner':''}">${fmt(va,pct)}</td><td class="${bw?'winner':''}">${fmt(vb,pct)}</td><td style="color:var(--accent);font-size:10px">${aw?'← A':bw?'B →':'TIE'}</td></tr>`;
-      }).join('');
-    renderReport('cmp-report', data.comparison);
-    document.getElementById('cmp-out').classList.add('visible');
-  } catch(e) { showErr('cmp', e.message); }
-  finally { hideLoad('cmp'); }
-}
-
-// ── Trade ──────────────────────────────────────────────────────────────────
-function addTag(side) {
-  const input = document.getElementById(side + '-input');
-  const name = input.value.trim();
-  if (!name) return;
-  if (side === 'out') tradeOut.push(name); else tradeIn.push(name);
-  input.value = '';
-  renderTags();
-}
-
-function removeTag(side, name) {
-  if (side === 'out') tradeOut = tradeOut.filter(n=>n!==name);
-  else tradeIn = tradeIn.filter(n=>n!==name);
-  renderTags();
-}
-
-function renderTags() {
-  ['out','in'].forEach(side => {
-    const list = side === 'out' ? tradeOut : tradeIn;
-    document.getElementById(side + '-tags').innerHTML = list.map(n =>
-      `<div class="tag">${n}<span class="tag-x" onclick="removeTag('${side}','${n}')">×</span></div>`
-    ).join('');
-  });
-}
-
-async function runTrade() {
-  if (!tradeOut.length || !tradeIn.length) { showErr('trade', 'Add players on both sides.'); return; }
-  const ctx = document.getElementById('trade-ctx').value.trim();
-  showLoad('trade');
-  try {
-    const res = await fetch(`${API}/trade`, {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({outgoing:tradeOut, incoming:tradeIn, season:getSeason(), context:ctx})
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.detail || 'Error');
-    document.getElementById('trade-title').textContent =
-      `${data.outgoing.join(', ')}  →  ${data.incoming.join(', ')}`;
-    renderReport('trade-report', data.analysis);
-    document.getElementById('trade-out').classList.add('visible');
-  } catch(e) { showErr('trade', e.message); }
-  finally { hideLoad('trade'); }
-}
-
-// ── Team ───────────────────────────────────────────────────────────────────
-async function runTeam() {
-  const abbr = document.getElementById('team-abbr').value.trim().toUpperCase();
-  const q = document.getElementById('team-q').value.trim();
-  if (!abbr) return;
-  showLoad('team', `Loading ${abbr} roster...`);
-  try {
-    let url = `${API}/team/${abbr}?season=${getSeason()}`;
-    if (q) url += `&question=${encodeURIComponent(q)}`;
-    const res = await fetch(url);
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.detail || 'Not found');
-    document.getElementById('team-name').textContent = data.team;
-    document.getElementById('team-meta').textContent = `${abbr} · ${data.roster_size} PLAYERS · ${getSeason()} SEASON`;
-    const leaders = data.leaders || {};
-    const leaderFields = [
-      {k:'scoring',l:'SCORING LEADER'},{k:'rebounding',l:'REBOUNDS'},{k:'assists',l:'ASSISTS'},
-      {k:'defense',l:'DEFENSE'},{k:'efficiency',l:'EFFICIENCY'}
-    ];
-    document.getElementById('team-leaders').innerHTML = leaderFields.map(f =>
-      `<div class="stat-card"><div class="stat-val" style="font-size:18px;letter-spacing:1px">${(leaders[f.k]||'N/A').split(' ').pop()}</div><div class="stat-lbl">${f.l}</div></div>`
-    ).join('');
-    renderReport('team-report', data.report);
-    document.getElementById('team-out').classList.add('visible');
-  } catch(e) { showErr('team', e.message); }
-  finally { hideLoad('team'); }
-}
-
-// ── Roster Package ─────────────────────────────────────────────────────────
-async function runRoster() {
-  const abbr = document.getElementById('roster-abbr').value.trim().toUpperCase();
-  if (!abbr) return;
-  document.getElementById('roster-results').style.display = 'none';
-  showLoad('roster', `Generating ${abbr} roster package — all players concurrent...`);
-  try {
-    const res = await fetch(`${API}/team/${abbr}/roster?season=${getSeason()}`);
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.detail || 'Not found');
-    document.getElementById('roster-title').textContent =
-      `${data.team} — ${data.players_covered} reports generated`;
-    const grid = document.getElementById('roster-grid');
-    grid.innerHTML = '';
-    const rosterStats = data.roster_stats || [];
-    Object.entries(data.reports || {}).forEach(([name, report], i) => {
-      const stat = rosterStats.find(r => r.name === name) || {};
-      const card = document.createElement('div');
-      card.className = 'roster-card';
-      card.style.animationDelay = `${i * 0.04}s`;
-      card.innerHTML = `
-        <div class="rc-name">${name}</div>
-        <div class="rc-meta">${stat.position || ''}</div>
-        <div class="rc-stats">
-          <div class="rc-stat"><div class="rc-stat-val">${Number(stat.ppg||0).toFixed(1)}</div><div class="rc-stat-lbl">PPG</div></div>
-          <div class="rc-stat"><div class="rc-stat-val">${Number(stat.rpg||0).toFixed(1)}</div><div class="rc-stat-lbl">RPG</div></div>
-          <div class="rc-stat"><div class="rc-stat-val">${Number(stat.apg||0).toFixed(1)}</div><div class="rc-stat-lbl">APG</div></div>
-          <div class="rc-stat"><div class="rc-stat-val">${stat.gp||0}</div><div class="rc-stat-lbl">GP</div></div>
-        </div>`;
-      card.onclick = () => openModal(name, stat, report);
-      grid.appendChild(card);
-    });
-    document.getElementById('roster-results').style.display = 'block';
-  } catch(e) { showErr('roster', e.message); }
-  finally { hideLoad('roster'); }
-}
-
-// ── Modal ──────────────────────────────────────────────────────────────────
-function openModal(name, stats, report) {
-  document.getElementById('modal-name').textContent = name;
-  document.getElementById('modal-meta').textContent = `${stats.position || ''} · FULL SCOUTING REPORT`;
-  renderStats('modal-stats', stats);
-  renderReport('modal-report', report);
-  document.getElementById('modal-bg').classList.add('open');
-  document.body.style.overflow = 'hidden';
-}
-
-function closeModal(e) {
-  if (!e || e.target === document.getElementById('modal-bg') || e.currentTarget.classList.contains('modal-close')) {
-    document.getElementById('modal-bg').classList.remove('open');
-    document.body.style.overflow = '';
-  }
-}
-
-// ── Chat ───────────────────────────────────────────────────────────────────
-async function loadChat() {
-  const name = document.getElementById('chat-player').value.trim();
-  if (!name) return;
-  document.getElementById('chat-load-btn').disabled = true;
-  document.getElementById('chat-load').classList.add('visible');
-  document.getElementById('chat-err').classList.remove('visible');
-  try {
-    const res = await fetch(`${API}/player/${encodeURIComponent(name)}?season=${getSeason()}`);
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.detail || 'Not found');
-    chatPlayer = data;
-    chatHistory = [];
-    document.getElementById('chat-pname').textContent = data.player;
-    document.getElementById('chat-pmeta').textContent = `${data.team} · ${data.position} · ${getSeason()} SEASON`;
-    document.getElementById('chat-msgs').innerHTML = '';
-    document.getElementById('chat-ui').style.display = 'block';
-    appendMsg('ai', `Scouting file loaded for **${data.player}**. I have their full ${getSeason()} stats. Ask me anything — trade value, fit analysis, contract situation, comparables, weaknesses, anything.`);
-  } catch(e) {
-    document.getElementById('chat-err').textContent = '⚠ ' + e.message;
-    document.getElementById('chat-err').classList.add('visible');
-  } finally {
-    document.getElementById('chat-load-btn').disabled = false;
-    document.getElementById('chat-load').classList.remove('visible');
-  }
-}
-
-function clearChat() {
-  chatHistory = [];
-  document.getElementById('chat-msgs').innerHTML = '';
-  document.getElementById('chat-ui').style.display = 'none';
-  document.getElementById('chat-player').value = '';
-  chatPlayer = null;
-}
-
-function appendMsg(role, text) {
-  const win = document.getElementById('chat-msgs');
-  const div = document.createElement('div');
-  div.className = 'msg msg-' + (role === 'user' ? 'user' : 'ai');
-  const formatted = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-  div.innerHTML = `<div class="msg-label">${role === 'user' ? 'YOU' : 'PIVOT'}</div><div class="msg-bubble">${formatted}</div>`;
-  win.appendChild(div);
-  win.scrollTop = win.scrollHeight;
-}
-
-async function sendChat() {
-  const input = document.getElementById('chat-input');
-  const msg = input.value.trim();
-  if (!msg || !chatPlayer) return;
-  input.value = '';
-  appendMsg('user', msg);
-  document.getElementById('chat-send').disabled = true;
-  document.getElementById('chat-load').classList.add('visible');
-  try {
-    const res = await fetch(`${API}/chat`, {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({player: chatPlayer.player, season: getSeason(), message: msg, history: chatHistory})
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.detail || 'Error');
-    chatHistory = data.history;
-    appendMsg('ai', data.reply);
-  } catch(e) { appendMsg('ai', '⚠ ' + e.message); }
-  finally {
-    document.getElementById('chat-send').disabled = false;
-    document.getElementById('chat-load').classList.remove('visible');
-  }
-}
-
-// ── Games ──────────────────────────────────────────────────────────────────
-async function loadGames() {
-  document.getElementById('games-load').classList.add('visible');
-  document.getElementById('games-err').classList.remove('visible');
-  document.getElementById('games-empty').style.display = 'none';
-  try {
-    const res = await fetch(`${API}/games/today`);
-    const data = await res.json();
-    const games = data.games || [];
-    const grid = document.getElementById('games-grid');
-    if (!games.length) {
-      grid.innerHTML = '';
-      document.getElementById('games-empty').style.display = 'block';
-      return;
+    function toggleSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      const closeBtn = document.querySelector('.close-sidebar');
+      sidebar.classList.toggle('open');
+      closeBtn.style.display = sidebar.classList.contains('open') ? 'block' : 'none';
+      document.body.style.overflow = sidebar.classList.contains('open') ? 'hidden' : 'auto';
     }
-    grid.innerHTML = games.map(g => {
-      const home = g.home_team || {};
-      const away = g.visitor_team || {};
-      const hs = g.home_team_score;
-      const as = g.visitor_team_score;
-      const status = g.status || 'Scheduled';
-      const isLive = status.includes('Qtr') || status.includes('Half');
-      const isFinal = status === 'Final';
-      return `<div class="game-card">
-        <div class="game-status ${isFinal?'final':''}">${isLive ? '⬤ LIVE — ' : ''}${status.toUpperCase()}</div>
-        <div class="game-teams">
-          <div class="game-team">
-            <div class="game-team-name">${away.abbreviation || 'AWY'}</div>
-            <div class="game-team-score">${as || '—'}</div>
-          </div>
-          <div class="game-vs">@</div>
-          <div class="game-team">
-            <div class="game-team-name">${home.abbreviation || 'HME'}</div>
-            <div class="game-team-score">${hs || '—'}</div>
-          </div>
-        </div>
-      </div>`;
-    }).join('');
-  } catch(e) {
-    document.getElementById('games-err').textContent = '⚠ ' + e.message;
-    document.getElementById('games-err').classList.add('visible');
-  } finally {
-    document.getElementById('games-load').classList.remove('visible');
-  }
-}
 
-// ── Keyboard shortcuts ─────────────────────────────────────────────────────
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') closeModal();
-});
+    function switchPage(page) {
+      document.querySelectorAll('.page').forEach(p => p.style.display = 'none');
+      document.getElementById(`page-${page}`).style.display = 'block';
+      document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+      document.querySelector(`.sidebar-item[onclick="switchPage('${page}')"]`).classList.add('active');
+      toggleSidebar();
+      if (page === 'games') loadGames();
+      localStorage.setItem('activePage', page);
+    }
 
-// ── Init ───────────────────────────────────────────────────────────────────
-loadGames();
-</script>
+    function handleListInput(input, listId, e) {
+      if (e.keyCode === 188 || e.keyCode === 13) {
+        e.preventDefault();
+        const val = input.value.trim();
+        if (val) {
+          const chip = document.createElement('div');
+          chip.classList.add('list-chip');
+          chip.innerHTML = val + '<span class="list-chip-remove" onclick="this.parentNode.remove()">×</span>';
+          document.getElementById(listId).insertBefore(chip, input);
+          input.value = '';
+        }
+      }
+    }
+
+    function autocomplete(input, id) {
+      const q = input.value.trim();
+      if (q.length < 2) {
+        document.getElementById(`${id}-sugg`).classList.remove('visible');
+        return;
+      }
+      fetch(`${API}/players/search?q=${q}`)
+        .then(res => res.json())
+        .then(data => {
+          const list = document.getElementById(`${id}-sugg`);
+          list.innerHTML = data.players.map(p => `<div class="autocomp-item" onclick="selectAuto('${id}', '${p}')">${p}</div>`).join('');
+          list.classList.add('visible');
+        });
+    }
+
+    function selectAuto(id, val) {
+      document.getElementById(`${id}-name` || id) .value = val;
+      document.getElementById(`${id}-sugg`).classList.remove('visible');
+    }
+
+    async function generateScout(force = false) {
+      const name = document.getElementById('scout-name').value.trim();
+      const question = document.getElementById('scout-question').value.trim();
+      if (!name) return alert('Enter a player name');
+      document.getElementById('scout-load').classList.add('visible');
+      document.getElementById('scout-err').classList.remove('visible');
+      document.getElementById('scout-stats').style.display = 'none';
+      document.getElementById('scout-print').style.display = 'none';
+      document.getElementById('scout-report').style.display = 'none';
+      try {
+        const res = await fetch(`${API}/player/${encodeURIComponent(name)}?season=2025&question=${encodeURIComponent(question)}&force=${force}`);
+        if (!res.ok) throw new Error(await res.text());
+        const data = await res.json();
+        const stats = data.stats;
+        document.getElementById('scout-stats').innerHTML = `
+          <div class="stats">
+            <div class="stat"><div class="stat-label">PPG</div><div class="stat-value">${stats.ppg.toFixed(1)}</div></div>
+            <div class="stat"><div class="stat-label">RPG</div><div class="stat-value">${stats.rpg.toFixed(1)}</div></div>
+            <div class="stat"><div class="stat-label">APG</div><div class="stat-value">${stats.apg.toFixed(1)}</div></div>
+            <div class="stat"><div class="stat-label">FG%</div><div class="stat-value">${(stats.fg_pct * 100).toFixed(1)}%</div></div>
+            <div class="stat"><div class="stat-label">TS%</div><div class="stat-value">${(stats.ts_pct * 100).toFixed(1)}%</div></div>
+            <div class="stat"><div class="stat-label">GP</div><div class="stat-value">${stats.gp}</div></div>
+          </div>
+          <div style="font-size:16px;margin-bottom:16px">${data.player} | ${data.team} · ${data.position} · ${data.season} SEASON</div>
+        `;
+        document.getElementById('scout-stats').style.display = 'block';
+        document.getElementById('scout-report').textContent = data.report;
+        document.getElementById('scout-report').style.display = 'block';
+        document.getElementById('scout-print').style.display = 'block';
+      } catch(e) {
+        document.getElementById('scout-err').textContent = '⚠ ' + e.message;
+        document.getElementById('scout-err').classList.add('visible');
+      } finally {
+        document.getElementById('scout-load').classList.remove('visible');
+      }
+    }
+
+    async function generateCompare(force = false) {
+      const a = document.getElementById('comp-a').value.trim();
+      const b = document.getElementById('comp-b').value.trim();
+      const context = document.getElementById('comp-context').value.trim();
+      if (!a || !b) return alert('Enter both players');
+      document.getElementById('comp-load').classList.add('visible');
+      document.getElementById('comp-err').classList.remove('visible');
+      document.getElementById('comp-print').style.display = 'none';
+      document.getElementById('comp-report').style.display = 'none';
+      try {
+        const res = await fetch(`${API}/compare?player_a=${encodeURIComponent(a)}&player_b=${encodeURIComponent(b)}&season=2025&context=${encodeURIComponent(context)}&force=${force}`);
+        if (!res.ok) throw new Error(await res.text());
+        const data = await res.json();
+        document.getElementById('comp-report').textContent = data.comparison;
+        document.getElementById('comp-report').style.display = 'block';
+        document.getElementById('comp-print').style.display = 'block';
+      } catch(e) {
+        document.getElementById('comp-err').textContent = '⚠ ' + e.message;
+        document.getElementById('comp-err').classList.add('visible');
+      } finally {
+        document.getElementById('comp-load').classList.remove('visible');
+      }
+    }
+
+    async function generateTrade(force = false) {
+      const outList = Array.from(document.getElementById('trade-out-list').querySelectorAll('.list-chip')).map(c => c.textContent.trim().slice(0, -1));
+      const inList = Array.from(document.getElementById('trade-in-list').querySelectorAll('.list-chip')).map(c => c.textContent.trim().slice(0, -1));
+      const context = document.getElementById('trade-context').value.trim();
+      if (!outList.length || !inList.length) return alert('Add players to both sides');
+      document.getElementById('trade-load').classList.add('visible');
+      document.getElementById('trade-err').classList.remove('visible');
+      document.getElementById('trade-print').style.display = 'none';
+      document.getElementById('trade-report').style.display = 'none';
+      try {
+        const res = await fetch(`${API}/trade`, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({outgoing: outList, incoming: inList, season: 2025, context, force})
+        });
+        if (!res.ok) throw new Error(await res.text());
+        const data = await res.json();
+        document.getElementById('trade-report').textContent = data.analysis;
+        document.getElementById('trade-report').style.display = 'block';
+        document.getElementById('trade-print').style.display = 'block';
+      } catch(e) {
+        document.getElementById('trade-err').textContent = '⚠ ' + e.message;
+        document.getElementById('trade-err').classList.add('visible');
+      } finally {
+        document.getElementById('trade-load').classList.remove('visible');
+      }
+    }
+
+    async function generateTeam(force = false) {
+      const abbr = document.getElementById('team-abbr').value.trim();
+      const question = document.getElementById('team-question').value.trim();
+      if (!abbr) return alert('Enter a team abbreviation');
+      document.getElementById('team-load').classList.add('visible');
+      document.getElementById('team-err').classList.remove('visible');
+      document.getElementById('team-print').style.display = 'none';
+      document.getElementById('team-report').style.display = 'none';
+      try {
+        const res = await fetch(`${API}/team/${encodeURIComponent(abbr)}?season=2025&question=${encodeURIComponent(question)}&force=${force}`);
+        if (!res.ok) throw new Error(await res.text());
+        const data = await res.json();
+        document.getElementById('team-report').textContent = data.report;
+        document.getElementById('team-report').style.display = 'block';
+        document.getElementById('team-print').style.display = 'block';
+      } catch(e) {
+        document.getElementById('team-err').textContent = '⚠ ' + e.message;
+        document.getElementById('team-err').classList.add('visible');
+      } finally {
+        document.getElementById('team-load').classList.remove('visible');
+      }
+    }
+
+    async function generateRoster(force = false) {
+      const abbr = document.getElementById('roster-abbr').value.trim();
+      if (!abbr) return alert('Enter a team abbreviation');
+      document.getElementById('roster-load').classList.add('visible');
+      document.getElementById('roster-err').classList.remove('visible');
+      document.getElementById('roster-print').style.display = 'none';
+      document.getElementById('roster-reports').style.display = 'none';
+      document.getElementById('roster-reports').innerHTML = '';
+      try {
+        const res = await fetch(`${API}/team/${encodeURIComponent(abbr)}/roster?season=2025&force=${force}`);
+        if (!res.ok) throw new Error(await res.text());
+        const data = await res.json();
+        const reports = data.reports;
+        const div = document.getElementById('roster-reports');
+        for (const [name, report] of Object.entries(reports)) {
+          const card = document.createElement('div');
+          card.classList.add('game-card');
+          card.innerHTML = `<div class="section-title">${name}</div><pre class="report">${report}</pre>`;
+          div.appendChild(card);
+        }
+        div.style.display = 'block';
+        document.getElementById('roster-print').style.display = 'block';
+      } catch(e) {
+        document.getElementById('roster-err').textContent = '⚠ ' + e.message;
+        document.getElementById('roster-err').classList.add('visible');
+      } finally {
+        document.getElementById('roster-load').classList.remove('visible');
+      }
+    }
+
+    async function startChat() {
+      const player = document.getElementById('chat-player').value.trim();
+      if (!player) return alert('Enter a player name');
+      document.getElementById('chat-session').style.display = 'block';
+      chatHistory = [];
+      document.getElementById('chat-messages').innerHTML = '';
+      document.getElementById('chat-input').focus();
+    }
+
+    async function sendChat() {
+      const message = document.getElementById('chat-input').value.trim();
+      if (!message) return;
+      const player = document.getElementById('chat-player').value.trim();
+      const messages = document.getElementById('chat-messages');
+      messages.innerHTML += `<div style="margin-bottom:16px;color:var(--text2)">You: ${message}</div>`;
+      document.getElementById('chat-input').value = '';
+      messages.scrollTop = messages.scrollHeight;
+      try {
+        const res = await fetch(`${API}/chat`, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({player, season:2025, message, history:chatHistory})
+        });
+        if (!res.ok) throw new Error(await res.text());
+        const data = await res.json();
+        messages.innerHTML += `<div style="margin-bottom:16px;color:var(--accent)">PIVOT: ${data.reply}</div>`;
+        chatHistory = data.history;
+        messages.scrollTop = messages.scrollHeight;
+      } catch(e) {
+        messages.innerHTML += `<div style="margin-bottom:16px;color:var(--red)">Error: ${e.message}</div>`;
+        messages.scrollTop = messages.scrollHeight;
+      }
+    }
+
+    async function loadGames() {
+      document.getElementById('games-load').classList.add('visible');
+      document.getElementById('games-err').classList.remove('visible');
+      document.getElementById('games-empty').style.display = 'none';
+      document.getElementById('games-grid').innerHTML = '';
+      try {
+        const res = await fetch(`${API}/games/live`);
+        const data = await res.json();
+        const games = data.games;
+        if (!games.length) {
+          document.getElementById('games-empty').style.display = 'block';
+          return;
+        }
+        const grid = document.getElementById('games-grid');
+        grid.innerHTML = games.map(g => {
+          const home = g.home_team || {};
+          const away = g.visitor_team || {};
+          const status = g.status || 'Scheduled';
+          const isLive = status.includes('Qtr') || status.includes('Half');
+          const isFinal = status === 'Final';
+          const hq = [g.home_q1,g.home_q2,g.home_q3,g.home_q4].filter(q=>q!=null);
+          const aq = [g.visitor_q1,g.visitor_q2,g.visitor_q3,g.visitor_q4].filter(q=>q!=null);
+          const qRow = hq.length ? `
+            <div style="display:grid;grid-template-columns:repeat(${hq.length+1},1fr);gap:1px;background:var(--border);border:1px solid var(--border);margin-top:16px;font-family:var(--mono);font-size:10px;text-align:center">
+              <div style="background:var(--surface2);padding:6px;color:var(--text3)">TEAM</div>
+              ${hq.map((_,i)=>`<div style="background:var(--surface2);padding:6px;color:var(--text3)">Q${i+1}</div>`).join('')}
+              <div style="background:var(--surface2);padding:6px;color:var(--text3)">${away.abbreviation||'AWY'}</div>
+              ${aq.map(q=>`<div style="background:var(--surface);padding:6px;color:var(--text2)">${q??0}</div>`).join('')}
+              <div style="background:var(--surface2);padding:6px;color:var(--text3)">${home.abbreviation||'HME'}</div>
+              ${hq.map(q=>`<div style="background:var(--surface);padding:6px;color:var(--text2)">${q??0}</div>`).join('')}
+            </div>` : '';
+          return `<div class="game-card" onclick="openBoxScore(${JSON.stringify(g)})">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+              <div class="game-status ${isFinal?'final':''}">${isLive?'LIVE ':''} ${g.time||status}</div>
+            </div>
+            <div class="game-teams">
+              <div class="game-team">
+                <div class="game-team-name">${away.abbreviation||'AWY'}</div>
+                <div class="game-team-score" style="${g.visitor_team_score>g.home_team_score?'color:var(--accent)':''}">${g.visitor_team_score??'—'}</div>
+              </div>
+              <div class="game-vs">@</div>
+              <div class="game-team">
+                <div class="game-team-name">${home.abbreviation||'HME'}</div>
+                <div class="game-team-score" style="${g.home_team_score>g.visitor_team_score?'color:var(--accent)':''}">${g.home_team_score??'—'}</div>
+              </div>
+            </div>
+            ${qRow}
+          </div>`;
+        }).join('');
+      } catch(e) {
+        document.getElementById('games-err').textContent = '⚠ ' + e.message;
+        document.getElementById('games-err').classList.add('visible');
+      } finally {
+        document.getElementById('games-load').classList.remove('visible');
+      }
+    }
+
+    function openBoxScore(game) {
+      const home = game.home_team || {};
+      const away = game.visitor_team || {};
+      document.getElementById('modal-name').textContent = `${away.abbreviation} ${game.visitor_team_score} - ${game.home_team_score} ${home.abbreviation}`;
+      document.getElementById('modal-meta').textContent = `${game.time || game.status} · ${game.date}`;
+      document.getElementById('modal-stats').innerHTML = playerTable(away.players, away.full_name) + playerTable(home.players, home.full_name);
+      document.getElementById('modal-bg').classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function playerTable(players, teamName) {
+      const active = players.filter(p => p.min && p.min !== '00').sort((a,b) => b.pts - a.pts);
+      return `
+        <div style="font-family:var(--display);font-size:18px;letter-spacing:3px;margin-bottom:12px;color:var(--accent)">${teamName}</div>
+        <table style="width:100%;border-collapse:collapse;font-family:var(--mono);font-size:11px;margin-bottom:32px">
+          <tr style="border-bottom:1px solid var(--border)">
+            <th style="text-align:left;padding:8px 6px;color:var(--text3);letter-spacing:1px">PLAYER</th>
+            <th style="padding:8px 6px;color:var(--text3)">MIN</th>
+            <th style="padding:8px 6px;color:var(--text3)">PTS</th>
+            <th style="padding:8px 6px;color:var(--text3)">REB</th>
+            <th style="padding:8px 6px;color:var(--text3)">AST</th>
+            <th style="padding:8px 6px;color:var(--text3)">STL</th>
+            <th style="padding:8px 6px;color:var(--text3)">BLK</th>
+            <th style="padding:8px 6px;color:var(--text3)">TO</th>
+            <th style="padding:8px 6px;color:var(--text3)">FG</th>
+            <th style="padding:8px 6px;color:var(--text3)">3PT</th>
+            <th style="padding:8px 6px;color:var(--text3)">+/-</th>
+          </tr>
+          ${active.map(p => `
+            <tr style="border-bottom:1px solid var(--border);transition:background 0.1s" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background=''">
+              <td style="padding:10px 6px;text-align:left"><span style="font-weight:500;color:var(--text)">${p.player.first_name} ${p.player.last_name}</span> <span style="color:var(--text3)">#${p.player.jersey_number||''}</span></td>
+              <td style="padding:10px 6px;text-align:center;color:var(--text2)">${p.min}</td>
+              <td style="padding:10px 6px;text-align:center;color:${p.pts>=20?'var(--accent)':p.pts>=10?'var(--text)':'var(--text2)'};font-weight:${p.pts>=10?'600':'400'}">${p.pts}</td>
+              <td style="padding:10px 6px;text-align:center;color:var(--text2)">${p.reb}</td>
+              <td style="padding:10px 6px;text-align:center;color:var(--text2)">${p.ast}</td>
+              <td style="padding:10px 6px;text-align:center;color:var(--text2)">${p.stl}</td>
+              <td style="padding:10px 6px;text-align:center;color:var(--text2)">${p.blk}</td>
+              <td style="padding:10px 6px;text-align:center;color:${p.turnover>=3?'var(--red)':'var(--text2)'}">${p.turnover}</td>
+              <td style="padding:10px 6px;text-align:center;color:var(--text2)">${p.fgm}-${p.fga}</td>
+              <td style="padding:10px 6px;text-align:center;color:var(--text2)">${p.fg3m}-${p.fg3a}</td>
+              <td style="padding:10px 6px;text-align:center;color:${p.plus_minus>0?'var(--green)':p.plus_minus<0?'var(--red)':'var(--text3)'}">${p.plus_minus>0?'+':''}${p.plus_minus}</td>
+            </tr>`).join('')}
+        </table>`;
+    }
+
+    function printReport(page) {
+      const report = document.getElementById(`${page}-report`).innerHTML;
+      const stats = document.getElementById(`${page}-stats`) ? document.getElementById(`${page}-stats`).innerHTML : '';
+      const win = window.open('', '', 'height=500,width=800');
+      win.document.write('<html><head><title>Print Report</title></head><body>' + stats + '<pre>' + report + '</pre></body></html>');
+      win.document.close();
+      win.print();
+    }
+
+    function printModal() {
+      const name = document.getElementById('modal-name').textContent;
+      const meta = document.getElementById('modal-meta').textContent;
+      const stats = document.getElementById('modal-stats').innerHTML;
+      const win = window.open('', '', 'height=500,width=800');
+      win.document.write('<html><head><title>Print Box Score</title></head><body><h1>' + name + '</h1><p>' + meta + '</p>' + stats + '</body></html>');
+      win.document.close();
+      win.print();
+    }
+
+    function closeModal() {
+      document.getElementById('modal-bg').classList.remove('open');
+      document.body.style.overflow = 'auto';
+    }
+
+    window.addEventListener('load', () => {
+      const active = localStorage.getItem('activePage') || 'scout';
+      switchPage(active);
+    });
+  </script>
 </body>
 </html>
