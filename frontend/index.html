@@ -187,7 +187,8 @@
     .list-chip { background: #000; border: 2px solid var(--panel-border); padding: 10px 16px; font-size: 12px; display: flex; align-items: center; gap: 12px; text-transform: uppercase; letter-spacing: 1px; }
     .list-chip span { cursor: pointer; color: var(--text-muted); transition: color 0.2s; font-size: 16px; line-height: 1; }
     .list-chip span:hover { color: var(--red); }
-/* SYSTEM STATUS TICKER */
+
+    /* SYSTEM STATUS TICKER */
     .ticker-wrap {
       background: #000000;
       border-top: 2px solid var(--panel-border);
@@ -206,24 +207,22 @@
       will-change: transform;
     }
     .ticker-text {
-      font-family: var(--font-mono) !important;
       font-size: 11px !important;
       color: var(--accent);
       text-transform: uppercase;
       letter-spacing: 3px;
       padding-right: 40px;
-      font-weight: 700 !important;
       text-shadow: 0 0 8px var(--accent-glow);
     }
     @keyframes ticker {
       0% { transform: translateX(0); }
       100% { transform: translateX(-50%); }
     }
-    
+
     /* PRINT MEDIA */
     @media print {
       body { background: white; color: black; background-image: none; height: auto; overflow: visible; }
-      .navbar, .controls-row, .btn, .btn-ghost, .autocomp-list, .dashboard-header { display: none !important; }
+      .navbar, .controls-row, .btn, .btn-ghost, .autocomp-list, .dashboard-header, .ticker-wrap { display: none !important; }
       .main { padding: 0; }
       .panel, .modal { border: none; box-shadow: none; padding: 0; background: white; display: block !important; }
       .report, .stat-value, .stat-label { color: black; }
@@ -474,6 +473,17 @@
       </div>
     </div>
     
+  </div>
+
+  <div class="ticker-wrap no-print">
+    <div class="ticker-content">
+      <div class="ticker-text">
+        PIVOT_CORE_ONLINE // DATA_PIPELINE: ACTIVE // BDL_API_SYNC: CONTINUOUS // LATENCY: 12MS // ORCHESTRATOR: IDLE // LLM_NODE: CLAUDE-SONNET // SECURE_DATALINK_ESTABLISHED // CACHE_HIT_RATIO: 94.2% // SYS_LOAD: 2.4% // 
+      </div>
+      <div class="ticker-text">
+        PIVOT_CORE_ONLINE // DATA_PIPELINE: ACTIVE // BDL_API_SYNC: CONTINUOUS // LATENCY: 12MS // ORCHESTRATOR: IDLE // LLM_NODE: CLAUDE-SONNET // SECURE_DATALINK_ESTABLISHED // CACHE_HIT_RATIO: 94.2% // SYS_LOAD: 2.4% // 
+      </div>
+    </div>
   </div>
 
   <div class="modal-bg no-print" id="modal-bg" onclick="closeModal()">
