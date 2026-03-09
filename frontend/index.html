@@ -636,7 +636,7 @@
     }
 
     // LIVE GAMES (WITH INTELLIGENT FALLBACK)
-    async function loadGames() {
+async function loadGames() {
       document.getElementById('games-load').classList.add('visible');
       document.getElementById('games-empty').style.display = 'none';
       document.getElementById('games-grid').innerHTML = '';
@@ -658,15 +658,27 @@
         }
         
         document.getElementById('games-grid').innerHTML = games.map(g => {
-          const h = g.home_team || {}; const a = g.visitor_team || {};
+          const h = g.home_team || {}; 
+          const a = g.visitor_team || {};
           const isLive = (g.status || '').includes('Qtr') || (g.status || '').includes('Half');
+          
+          // ROBUST SCORE CALCULATION: Handles 0, null, and sums quarters if total score is missing
+          const calcScore = (team) => {
+            if (g[`${team}_team_score`] !== null && g[`${team}_team_score`] !== undefined) return g[`${team}_team_score`];
+            if (g[`${team}_q1`] != null) return (g[`${team}_q1`]||0) + (g[`${team}_q2`]||0) + (g[`${team}_q3`]||0) + (g[`${team}_q4`]||0);
+            return '—';
+          };
+          
+          const vScore = calcScore('visitor');
+          const hScore = calcScore('home');
+
           return `
           <div class="game-card" onclick='openBoxScore(${JSON.stringify(g).replace(/'/g, "&apos;")})'>
             <div class="game-status"><span class="${isLive ? 'live' : ''}">${isLive ? 'LIVE' : 'SCHED'}</span> <span>${g.time || g.status}</span></div>
             <div class="game-teams">
-              <div class="team-block"><div class="team-name">${a.abbreviation||'AWY'}</div><div class="team-score ${g.visitor_team_score > g.home_team_score ? 'score-high':''}">${g.visitor_team_score||'—'}</div></div>
+              <div class="team-block"><div class="team-name">${a.abbreviation||'AWY'}</div><div class="team-score ${vScore > hScore && vScore !== '—' ? 'score-high':''}">${vScore}</div></div>
               <div style="color:var(--text-muted); font-size:14px;">VS</div>
-              <div class="team-block"><div class="team-name">${h.abbreviation||'HME'}</div><div class="team-score ${g.home_team_score > g.visitor_team_score ? 'score-high':''}">${g.home_team_score||'—'}</div></div>
+              <div class="team-block"><div class="team-name">${h.abbreviation||'HME'}</div><div class="team-score ${hScore > vScore && hScore !== '—' ? 'score-high':''}">${hScore}</div></div>
             </div>
           </div>`;
         }).join('');

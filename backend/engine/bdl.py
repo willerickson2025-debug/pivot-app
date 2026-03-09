@@ -159,9 +159,11 @@ async def get_games(date: str) -> list[dict]:
 
 
 async def get_live_games() -> list[dict]:
-    """Get today's live games."""
-    from datetime import date
-    today = date.today().isoformat()
+    """Get today's live games, locked to US time."""
+    from datetime import datetime, timedelta
+    
+    # Offset UTC by 6 hours so evening games don't roll over to 'tomorrow' at 7 PM EST
+    today = (datetime.utcnow() - timedelta(hours=6)).date().isoformat()
     return await get_games(today)
 
 
