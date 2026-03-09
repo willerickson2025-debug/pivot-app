@@ -188,12 +188,8 @@ async def get_player_game_log(player_id: int, season: int) -> list[dict]:
         return []
     
 async def get_recent_stats(player_id: int, limit: int = 10) -> list[dict]:
-    """Fetches the last X game box scores for a specific player."""
+    """Fetches the last X game box scores for a specific player.""" # Add 4 spaces here
     key = make_key("bdl:recent", pid=player_id, limit=limit)
-    cached = cget(key)
-    if cached is not None:
-        return cached
-    # ... keep the rest of the function indented at this level ...
 
     # Fetch game logs for the current season
     data = await _get("/stats", {
