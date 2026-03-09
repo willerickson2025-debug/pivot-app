@@ -12,17 +12,15 @@
       --panel-border: #222222;
       --text-main: #ffffff;
       --text-muted: #666666;
-      --accent: #39ff14; /* Pure Neon Green */
-      --accent-hover: #ffffff;
+      --accent: #39ff14; /* Neon Green */
       --accent-glow: rgba(57, 255, 20, 0.15);
       --red: #ff3333;
     }
     
-    /* GLOBAL HELVETICA BOLD MANDATE */
+    /* HELVETICA BOLD MANDATE */
     * { 
       box-sizing: border-box; 
-      margin: 0; 
-      padding: 0; 
+      margin: 0; padding: 0; 
       font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif !important;
       font-weight: bold !important;
     }
@@ -33,545 +31,294 @@
         linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px), 
         linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px);
       background-size: 40px 40px;
-      background-position: center top;
       color: var(--text-main); 
-      font-size: 14px; 
-      line-height: 1.5; 
-      height: 100vh; 
-      display: flex; 
-      flex-direction: column; 
-      overflow: hidden; 
+      font-size: 14px; line-height: 1.5; 
+      height: 100vh; display: flex; flex-direction: column; overflow: hidden; 
+    }
+
+    /* CRT SCANLINE OVERLAY */
+    body::after {
+      content: " ";
+      position: absolute; top: 0; left: 0; bottom: 0; right: 0;
+      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%), 
+                  linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+      z-index: 100;
+      background-size: 100% 3px, 3px 100%;
+      pointer-events: none;
+      opacity: 0.4;
     }
     
-    /* ENTERPRISE TOP NAV (FROSTED GLASS) */
+    /* NAVIGATION */
     .navbar { 
-      background: rgba(0, 0, 0, 0.4); 
-      backdrop-filter: blur(16px); 
+      background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(12px); 
       border-bottom: 2px solid var(--panel-border); 
       display: flex; align-items: center; justify-content: space-between; 
-      padding: 0 40px; height: 72px; flex-shrink: 0; 
-      position: relative; z-index: 50; 
+      padding: 0 40px; height: 72px; flex-shrink: 0; z-index: 60; 
     }
-    
-    .brand { font-size: 28px; letter-spacing: -1px; color: var(--text-main); cursor: pointer; transition: color 0.2s; display: flex; align-items: center; gap: 8px; text-transform: uppercase; }
-    .brand:hover { color: var(--accent); }
+    .brand { font-size: 28px; letter-spacing: -1px; cursor: pointer; text-transform: uppercase; }
     .brand span { color: var(--accent); }
     
-    /* RIGHT HAND TABS */
-    .nav-links { display: flex; gap: 0; height: 100%; }
+    .nav-links { display: flex; height: 100%; }
     .dropdown { position: relative; height: 100%; display: flex; align-items: center; }
-    .dropbtn { height: 100%; background: none; border: none; color: var(--text-muted); font-size: 13px; text-transform: uppercase; letter-spacing: 1px; padding: 0 24px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; border-bottom: 3px solid transparent; }
+    .dropbtn { 
+      height: 100%; background: none; border: none; color: var(--text-muted); 
+      font-size: 13px; text-transform: uppercase; letter-spacing: 1px; 
+      padding: 0 24px; cursor: pointer; border-bottom: 3px solid transparent; 
+    }
     .dropdown:hover .dropbtn, .dropbtn.active { color: var(--text-main); border-bottom: 3px solid var(--accent); background: rgba(0,0,0,0.6); }
-    .dropbtn::after { content: '▾'; font-size: 10px; margin-left: 8px; color: var(--accent); }
     
-    .dropdown-content { display: none; position: absolute; top: 72px; right: 0; background: var(--panel-bg); border: 2px solid var(--panel-border); border-top: none; min-width: 240px; box-shadow: 0 20px 40px rgba(0,0,0,0.9); z-index: 100; }
+    .dropdown-content { 
+      display: none; position: absolute; top: 72px; right: 0; 
+      background: var(--panel-bg); border: 2px solid var(--panel-border); 
+      min-width: 240px; z-index: 100; 
+    }
     .dropdown:hover .dropdown-content { display: block; }
-    .dropdown-item { padding: 16px 24px; color: var(--text-muted); text-decoration: none; display: block; cursor: pointer; transition: all 0.2s; font-size: 13px; text-transform: uppercase; border-right: 3px solid transparent; text-align: right; letter-spacing: 0.5px; }
-    .dropdown-item:hover, .dropdown-item.active { background: #111; color: var(--text-main); border-right-color: var(--accent); }
+    .dropdown-item { 
+      padding: 16px 24px; color: var(--text-muted); text-decoration: none; 
+      display: block; font-size: 13px; text-transform: uppercase; 
+      border-right: 3px solid transparent; text-align: right; 
+    }
+    .dropdown-item:hover { background: #111; color: var(--text-main); border-right-color: var(--accent); }
     
-    /* MAIN CONTAINER */
+    /* MAIN AREA */
     .main { flex: 1; padding: 40px; overflow-y: auto; position: relative; z-index: 20; }
     .page { display: none; max-width: 1200px; margin: 0 auto; height: 100%; }
     .page.active { display: flex; flex-direction: column; }
     
-    /* COVER PAGE (EDGE TO EDGE FULL SCREEN) */
+    /* COVER PAGE (MOBILE RESPONSIVE VIDEO) */
     .page.cover-page.active { 
-      display: flex; 
-      position: fixed; /* Breaks out of the padding */
-      top: 0; left: 0; width: 100vw; height: 100vh; 
-      max-width: none; margin: 0; padding: 0;
-      justify-content: center; align-items: center; text-align: center; 
-      z-index: 10; /* Sits beneath the navbar */
-      overflow: hidden; 
+      display: flex; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; 
+      max-width: none; justify-content: center; align-items: center; text-align: center; z-index: 10; 
+      overflow: hidden; background: #000;
     }
-    
-    /* BACKGROUND VIDEO (BRIGHTER & FULL COVERAGE) */
-    .bg-video {
-      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-      object-fit: cover; z-index: 0; 
-      opacity: 0.75; /* Cranked up brightness significantly */
-      filter: grayscale(100%) contrast(120%); pointer-events: none;
+    .bg-video { 
+      position: absolute; top: 50%; left: 50%; 
+      min-width: 100%; min-height: 100%; 
+      width: auto; height: auto; 
+      transform: translate(-50%, -50%); 
+      object-fit: cover; opacity: 0.75; 
+      filter: grayscale(100%) contrast(120%); 
     }
-    .video-overlay {
-      position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-      /* Soft radial gradient so the center is bright and edges are dark */
-      background: radial-gradient(circle, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.85) 100%); 
-      z-index: 1; pointer-events: none;
-    }
-    .cover-content { position: relative; z-index: 2; margin-top: 72px; /* Offset to center it below navbar */ }
-    .cover-title { font-size: 16vw; letter-spacing: -0.06em; line-height: 0.8; color: var(--text-main); margin: 0; text-transform: uppercase; }
-    .cover-subtitle { color: var(--accent); font-size: 18px; letter-spacing: 10px; text-transform: uppercase; margin-top: 24px; text-shadow: 0 0 20px rgba(57, 255, 20, 0.4); }
+    .video-overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: radial-gradient(circle, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.85) 100%); }
+    .cover-content { position: relative; z-index: 2; }
+    .cover-title { font-size: 16vw; letter-spacing: -0.06em; line-height: 0.8; margin: 0; text-transform: uppercase; }
+    .cover-subtitle { color: var(--accent); font-size: 18px; letter-spacing: 10px; text-transform: uppercase; margin-top: 24px; }
 
-    /* DASHBOARD HEADERS */
+    /* UI PANELS */
     .dashboard-header { margin-bottom: 32px; padding-bottom: 16px; border-bottom: 2px solid var(--panel-border); display: flex; justify-content: space-between; align-items: flex-end; }
-    .section-title { font-size: 40px; letter-spacing: -1.5px; color: var(--text-main); text-transform: uppercase; line-height: 1; }
+    .section-title { font-size: 40px; letter-spacing: -1.5px; text-transform: uppercase; line-height: 1; }
     .section-subtitle { color: var(--accent); font-size: 12px; margin-top: 8px; text-transform: uppercase; letter-spacing: 2px; }
-
-    /* PANELS & INPUTS */
     .panel { background: var(--panel-bg); border: 2px solid var(--panel-border); padding: 32px; margin-bottom: 24px; }
-    
-    .controls-row { display: flex; gap: 16px; flex-wrap: wrap; align-items: center; }
-    .input-group { flex: 1; min-width: 250px; position: relative; }
-    .input { background: #000; border: 2px solid var(--panel-border); color: var(--text-main); padding: 16px 20px; font-size: 14px; width: 100%; transition: all 0.2s; text-transform: uppercase; letter-spacing: 0.5px; }
+    .input { background: #000; border: 2px solid var(--panel-border); color: var(--text-main); padding: 16px 20px; font-size: 14px; width: 100%; text-transform: uppercase; }
     .input:focus { outline: none; border-color: var(--accent); }
-    .input::placeholder { color: #444; }
-    
-    .btn { background: var(--accent); color: #000; padding: 16px 32px; border: 2px solid var(--accent); cursor: pointer; font-size: 14px; transition: all 0.2s; text-transform: uppercase; letter-spacing: 1px; display: inline-block; text-align: center; }
-    .btn:hover { background: var(--text-main); border-color: var(--text-main); color: #000; }
-    .btn-ghost { background: transparent; border: 2px solid var(--text-muted); color: var(--text-muted); padding: 12px 24px; cursor: pointer; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; transition: all 0.2s; }
-    .btn-ghost:hover { border-color: var(--accent); color: var(--accent); background: rgba(57, 255, 20, 0.05); }
-
-    /* AUTOCOMPLETE */
-    .autocomp-list { position: absolute; top: calc(100% + 2px); left: 0; right: 0; background: var(--panel-bg); border: 2px solid var(--accent); max-height: 250px; overflow-y: auto; z-index: 20; display: none; }
-    .autocomp-list.visible { display: block; }
-    .autocomp-item { padding: 14px 20px; cursor: pointer; border-bottom: 1px solid var(--panel-border); font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; transition: all 0.1s; }
-    .autocomp-item:hover { background: var(--accent); color: #000; }
+    .btn { background: var(--accent); color: #000; padding: 16px 32px; border: 2px solid var(--accent); cursor: pointer; font-size: 14px; text-transform: uppercase; }
+    .btn:hover { background: var(--text-main); border-color: var(--text-main); }
 
     /* STATS GRID */
     .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 2px; background: var(--panel-border); border: 2px solid var(--panel-border); margin-bottom: 32px; }
     .stat-box { background: var(--panel-bg); padding: 24px 20px; text-align: center; }
-    .stat-label { font-size: 12px; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 2px; }
-    .stat-value { font-size: 40px; color: var(--text-main); letter-spacing: -2px; line-height: 1; }
+    .stat-label { font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 8px; }
+    .stat-value { font-size: 40px; letter-spacing: -2px; line-height: 1; }
 
     /* REPORTS */
-    .report { white-space: pre-wrap; color: #b3b3b3; font-size: 15px; line-height: 1.8; letter-spacing: 0.2px; }
-    .report strong { color: var(--text-main); }
-    .report h2 { color: var(--accent); font-size: 18px; margin: 48px 0 16px 0; border-bottom: 2px solid var(--panel-border); padding-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }
-    .report h2:first-child { margin-top: 0; }
+    .report { white-space: pre-wrap; color: #b3b3b3; font-size: 15px; line-height: 1.8; }
+    .report h2 { color: var(--accent); font-size: 18px; margin: 48px 0 16px 0; border-bottom: 2px solid var(--panel-border); padding-bottom: 8px; text-transform: uppercase; }
 
-    /* CHAT INTERFACE */
+    /* TICKER */
+    .ticker-wrap { background: #000; border-top: 2px solid var(--panel-border); height: 36px; overflow: hidden; display: flex; align-items: center; z-index: 60; }
+    .ticker-content { display: flex; white-space: nowrap; animation: ticker 20s linear infinite; }
+    .ticker-text { font-size: 11px; color: var(--accent); text-transform: uppercase; letter-spacing: 3px; padding-right: 40px; }
+    @keyframes ticker { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+
+    /* CHAT */
     .chat-container { display: flex; flex-direction: column; height: 600px; background: var(--panel-bg); border: 2px solid var(--panel-border); }
     .chat-messages { flex: 1; padding: 32px; overflow-y: auto; display: flex; flex-direction: column; gap: 24px; }
-    .chat-bubble { padding: 16px 24px; max-width: 80%; font-size: 14px; line-height: 1.6; letter-spacing: 0.5px; }
-    .chat-user { align-self: flex-end; background: #222; color: var(--text-main); text-transform: uppercase; }
-    .chat-ai { align-self: flex-start; background: #000; border: 2px solid var(--panel-border); color: #ccc; border-left: 4px solid var(--accent); }
-    .chat-input-area { padding: 24px; background: #000; border-top: 2px solid var(--panel-border); display: flex; gap: 16px; }
-
-    /* LIVE GAMES */
-    .games-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 24px; }
-    .game-card { background: var(--panel-bg); border: 2px solid var(--panel-border); padding: 32px 24px; cursor: pointer; transition: all 0.2s; position: relative; }
-    .game-card:hover { border-color: var(--accent); transform: translateY(-4px); background: #111; }
-    
-    .game-status { font-size: 12px; color: var(--text-muted); margin-bottom: 24px; display: flex; justify-content: space-between; text-transform: uppercase; letter-spacing: 1.5px; }
-    .game-status.live { color: var(--bg); background: var(--accent); padding: 4px 8px; font-size: 10px; display: inline-block; }
-    
-    .game-teams { display: flex; justify-content: space-between; align-items: center; }
-    .team-block { text-align: center; flex: 1; }
-    .team-name { font-size: 24px; color: var(--text-muted); letter-spacing: -1px; text-transform: uppercase; }
-    .team-score { font-size: 48px; margin-top: 4px; color: #333; line-height: 1; letter-spacing: -2px; }
-    .score-high { color: var(--text-main); }
+    .chat-bubble { padding: 16px 24px; max-width: 80%; font-size: 14px; }
+    .chat-user { align-self: flex-end; background: #222; text-transform: uppercase; }
+    .chat-ai { align-self: flex-start; background: #000; border: 2px solid var(--panel-border); border-left: 4px solid var(--accent); }
 
     /* MODAL */
     .modal-bg { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.95); z-index: 999; display: none; align-items: center; justify-content: center; }
     .modal-bg.open { display: flex; }
     .modal { background: #000; border: 2px solid var(--accent); width: 95vw; max-width: 1200px; max-height: 90vh; overflow-y: auto; padding: 48px; position: relative; }
-    .modal-close { position: absolute; top: 24px; right: 32px; cursor: pointer; color: var(--text-muted); font-size: 40px; transition: color 0.2s; line-height: 1; }
-    .modal-close:hover { color: var(--red); }
-    
-    /* TABLES */
-    table { width: 100%; border-collapse: collapse; text-align: left; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; }
-    th { padding: 16px; color: var(--text-muted); border-bottom: 2px solid var(--panel-border); }
-    td { padding: 16px; color: var(--text-main); border-bottom: 1px solid var(--panel-border); }
-    tr:hover td { background: #111; color: var(--accent); }
-    
-    /* UTILS */
-    .loading { display: none; align-items: center; justify-content: center; gap: 16px; font-size: 14px; color: var(--accent); margin: 32px 0; letter-spacing: 2px; text-transform: uppercase; }
-    .loading.visible { display: flex; }
-    .spinner { border: 3px solid rgba(57, 255, 20, 0.2); border-top: 3px solid var(--accent); width: 24px; height: 24px; animation: spin 0.5s linear infinite; border-radius: 50%; }
-    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-    .error { display: none; background: #1a0000; border: 2px solid var(--red); color: var(--red); padding: 16px 24px; margin-bottom: 24px; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; }
-    .error.visible { display: block; }
-    
-    /* LIST INPUT CHIPS */
-    .list-input { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
-    .list-chip { background: #000; border: 2px solid var(--panel-border); padding: 10px 16px; font-size: 12px; display: flex; align-items: center; gap: 12px; text-transform: uppercase; letter-spacing: 1px; }
-    .list-chip span { cursor: pointer; color: var(--text-muted); transition: color 0.2s; font-size: 16px; line-height: 1; }
-    .list-chip span:hover { color: var(--red); }
+    .modal-close { position: absolute; top: 24px; right: 32px; cursor: pointer; color: var(--text-muted); font-size: 40px; }
 
-    /* SYSTEM STATUS TICKER */
-    .ticker-wrap {
-      background: #000000;
-      border-top: 2px solid var(--panel-border);
-      height: 36px;
-      flex-shrink: 0;
-      overflow: hidden;
-      display: flex;
-      align-items: center;
-      position: relative;
-      z-index: 50;
-    }
-    .ticker-content {
-      display: flex;
-      white-space: nowrap;
-      animation: ticker 20s linear infinite;
-      will-change: transform;
-    }
-    .ticker-text {
-      font-size: 11px !important;
-      color: var(--accent);
-      text-transform: uppercase;
-      letter-spacing: 3px;
-      padding-right: 40px;
-      text-shadow: 0 0 8px var(--accent-glow);
-    }
-    @keyframes ticker {
-      0% { transform: translateX(0); }
-      100% { transform: translateX(-50%); }
+    @media (max-width: 768px) {
+      .navbar { padding: 0 20px; }
+      .brand { font-size: 20px; }
+      .cover-title { font-size: 20vw; }
+      .cover-subtitle { font-size: 12px; letter-spacing: 4px; }
     }
 
-    /* PRINT MEDIA */
-    @media print {
-      body { background: white; color: black; background-image: none; height: auto; overflow: visible; }
-      .navbar, .controls-row, .btn, .btn-ghost, .autocomp-list, .dashboard-header, .ticker-wrap { display: none !important; }
-      .main { padding: 0; }
-      .panel, .modal { border: none; box-shadow: none; padding: 0; background: white; display: block !important; }
-      .report, .stat-value, .stat-label { color: black; }
-      .report h2 { color: black; border-bottom: 4px solid black; }
-      .stats-grid { border: 4px solid black; gap: 4px; background: black; }
-      .stat-box { background: white; }
-      .page { display: none !important; }
-      .page.active { display: block !important; }
-      .modal-bg { position: static; background: transparent; display: block; }
-      .modal-close { display: none; }
-    }
+    @media print { .navbar, .controls-row, .btn, .ticker-wrap { display: none !important; } }
   </style>
 </head>
 <body>
 
   <nav class="navbar no-print">
-    <div class="brand" onclick="switchPage('home', null, null)">PIVOT <span>//</span></div>
-    
+    <div class="brand" onclick="switchPage('home')">PIVOT <span>//</span></div>
     <div class="nav-links">
       <div class="dropdown">
-        <button class="dropbtn" id="nav-player">Player Intel</button>
+        <button class="dropbtn">Player Intel</button>
         <div class="dropdown-content">
-          <a class="dropdown-item" onclick="switchPage('scout', 'nav-player', this)">Scout Profile</a>
-          <a class="dropdown-item" onclick="switchPage('compare', 'nav-player', this)">H2H Comparison</a>
-          <a class="dropdown-item" onclick="switchPage('chat', 'nav-player', this)">AI Analyst Desk</a>
+          <a class="dropdown-item" onclick="switchPage('scout')">Scout Profile</a>
+          <a class="dropdown-item" onclick="switchPage('compare')">H2H Comparison</a>
+          <a class="dropdown-item" onclick="switchPage('chat')">AI Analyst Desk</a>
         </div>
       </div>
       <div class="dropdown">
-        <button class="dropbtn" id="nav-team">Team Intel</button>
+        <button class="dropbtn">Team Intel</button>
         <div class="dropdown-content">
-          <a class="dropdown-item" onclick="switchPage('team', 'nav-team', this)">Franchise Report</a>
-          <a class="dropdown-item" onclick="switchPage('roster', 'nav-team', this)">Roster Package</a>
-          <a class="dropdown-item" onclick="switchPage('trade', 'nav-team', this)">Trade Machine</a>
+          <a class="dropdown-item" onclick="switchPage('team')">Franchise Report</a>
+          <a class="dropdown-item" onclick="switchPage('roster')">Roster Package</a>
+          <a class="dropdown-item" onclick="switchPage('trade')">Trade Machine</a>
         </div>
       </div>
       <div class="dropdown">
-        <button class="dropbtn" id="nav-live" onclick="switchPage('games', 'nav-live', this)">Live Data</button>
+        <button class="dropbtn" onclick="switchPage('games')">Live Data</button>
       </div>
     </div>
   </nav>
 
   <div class="main">
-    
     <div class="page cover-page active" id="page-home">
-      <video class="bg-video" autoplay loop muted playsinline>
+      <video class="bg-video" autoplay loop muted playsinline webkit-playsinline preload="auto">
         <source src="/static/bg.mp4" type="video/mp4">
       </video>
       <div class="video-overlay"></div>
-      
-      <div class="cover-content">
-        <h1 class="cover-title">PIVOT</h1>
-        <div class="cover-subtitle">Pro Basketball Intelligence</div>
-      </div>
+      <div class="cover-content"><h1 class="cover-title">PIVOT</h1><div class="cover-subtitle">Pro Basketball Intelligence</div></div>
     </div>
 
     <div class="page" id="page-scout">
-      <div class="dashboard-header">
-        <div>
-          <div class="section-title">Player Intelligence</div>
-          <div class="section-subtitle">Data Synthesis & Reporting</div>
-        </div>
-      </div>
-      
-      <div class="panel no-print">
-        <div class="controls-row">
-          <div class="input-group">
-            <input class="input" id="scout-name" placeholder="Search Player" onkeyup="autocomplete(this, 'scout')">
-            <div class="autocomp-list" id="scout-sugg"></div>
-          </div>
-          <div class="input-group">
-            <input class="input" id="scout-question" placeholder="Custom Directive (Optional)">
-          </div>
-          <button class="btn" onclick="generateScout()">Execute</button>
-        </div>
-      </div>
-      
-      <div class="loading" id="scout-load"><div class="spinner"></div> SYNTHESIZING INTELLIGENCE...</div>
-      <div class="error" id="scout-err"></div>
-      
-      <div class="panel" id="scout-wrapper" style="display:none;">
-        <div style="display:flex; justify-content: space-between; align-items: flex-start; margin-bottom: 40px; padding-bottom: 24px;">
-          <h1 id="scout-header" style="font-size: 36px; letter-spacing: -1px; margin:0; text-transform: uppercase;"></h1>
-          <button class="btn-ghost no-print" onclick="window.print()">Export PDF</button>
-        </div>
-        <div class="stats-grid" id="scout-stats"></div>
-        <pre class="report" id="scout-report"></pre>
-      </div>
+      <div class="dashboard-header"><div><div class="section-title">Player Intel</div><div class="section-subtitle">Data Synthesis</div></div></div>
+      <div class="panel no-print"><div class="controls-row"><div class="input-group"><input class="input" id="scout-name" placeholder="Search Player" onkeyup="autocomplete(this, 'scout')"><div class="autocomp-list" id="scout-sugg"></div></div><input class="input" id="scout-question" placeholder="Directive"><button class="btn" onclick="generateScout()">Execute</button></div></div>
+      <div class="loading" id="scout-load"><div class="spinner"></div> SYNTHESIZING...</div>
+      <div class="panel" id="scout-wrapper" style="display:none;"><div style="display:flex;justify-content:space-between;margin-bottom:40px;"><h1 id="scout-header"></h1><button class="btn" onclick="window.print()">PDF</button></div><div class="stats-grid" id="scout-stats"></div><pre class="report" id="scout-report"></pre></div>
     </div>
 
     <div class="page" id="page-compare">
-      <div class="dashboard-header">
-        <div>
-          <div class="section-title">Head-to-Head</div>
-          <div class="section-subtitle">Matchup Evaluation Engine</div>
-        </div>
-      </div>
-      <div class="panel no-print">
-        <div class="controls-row">
-          <div class="input-group">
-            <input class="input" id="comp-a" placeholder="Player A" onkeyup="autocomplete(this, 'comp-a')">
-            <div class="autocomp-list" id="comp-a-sugg"></div>
-          </div>
-          <div class="input-group">
-            <input class="input" id="comp-b" placeholder="Player B" onkeyup="autocomplete(this, 'comp-b')">
-            <div class="autocomp-list" id="comp-b-sugg"></div>
-          </div>
-          <div class="input-group">
-            <input class="input" id="comp-context" placeholder="Context Focus (Optional)">
-          </div>
-          <button class="btn" onclick="generateCompare()">Run Matchup</button>
-        </div>
-      </div>
-      <div class="loading" id="comp-load"><div class="spinner"></div> ANALYZING DIFFERENTIALS...</div>
-      <div class="error" id="comp-err"></div>
-      <div class="panel" id="comp-wrapper" style="display:none;">
-        <div style="text-align: right; margin-bottom: 24px;"><button class="btn-ghost no-print" onclick="window.print()">Export PDF</button></div>
-        <pre class="report" id="comp-report"></pre>
-      </div>
+      <div class="dashboard-header"><div><div class="section-title">Head-to-Head</div><div class="section-subtitle">Comparative Analytics</div></div></div>
+      <div class="panel no-print"><div class="controls-row"><input class="input" id="comp-a" placeholder="Player A" onkeyup="autocomplete(this, 'comp-a')"><div class="autocomp-list" id="comp-a-sugg"></div><input class="input" id="comp-b" placeholder="Player B" onkeyup="autocomplete(this, 'comp-b')"><div class="autocomp-list" id="comp-b-sugg"></div><button class="btn" onclick="generateCompare()">Matchup</button></div></div>
+      <div class="loading" id="comp-load"><div class="spinner"></div> ANALYZING...</div>
+      <div class="panel" id="comp-wrapper" style="display:none;"><pre class="report" id="comp-report"></pre></div>
     </div>
 
     <div class="page" id="page-trade">
-      <div class="dashboard-header">
-        <div>
-          <div class="section-title">Trade Machine</div>
-          <div class="section-subtitle">Roster Value Delta</div>
-        </div>
-      </div>
-      <div class="panel no-print">
-        <div style="display:flex; gap: 24px; margin-bottom: 24px;">
-          <div class="input-group" style="flex:1;">
-             <div style="color:var(--text-muted); margin-bottom:12px; font-size: 12px; letter-spacing: 2px;">OUTGOING ASSETS</div>
-             <div class="list-input" id="trade-out-list">
-               <input class="input" id="trade-out" placeholder="Type & Enter..." onkeyup="handleListInput(this, 'trade-out-list', event)">
-             </div>
-          </div>
-          <div class="input-group" style="flex:1;">
-             <div style="color:var(--text-muted); margin-bottom:12px; font-size: 12px; letter-spacing: 2px;">INCOMING ASSETS</div>
-             <div class="list-input" id="trade-in-list">
-               <input class="input" id="trade-in" placeholder="Type & Enter..." onkeyup="handleListInput(this, 'trade-in-list', event)">
-             </div>
-          </div>
-        </div>
-        <div class="controls-row">
-          <input class="input" style="flex:1" id="trade-context" placeholder="Strategic Goal (e.g. Salary Dump)">
-          <button class="btn" onclick="generateTrade()">Evaluate Scenario</button>
-        </div>
-      </div>
-      <div class="loading" id="trade-load"><div class="spinner"></div> SIMULATING TRADE LOGIC...</div>
-      <div class="error" id="trade-err"></div>
-      <div class="panel" id="trade-wrapper" style="display:none;">
-         <div style="text-align: right; margin-bottom: 24px;"><button class="btn-ghost no-print" onclick="window.print()">Export PDF</button></div>
-        <pre class="report" id="trade-report"></pre>
-      </div>
+      <div class="dashboard-header"><div><div class="section-title">Trade Machine</div><div class="section-subtitle">Value Delta</div></div></div>
+      <div class="panel no-print"><div class="list-input" id="trade-out-list"><input class="input" id="trade-out" placeholder="Outgoing" onkeyup="handleListInput(this, 'trade-out-list', event)"></div><div class="list-input" id="trade-in-list"><input class="input" id="trade-in" placeholder="Incoming" onkeyup="handleListInput(this, 'trade-in-list', event)"></div><button class="btn" onclick="generateTrade()">Evaluate</button></div>
+      <div class="loading" id="trade-load"><div class="spinner"></div> SIMULATING...</div>
+      <div class="panel" id="trade-wrapper" style="display:none;"><pre class="report" id="trade-report"></pre></div>
     </div>
 
     <div class="page" id="page-team">
-      <div class="dashboard-header">
-        <div>
-          <div class="section-title">Franchise Intel</div>
-          <div class="section-subtitle">Macro-level Roster Analysis</div>
-        </div>
-      </div>
-      <div class="panel no-print">
-        <div class="controls-row">
-          <div class="input-group" style="max-width: 250px;">
-            <input class="input" id="team-abbr" placeholder="Abbreviation (e.g. BOS)">
-          </div>
-          <div class="input-group">
-            <input class="input" id="team-question" placeholder="Focus (Optional)">
-          </div>
-          <button class="btn" onclick="generateTeam()">Compile Intel</button>
-        </div>
-      </div>
-      <div class="loading" id="team-load"><div class="spinner"></div> AGGREGATING ROSTER DATA...</div>
-      <div class="error" id="team-err"></div>
-      <div class="panel" id="team-wrapper" style="display:none;">
-         <div style="text-align: right; margin-bottom: 24px;"><button class="btn-ghost no-print" onclick="window.print()">Export PDF</button></div>
-        <pre class="report" id="team-report"></pre>
-      </div>
+      <div class="dashboard-header"><div><div class="section-title">Franchise Intel</div><div class="section-subtitle">Roster Aggregation</div></div></div>
+      <div class="panel no-print"><div class="controls-row"><input class="input" id="team-abbr" placeholder="Abbr (OKC)"><button class="btn" onclick="generateTeam()">Compile</button></div></div>
+      <div class="loading" id="team-load"><div class="spinner"></div> AGGREGATING...</div>
+      <div class="panel" id="team-wrapper" style="display:none;"><pre class="report" id="team-report"></pre></div>
     </div>
 
     <div class="page" id="page-roster">
-       <div class="dashboard-header">
-        <div>
-          <div class="section-title">Concurrent Roster Build</div>
-          <div class="section-subtitle">15-Man Pipeline Generation</div>
-        </div>
-      </div>
-      <div class="panel no-print">
-        <div class="controls-row">
-          <div class="input-group" style="max-width: 300px;">
-            <input class="input" id="roster-abbr" placeholder="Team Abbreviation (e.g. MIN)">
-          </div>
-          <button class="btn" onclick="generateRoster()">Execute Pipeline</button>
-        </div>
-      </div>
-      <div class="loading" id="roster-load"><div class="spinner"></div> ORCHESTRATING MULTI-AGENT ANALYSIS...</div>
-      <div class="error" id="roster-err"></div>
-      <div id="roster-wrapper" style="display:none; margin-top: 24px;">
-        <div style="text-align: right; margin-bottom: 24px;"><button class="btn-ghost no-print" onclick="window.print()">Export Full Package PDF</button></div>
-        <div id="roster-reports"></div>
-      </div>
+       <div class="dashboard-header"><div><div class="section-title">Roster Package</div><div class="section-subtitle">15-Man Parallel Analysis</div></div></div>
+       <div class="panel no-print"><div class="controls-row"><input class="input" id="roster-abbr" placeholder="Abbr (MIN)"><button class="btn" onclick="generateRoster()">Execute</button></div></div>
+       <div class="loading" id="roster-load"><div class="spinner"></div> ORCHESTRATING...</div>
+       <div id="roster-wrapper" style="display:none;margin-top:24px;"><div id="roster-reports"></div></div>
     </div>
 
     <div class="page" id="page-chat">
-       <div class="dashboard-header no-print">
-        <div>
-          <div class="section-title">AI Analyst Desk</div>
-          <div class="section-subtitle">Context-Aware Interrogation</div>
-        </div>
-      </div>
-       <div class="panel no-print" id="chat-setup-panel">
-         <div class="controls-row">
-           <div class="input-group">
-             <input class="input" id="chat-player" placeholder="Load Player Profile (e.g. Anthony Edwards)" onkeyup="autocomplete(this, 'chat')">
-             <div class="autocomp-list" id="chat-sugg"></div>
-           </div>
-           <button class="btn" onclick="startChat()">Initialize Connection</button>
-         </div>
-       </div>
-       
-       <div id="chat-wrapper" class="no-print chat-container" style="display:none;">
-         <div id="chat-messages" class="chat-messages">
-            </div>
-         <div class="chat-input-area">
-           <input class="input" style="border:none; border-bottom: 2px solid var(--panel-border);" id="chat-input" placeholder="Query the AI Analyst..." onkeyup="if(event.keyCode===13)sendChat()">
-           <button class="btn" onclick="sendChat()">Send</button>
-         </div>
-       </div>
+       <div class="dashboard-header no-print"><div><div class="section-title">Analyst Desk</div><div class="section-subtitle">Secure Interrogation</div></div></div>
+       <div class="panel no-print" id="chat-setup-panel"><div class="controls-row"><input class="input" id="chat-player" placeholder="Load Context" onkeyup="autocomplete(this, 'chat')"><div class="autocomp-list" id="chat-sugg"></div><button class="btn" onclick="startChat()">Initialize</button></div></div>
+       <div id="chat-wrapper" class="chat-container" style="display:none;"><div id="chat-messages" class="chat-messages"></div><div class="chat-input-area"><input class="input" id="chat-input" placeholder="Query..." onkeyup="if(event.keyCode===13)sendChat()"><button class="btn" onclick="sendChat()">Send</button></div></div>
     </div>
 
     <div class="page" id="page-games">
-       <div class="dashboard-header">
-        <div>
-          <div class="section-title">Live Data</div>
-          <div class="section-subtitle">Real-time Pipeline & Schedule</div>
-        </div>
-        <button class="btn-ghost no-print" onclick="loadGames()" style="display:flex; align-items:center; gap:8px;">
-          SYNC FEED
-        </button>
-      </div>
-      <div class="loading" id="games-load"><div class="spinner"></div> POLLING DATA PIPELINE...</div>
-      
-      <div class="games-grid" id="games-grid"></div>
-      
-      <div id="games-empty" style="display:none; padding: 80px 20px; text-align: center; border: 2px dashed var(--panel-border); background: var(--panel-bg);">
-        <div style="color: var(--text-muted); font-size: 14px; letter-spacing: 3px;">SYSTEM IDLE: NO GAMES SCHEDULED TODAY</div>
-      </div>
+       <div class="dashboard-header"><div><div class="section-title">Live Data</div><div class="section-subtitle">Pipeline Feed</div></div><button class="btn" onclick="loadGames()">Sync</button></div>
+       <div class="loading" id="games-load"><div class="spinner"></div> POLLING...</div>
+       <div class="games-grid" id="games-grid"></div>
+       <div id="games-empty" style="display:none;padding:80px;text-align:center;border:2px dashed #222;">SYSTEM IDLE</div>
     </div>
-    
   </div>
 
   <div class="ticker-wrap no-print">
     <div class="ticker-content">
-      <div class="ticker-text">
-        PIVOT_CORE_ONLINE // DATA_PIPELINE: ACTIVE // BDL_API_SYNC: CONTINUOUS // LATENCY: 12MS // ORCHESTRATOR: IDLE // LLM_NODE: CLAUDE-SONNET // SECURE_DATALINK_ESTABLISHED // CACHE_HIT_RATIO: 94.2% // SYS_LOAD: 2.4% // 
-      </div>
-      <div class="ticker-text">
-        PIVOT_CORE_ONLINE // DATA_PIPELINE: ACTIVE // BDL_API_SYNC: CONTINUOUS // LATENCY: 12MS // ORCHESTRATOR: IDLE // LLM_NODE: CLAUDE-SONNET // SECURE_DATALINK_ESTABLISHED // CACHE_HIT_RATIO: 94.2% // SYS_LOAD: 2.4% // 
-      </div>
+      <div class="ticker-text">PIVOT_CORE_ONLINE // DATA_PIPELINE: ACTIVE // BDL_API_SYNC: CONTINUOUS // LATENCY: 12MS // ORCHESTRATOR: IDLE // LLM_NODE: CLAUDE-SONNET // SECURE_DATALINK_ESTABLISHED // CACHE_HIT_RATIO: 94.2% // SYS_LOAD: 2.4% // </div>
+      <div class="ticker-text">PIVOT_CORE_ONLINE // DATA_PIPELINE: ACTIVE // BDL_API_SYNC: CONTINUOUS // LATENCY: 12MS // ORCHESTRATOR: IDLE // LLM_NODE: CLAUDE-SONNET // SECURE_DATALINK_ESTABLISHED // CACHE_HIT_RATIO: 94.2% // SYS_LOAD: 2.4% // </div>
     </div>
   </div>
 
   <div class="modal-bg no-print" id="modal-bg" onclick="closeModal()">
     <div class="modal" onclick="event.stopPropagation()">
       <div class="modal-close" onclick="closeModal()">×</div>
-      <div style="margin-bottom: 48px; text-align:center;">
-        <h2 class="section-title" id="modal-name" style="justify-content:center; font-size: 48px; margin-bottom: 12px;"></h2>
-        <div style="color: var(--accent); font-size: 16px; letter-spacing: 3px;" id="modal-meta"></div>
-      </div>
+      <div style="text-align:center;margin-bottom:48px;"><h2 class="section-title" id="modal-name" style="font-size:48px;"></h2><div id="modal-meta" style="color:var(--accent);letter-spacing:3px;"></div></div>
       <div id="modal-stats"></div>
     </div>
   </div>
 
   <script>
     const API = '/api';
+    let chatHistory = [];
 
-    function switchPage(pageId, navId, el) {
-      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-      document.getElementById(`page-${pageId}`).classList.add('active');
-      
-      document.querySelectorAll('.dropbtn').forEach(btn => btn.classList.remove('active'));
-      document.querySelectorAll('.dropdown-item').forEach(item => item.classList.remove('active'));
-      if(navId) document.getElementById(navId).classList.add('active');
-      if(el) el.classList.add('active');
-      
-      if (pageId === 'games') loadGames();
-      localStorage.setItem('activePage', pageId);
+    function switchPage(p) {
+      document.querySelectorAll('.page').forEach(pg => pg.classList.remove('active'));
+      const target = document.getElementById(`page-${p}`);
+      if(target) target.classList.add('active');
+      if (p === 'games') loadGames();
     }
 
-    // THE DECRYPT EFFECT FUNCTION
-    function decryptText(element, targetText, speed = 30) {
-      const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ@#$%&*()_+{}|[]<>';
-      let iterations = 0;
-      const maxIterations = 15;
-      
-      // Preserve HTML tags (like <h2> and <strong>) by decrypting only text nodes
-      if(element.innerHTML.includes('<')) {
-         element.innerHTML = targetText; // Fallback for complex HTML to avoid breaking tags
-         return;
-      }
-
+    // UTILITIES
+    function decryptText(el, target, speed = 15) {
+      const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ@#$%&*';
+      let i = 0;
       const interval = setInterval(() => {
-        element.innerText = targetText.split('').map((char, index) => {
+        el.innerText = target.split('').map((char, index) => {
           if(char === ' ' || char === '\n') return char;
-          if(index < iterations) return targetText[index];
-          return chars[Math.floor(Math.random() * chars.length)];
+          return index < i ? target[index] : chars[Math.floor(Math.random() * chars.length)];
         }).join('');
-        
-        if(iterations >= targetText.length) clearInterval(interval);
-        iterations += Math.max(1, Math.floor(targetText.length / maxIterations)); // Speed up for long texts
+        if(i >= target.length) clearInterval(interval);
+        i += Math.max(1, Math.floor(target.length / 15));
       }, speed);
     }
 
-    // AUTOCOMPLETE LOGIC
-    let searchTimeout;
+    function animateValue(id, end, duration = 500) {
+      const obj = document.getElementById(id);
+      if (!obj) return;
+      let start = 0;
+      const range = end - start;
+      const increment = end > start ? 0.1 : -0.1;
+      const stepTime = Math.abs(Math.floor(duration / (range / 0.1)));
+      const timer = setInterval(() => {
+        start += increment;
+        obj.innerHTML = start.toFixed(1);
+        if (start >= end) { obj.innerHTML = end.toFixed(1); clearInterval(timer); }
+      }, stepTime || 1);
+    }
+
+    // SEARCH & INPUT
+    let sTO;
     function autocomplete(input, id) {
-      clearTimeout(searchTimeout);
+      clearTimeout(sTO);
       const q = input.value.trim();
       const list = document.getElementById(`${id}-sugg`);
       if (q.length < 2) { list.classList.remove('visible'); return; }
-      
-      searchTimeout = setTimeout(async () => {
-        try {
-          const res = await fetch(`${API}/players/search?q=${q}`);
-          const data = await res.json();
-          if(data.players && data.players.length > 0) {
-            list.innerHTML = data.players.map(p => `<div class="autocomp-item" onclick="selectAuto('${id}', '${p.replace(/'/g, "\\'")}')">${p}</div>`).join('');
-            list.classList.add('visible');
-          } else {
-            list.classList.remove('visible');
-          }
-        } catch(e) {}
+      sTO = setTimeout(async () => {
+        const res = await fetch(`${API}/players/search?q=${q}`);
+        const data = await res.json();
+        list.innerHTML = data.players.map(p => `<div class="autocomp-item" onclick="selectAuto('${id}', '${p.replace(/'/g, "\\'")}')">${p}</div>`).join('');
+        list.classList.add('visible');
       }, 300);
     }
 
     function selectAuto(id, val) {
-      document.getElementById(`${id}-name` || id === 'chat' ? `${id}-player` : `${id}-name`).value = val;
-      document.getElementById(`${id}-sugg`).classList.remove('visible');
+      const elId = id === 'chat' ? 'chat-player' : (document.getElementById(`${id}-name`) ? `${id}-name` : id);
+      const el = document.getElementById(elId);
+      if(el) el.value = val;
+      document.querySelectorAll('.autocomp-list').forEach(l => l.classList.remove('visible'));
     }
 
-    // MULTI-LIST INPUT
     function handleListInput(input, listId, e) {
-      if (e.keyCode === 188 || e.keyCode === 13) {
-        e.preventDefault();
-        let val = input.value.replace(/,/g, '').trim();
+      if (e.keyCode === 13) {
+        const val = input.value.trim();
         if (val) {
-          const chip = document.createElement('div');
-          chip.classList.add('list-chip');
+          const chip = document.createElement('div'); chip.classList.add('list-chip');
           chip.innerHTML = `${val} <span onclick="this.parentNode.remove()">×</span>`;
           document.getElementById(listId).insertBefore(chip, input);
           input.value = '';
@@ -579,329 +326,154 @@
       }
     }
 
-    // DATA FETCHERS WITH DECRYPT EFFECT
+    // LOGIC HANDLERS
     async function generateScout() {
-      const name = document.getElementById('scout-name').value.trim();
-      const q = document.getElementById('scout-question').value.trim();
-      if (!name) return alert('ENTER PLAYER NAME');
-      
+      const name = document.getElementById('scout-name').value;
       document.getElementById('scout-load').classList.add('visible');
       document.getElementById('scout-wrapper').style.display = 'none';
-      document.getElementById('scout-err').classList.remove('visible');
-
       try {
-        const res = await fetch(`${API}/player/${encodeURIComponent(name)}?season=2025&question=${encodeURIComponent(q)}`);
-        if (!res.ok) throw new Error(await res.text());
+        const res = await fetch(`${API}/player/${encodeURIComponent(name)}?season=2025`);
         const data = await res.json();
-        const s = data.stats;
-        
-        document.getElementById('scout-header').textContent = `${data.player} | ${data.team} // ${data.position}`;
+        document.getElementById('scout-header').textContent = data.player;
         document.getElementById('scout-stats').innerHTML = `
-          <div class="stat-box"><div class="stat-label">PPG</div><div class="stat-value">${s.ppg.toFixed(1)}</div></div>
-          <div class="stat-box"><div class="stat-label">RPG</div><div class="stat-value">${s.rpg.toFixed(1)}</div></div>
-          <div class="stat-box"><div class="stat-label">APG</div><div class="stat-value">${s.apg.toFixed(1)}</div></div>
-          <div class="stat-box"><div class="stat-label">FG%</div><div class="stat-value">${(s.fg_pct * 100).toFixed(1)}%</div></div>
-          <div class="stat-box"><div class="stat-label">TS%</div><div class="stat-value">${s.ts_pct ? (s.ts_pct * 100).toFixed(1) + '%' : 'N/A'}</div></div>
+          <div class="stat-box"><div class="stat-label">PPG</div><div class="stat-value" id="v-ppg">0.0</div></div>
+          <div class="stat-box"><div class="stat-label">RPG</div><div class="stat-value" id="v-rpg">0.0</div></div>
+          <div class="stat-box"><div class="stat-label">APG</div><div class="stat-value" id="v-apg">0.0</div></div>
+          <div class="stat-box"><div class="stat-label">FG%</div><div class="stat-value" id="v-fg">0.0%</div></div>
         `;
-        
-        const reportEl = document.getElementById('scout-report');
         document.getElementById('scout-wrapper').style.display = 'block';
-        
-        // Temporarily treat HTML as plain text to decrypt, then render as HTML
-        const rawText = data.report;
-        reportEl.innerText = "";
-        decryptText(reportEl, rawText, 15);
-        setTimeout(() => { reportEl.innerHTML = rawText; }, 800); // Lock in HTML formatting after decrypt
-
-      } catch(e) { 
-        document.getElementById('scout-err').textContent = 'ERROR: ' + e.message;
-        document.getElementById('scout-err').classList.add('visible');
-      } 
+        animateValue("v-ppg", data.stats.ppg); animateValue("v-rpg", data.stats.rpg); animateValue("v-apg", data.stats.apg);
+        document.getElementById('v-fg').textContent = (data.stats.fg_pct * 100).toFixed(1) + '%';
+        const rep = document.getElementById('scout-report');
+        rep.innerText = ""; decryptText(rep, data.report);
+        setTimeout(() => { rep.innerHTML = data.report; }, 1000);
+      } catch(e) { alert("Error fetching data"); }
       finally { document.getElementById('scout-load').classList.remove('visible'); }
     }
 
     async function generateCompare() {
-      const a = document.getElementById('comp-a').value.trim();
-      const b = document.getElementById('comp-b').value.trim();
-      const ctx = document.getElementById('comp-context').value.trim();
-      if (!a || !b) return alert('ENTER BOTH PLAYERS');
-      
+      const a = document.getElementById('comp-a').value; const b = document.getElementById('comp-b').value;
       document.getElementById('comp-load').classList.add('visible');
-      document.getElementById('comp-wrapper').style.display = 'none';
-      document.getElementById('comp-err').classList.remove('visible');
-
       try {
-        const res = await fetch(`${API}/compare?player_a=${encodeURIComponent(a)}&player_b=${encodeURIComponent(b)}&season=2025&context=${encodeURIComponent(ctx)}`);
-        if (!res.ok) throw new Error(await res.text());
+        const res = await fetch(`${API}/compare?player_a=${encodeURIComponent(a)}&player_b=${encodeURIComponent(b)}`);
         const data = await res.json();
-        
-        const reportEl = document.getElementById('comp-report');
-        document.getElementById('comp-wrapper').style.display = 'block';
-        
-        const rawText = data.comparison;
-        reportEl.innerText = "";
-        decryptText(reportEl, rawText, 15);
-        setTimeout(() => { reportEl.innerHTML = rawText; }, 800);
-
-      } catch(e) {
-        document.getElementById('comp-err').textContent = 'ERROR: ' + e.message;
-        document.getElementById('comp-err').classList.add('visible');
-      } 
-      finally { document.getElementById('comp-load').classList.remove('visible'); }
+        const wrapper = document.getElementById('comp-wrapper'); wrapper.style.display = 'block';
+        const rep = document.getElementById('comp-report'); rep.innerText = "";
+        decryptText(rep, data.comparison);
+        setTimeout(() => { rep.innerHTML = data.comparison; }, 1000);
+      } catch(e) {} finally { document.getElementById('comp-load').classList.remove('visible'); }
     }
 
     async function generateTrade() {
-      const outList = Array.from(document.getElementById('trade-out-list').querySelectorAll('.list-chip')).map(c => c.textContent.replace('×','').trim());
-      const inList = Array.from(document.getElementById('trade-in-list').querySelectorAll('.list-chip')).map(c => c.textContent.replace('×','').trim());
-      const ctx = document.getElementById('trade-context').value.trim();
-      if (!outList.length || !inList.length) return alert('REQUIRE PLAYERS ON BOTH SIDES');
-      
+      const out = Array.from(document.getElementById('trade-out-list').querySelectorAll('.list-chip')).map(c => c.textContent.replace('×','').trim());
+      const inc = Array.from(document.getElementById('trade-in-list').querySelectorAll('.list-chip')).map(c => c.textContent.replace('×','').trim());
       document.getElementById('trade-load').classList.add('visible');
-      document.getElementById('trade-wrapper').style.display = 'none';
-      document.getElementById('trade-err').classList.remove('visible');
-
       try {
-        const res = await fetch(`${API}/trade`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({outgoing: outList, incoming: inList, season: 2025, context: ctx}) });
-        if (!res.ok) throw new Error(await res.text());
+        const res = await fetch(`${API}/trade`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({outgoing: out, incoming: inc, season: 2025}) });
         const data = await res.json();
-        
-        const reportEl = document.getElementById('trade-report');
         document.getElementById('trade-wrapper').style.display = 'block';
-        
-        const rawText = data.analysis;
-        reportEl.innerText = "";
-        decryptText(reportEl, rawText, 15);
-        setTimeout(() => { reportEl.innerHTML = rawText; }, 800);
-
-      } catch(e) {
-        document.getElementById('trade-err').textContent = 'ERROR: ' + e.message;
-        document.getElementById('trade-err').classList.add('visible');
-      } finally { document.getElementById('trade-load').classList.remove('visible'); }
+        const rep = document.getElementById('trade-report'); rep.innerText = "";
+        decryptText(rep, data.analysis);
+        setTimeout(() => { rep.innerHTML = data.analysis; }, 1000);
+      } catch(e) {} finally { document.getElementById('trade-load').classList.remove('visible'); }
     }
 
     async function generateTeam() {
-      const abbr = document.getElementById('team-abbr').value.trim();
-      const q = document.getElementById('team-question').value.trim();
-      if(!abbr) return alert("REQUIRE ABBREVIATION");
-      
+      const abbr = document.getElementById('team-abbr').value;
       document.getElementById('team-load').classList.add('visible');
-      document.getElementById('team-wrapper').style.display = 'none';
-      document.getElementById('team-err').classList.remove('visible');
-
       try {
-        const res = await fetch(`${API}/team/${encodeURIComponent(abbr)}?season=2025&question=${encodeURIComponent(q)}`);
-        if (!res.ok) throw new Error(await res.text());
+        const res = await fetch(`${API}/team/${abbr}?season=2025`);
         const data = await res.json();
-        
-        const reportEl = document.getElementById('team-report');
         document.getElementById('team-wrapper').style.display = 'block';
-        
-        const rawText = data.report;
-        reportEl.innerText = "";
-        decryptText(reportEl, rawText, 15);
-        setTimeout(() => { reportEl.innerHTML = rawText; }, 800);
-
-      } catch(e) {
-        document.getElementById('team-err').textContent = 'ERROR: ' + e.message;
-        document.getElementById('team-err').classList.add('visible');
-      } finally { document.getElementById('team-load').classList.remove('visible'); }
+        const rep = document.getElementById('team-report'); rep.innerText = "";
+        decryptText(rep, data.report);
+        setTimeout(() => { rep.innerHTML = data.report; }, 1000);
+      } catch(e) {} finally { document.getElementById('team-load').classList.remove('visible'); }
     }
 
     async function generateRoster() {
-      const abbr = document.getElementById('roster-abbr').value.trim();
-      if(!abbr) return alert("REQUIRE ABBREVIATION");
-      
+      const abbr = document.getElementById('roster-abbr').value;
       document.getElementById('roster-load').classList.add('visible');
-      document.getElementById('roster-wrapper').style.display = 'none';
-      document.getElementById('roster-err').classList.remove('visible');
-
       try {
-        const res = await fetch(`${API}/team/${encodeURIComponent(abbr)}/roster?season=2025`);
-        if (!res.ok) throw new Error(await res.text());
+        const res = await fetch(`${API}/team/${abbr}/roster?season=2025`);
         const data = await res.json();
-        const div = document.getElementById('roster-reports');
-        div.innerHTML = '';
+        const div = document.getElementById('roster-reports'); div.innerHTML = '';
         document.getElementById('roster-wrapper').style.display = 'block';
-        
         for (const [name, report] of Object.entries(data.reports)) {
-          const cardId = `roster-card-${name.replace(/\s+/g, '-')}`;
-          div.innerHTML += `<div class="panel"><h2 style="font-size:24px; color:var(--accent); margin-bottom:20px; border-bottom:2px solid var(--panel-border); padding-bottom:12px; text-transform:uppercase;">${name}</h2><pre class="report" id="${cardId}" style="background:transparent; padding:0; border:none;"></pre></div>`;
-          
-          // Decrypt effect on each card
-          setTimeout(() => {
-             const el = document.getElementById(cardId);
-             if(el) {
-                decryptText(el, report, 20);
-                setTimeout(()=> { el.innerHTML = report; }, 800);
-             }
-          }, 50);
+          const cardId = `rc-${name.replace(/\s+/g, '-')}`;
+          div.innerHTML += `<div class="panel"><h2 style="color:var(--accent);">${name}</h2><pre class="report" id="${cardId}"></pre></div>`;
+          setTimeout(() => { decryptText(document.getElementById(cardId), report); setTimeout(() => { document.getElementById(cardId).innerHTML = report; }, 1000); }, 50);
         }
-      } catch(e) {
-        document.getElementById('roster-err').textContent = 'ERROR: ' + e.message;
-        document.getElementById('roster-err').classList.add('visible');
-      } finally { document.getElementById('roster-load').classList.remove('visible'); }
+      } catch(e) {} finally { document.getElementById('roster-load').classList.remove('visible'); }
     }
 
-    // CHAT LOGIC
-    let chatHistory = [];
-    function startChat() {
-      const player = document.getElementById('chat-player').value.trim();
-      if (!player) return alert('ENTER PLAYER NAME');
-      
+    async function startChat() {
+      const p = document.getElementById('chat-player').value;
       document.getElementById('chat-setup-panel').style.display = 'none';
       document.getElementById('chat-wrapper').style.display = 'flex';
       chatHistory = [];
-      document.getElementById('chat-messages').innerHTML = `<div style="color:var(--accent); text-align:center; font-size:12px; margin-bottom:16px; letter-spacing:2px;" id="chat-init-msg"></div>`;
-      decryptText(document.getElementById('chat-init-msg'), `SECURE CONNECTION ESTABLISHED: ${player.toUpperCase()}`, 30);
-      document.getElementById('chat-input').focus();
+      const msg = document.getElementById('chat-messages');
+      msg.innerHTML = `<div id="c-init"></div>`;
+      decryptText(document.getElementById('c-init'), `SECURE CONNECTION: ${p.toUpperCase()}`);
     }
 
     async function sendChat() {
-      const message = document.getElementById('chat-input').value.trim();
-      if (!message) return;
-      const player = document.getElementById('chat-player').value.trim();
-      const messages = document.getElementById('chat-messages');
-      
-      messages.innerHTML += `<div class="chat-bubble chat-user">${message}</div>`;
+      const m = document.getElementById('chat-input').value; if(!m) return;
+      const p = document.getElementById('chat-player').value;
+      const msg = document.getElementById('chat-messages');
+      msg.innerHTML += `<div class="chat-bubble chat-user">${m}</div>`;
       document.getElementById('chat-input').value = '';
-      messages.scrollTop = messages.scrollHeight;
-      
-      const loadId = 'load-' + Date.now();
-      messages.innerHTML += `<div id="${loadId}" style="align-self: flex-start; color: var(--accent); font-size: 12px; letter-spacing: 1px;">PROCESSING...</div>`;
-      messages.scrollTop = messages.scrollHeight;
-
       try {
-        const res = await fetch(`${API}/chat`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({player, season:2025, message, history:chatHistory}) });
-        document.getElementById(loadId)?.remove();
+        const res = await fetch(`${API}/chat`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({player: p, message: m, history: chatHistory}) });
         const data = await res.json();
-        
-        const replyId = 'reply-' + Date.now();
-        messages.innerHTML += `<div class="chat-bubble chat-ai" id="${replyId}"></div>`;
-        
-        const rawReply = data.reply.replace(/\n/g, '<br>');
-        decryptText(document.getElementById(replyId), data.reply, 15);
-        setTimeout(() => { document.getElementById(replyId).innerHTML = rawReply; }, 800);
-        
+        const rid = 'r-' + Date.now();
+        msg.innerHTML += `<div class="chat-bubble chat-ai" id="${rid}"></div>`;
+        decryptText(document.getElementById(rid), data.reply);
+        setTimeout(() => { document.getElementById(rid).innerHTML = data.reply.replace(/\n/g, '<br>'); }, 1000);
         chatHistory = data.history;
-        messages.scrollTop = messages.scrollHeight;
-      } catch(e) { document.getElementById(loadId).textContent = "CONNECTION ERROR."; }
+      } catch(e) {}
     }
 
-    // LIVE GAMES LOGIC
     async function loadGames() {
       document.getElementById('games-load').classList.add('visible');
-      document.getElementById('games-empty').style.display = 'none';
-      document.getElementById('games-grid').innerHTML = '';
       try {
         let res = await fetch(`${API}/games/live`);
         let data = await res.json();
         let games = data.games || [];
-        
-        // Fallback to today if no live games
-        if (!games.length) {
-          res = await fetch(`${API}/games/today`);
-          data = await res.json();
-          games = data.games || [];
-        }
-
-        if(!games.length) { 
-          document.getElementById('games-empty').style.display = 'block'; 
-          return; 
-        }
-        
-        document.getElementById('games-grid').innerHTML = games.map(g => {
-          const h = g.home_team || {}; 
-          const a = g.visitor_team || {};
-          const isLive = (g.status || '').includes('Qtr') || (g.status || '').includes('Half');
-          
-          const calcScore = (team) => {
-            if (g[`${team}_team_score`] !== null && g[`${team}_team_score`] !== undefined) return g[`${team}_team_score`];
-            if (g[`${team}_q1`] != null) return (g[`${team}_q1`]||0) + (g[`${team}_q2`]||0) + (g[`${team}_q3`]||0) + (g[`${team}_q4`]||0);
-            return '—';
-          };
-          
-          const vScore = calcScore('visitor');
-          const hScore = calcScore('home');
-
-          return `
-          <div class="game-card" onclick='openBoxScore(${JSON.stringify(g).replace(/'/g, "&apos;")})'>
-            <div class="game-status"><span class="${isLive ? 'live' : ''}">${isLive ? 'LIVE' : 'SCHED'}</span> <span>${g.time || g.status}</span></div>
+        if (!games.length) { res = await fetch(`${API}/games/today`); data = await res.json(); games = data.games || []; }
+        const grid = document.getElementById('games-grid'); grid.innerHTML = '';
+        if(!games.length) { document.getElementById('games-empty').style.display = 'block'; return; }
+        grid.innerHTML = games.map(g => {
+          const vS = (g.visitor_team_score || 0); const hS = (g.home_team_score || 0);
+          return `<div class="game-card" onclick='openBoxScore(${JSON.stringify(g).replace(/'/g, "&apos;")})'>
+            <div class="game-status"><span class="${g.status.includes('Qtr')?'live':''}">DATA_FEED</span> <span>${g.time || g.status}</span></div>
             <div class="game-teams">
-              <div class="team-block"><div class="team-name">${a.abbreviation||'AWY'}</div><div class="team-score ${vScore > hScore && vScore !== '—' ? 'score-high':''}">${vScore}</div></div>
-              <div style="color:var(--text-muted); font-size:14px;">VS</div>
-              <div class="team-block"><div class="team-name">${h.abbreviation||'HME'}</div><div class="team-score ${hScore > vScore && hScore !== '—' ? 'score-high':''}">${hScore}</div></div>
+              <div class="team-block"><div class="team-name">${g.visitor_team.abbreviation}</div><div class="team-score ${vS>hS?'score-high':''}">${vS}</div></div>
+              <div style="color:#222;">//</div>
+              <div class="team-block"><div class="team-name">${g.home_team.abbreviation}</div><div class="team-score ${hS>vS?'score-high':''}">${hS}</div></div>
             </div>
           </div>`;
         }).join('');
-      } catch(e) { } finally { document.getElementById('games-load').classList.remove('visible'); }
+      } catch(e) {} finally { document.getElementById('games-load').classList.remove('visible'); }
     }
 
-    // MODAL WITH NEW SECURE ENDPOINT LOGIC
     async function openBoxScore(game) {
-      const h = game.home_team || {}; 
-      const a = game.visitor_team || {};
-      
-      // Open modal immediately with loading state
-      document.getElementById('modal-name').textContent = `${a.full_name} VS ${h.full_name}`;
-      document.getElementById('modal-meta').textContent = `${game.time || game.status} | FETCHING SECURE DATALINK...`;
-      document.getElementById('modal-stats').innerHTML = `<div class="loading visible" style="margin: 60px auto;"><div class="spinner" style="width: 40px; height: 40px; border-width: 4px;"></div></div>`;
+      document.getElementById('modal-name').textContent = `${game.visitor_team.abbreviation} @ ${game.home_team.abbreviation}`;
+      document.getElementById('modal-meta').textContent = game.status;
+      document.getElementById('modal-stats').innerHTML = `<div class="loading visible"><div class="spinner"></div>LINKING...</div>`;
       document.getElementById('modal-bg').classList.add('open');
-      document.body.style.overflow = 'hidden';
-
-      try {
-        // Fetch individual player stats using new backend route
-        const res = await fetch(`${API}/games/${game.id}/stats`);
-        const data = await res.json();
-        const stats = data.stats || [];
-
-        const hStats = stats.filter(s => s.team && s.team.id === h.id);
-        const aStats = stats.filter(s => s.team && s.team.id === a.id);
-
-        function renderTable(team, teamStats) {
-          if(!teamStats || teamStats.length === 0) {
-             return `
-              <div style="background:var(--panel-bg); border:2px solid var(--panel-border); padding:32px; text-align:center; margin-bottom:24px;">
-                <h3 style="color:var(--text-main); margin-bottom:12px; font-size:24px; text-transform:uppercase;">${team.full_name}</h3>
-                <div style="color:var(--text-muted); font-size:13px; text-transform:uppercase; letter-spacing:2px;">DATA SYNC IN PROGRESS / NO PLAYER STATS YET...</div>
-              </div>`;
-          }
-          
-          const active = teamStats.filter(p => p.min && p.min !== '00').sort((x,y) => y.pts - x.pts);
-          return `<h3 style="margin:40px 0 16px; color:var(--text-main); font-size:28px; letter-spacing:-1px;">${team.full_name}</h3>
-          <div style="border: 2px solid var(--panel-border); background: var(--panel-bg); overflow:hidden;">
-            <table>
-              <tr style="background: #111; color: var(--text-muted);">
-                <th>PLAYER</th><th>MIN</th><th style="color:var(--text-main);">PTS</th><th>REB</th><th>AST</th><th>FG</th>
-              </tr>
-              ${active.map(p => `<tr>
-                <td style="color:var(--text-main);">${p.player.first_name} ${p.player.last_name}</td>
-                <td style="color:var(--text-muted);">${p.min}</td>
-                <td style="font-size:16px; color: ${p.pts>=20 ? 'var(--accent)' : 'var(--text-main)'};">${p.pts}</td>
-                <td style="color:var(--text-muted);">${p.reb}</td><td style="color:var(--text-muted);">${p.ast}</td><td style="color:var(--text-muted);">${p.fgm}-${p.fga}</td>
-              </tr>`).join('')}
-            </table>
-          </div>`;
-        }
-
-        document.getElementById('modal-meta').textContent = `${game.time || game.status}`;
-        document.getElementById('modal-stats').innerHTML = renderTable(a, aStats) + renderTable(h, hStats);
-
-      } catch (e) {
-        document.getElementById('modal-meta').textContent = `CONNECTION ERROR`;
-        document.getElementById('modal-stats').innerHTML = `<div style="color:var(--red); text-align:center; padding: 40px; font-size:14px; text-transform:uppercase;">Failed to retrieve box score from BDL pipeline.</div>`;
-      }
+      const res = await fetch(`${API}/games/${game.id}/stats`);
+      const data = await res.json();
+      const stats = data.stats || [];
+      const render = (t, ts) => {
+        if(!ts.length) return `<div class="panel">SYNCING ${t.full_name}...</div>`;
+        return `<div class="panel"><h2>${t.full_name}</h2><table><tr><th>PLAYER</th><th>MIN</th><th>PTS</th><th>REB</th><th>AST</th></tr>
+        ${ts.filter(p=>p.min!=='00').sort((a,b)=>b.pts-a.pts).map(p=>`<tr><td>${p.player.first_name} ${p.player.last_name}</td><td>${p.min}</td><td style="color:var(--accent);">${p.pts}</td><td>${p.reb}</td><td>${p.ast}</td></tr>`).join('')}</table></div>`;
+      };
+      document.getElementById('modal-stats').innerHTML = render(game.visitor_team, stats.filter(s=>s.team.id===game.visitor_team.id)) + render(game.home_team, stats.filter(s=>s.team.id===game.home_team.id));
     }
 
-    function closeModal() {
-      document.getElementById('modal-bg').classList.remove('open');
-      document.body.style.overflow = 'auto';
-    }
-
-    document.addEventListener('click', (e) => {
-      if(!e.target.closest('.autocomp')) {
-        document.querySelectorAll('.autocomp-list').forEach(l => l.classList.remove('visible'));
-      }
-    });
+    function closeModal() { document.getElementById('modal-bg').classList.remove('open'); document.body.style.overflow='auto'; }
 
     window.addEventListener('load', () => {
       const active = localStorage.getItem('activePage') || 'home';
