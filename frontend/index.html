@@ -513,6 +513,30 @@
       localStorage.setItem('activePage', pageId);
     }
 
+    // THE DECRYPT EFFECT FUNCTION
+    function decryptText(element, targetText, speed = 30) {
+      const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ@#$%&*()_+{}|[]<>';
+      let iterations = 0;
+      const maxIterations = 15;
+      
+      // Preserve HTML tags (like <h2> and <strong>) by decrypting only text nodes
+      if(element.innerHTML.includes('<')) {
+         element.innerHTML = targetText; // Fallback for complex HTML to avoid breaking tags
+         return;
+      }
+
+      const interval = setInterval(() => {
+        element.innerText = targetText.split('').map((char, index) => {
+          if(char === ' ' || char === '\n') return char;
+          if(index < iterations) return targetText[index];
+          return chars[Math.floor(Math.random() * chars.length)];
+        }).join('');
+        
+        if(iterations >= targetText.length) clearInterval(interval);
+        iterations += Math.max(1, Math.floor(targetText.length / maxIterations)); // Speed up for long texts
+      }, speed);
+    }
+
     // AUTOCOMPLETE LOGIC
     let searchTimeout;
     function autocomplete(input, id) {
@@ -555,7 +579,7 @@
       }
     }
 
-    // DATA FETCHERS
+    // DATA FETCHERS WITH DECRYPT EFFECT
     async function generateScout() {
       const name = document.getElementById('scout-name').value.trim();
       const q = document.getElementById('scout-question').value.trim();
@@ -570,6 +594,7 @@
         if (!res.ok) throw new Error(await res.text());
         const data = await res.json();
         const s = data.stats;
+        
         document.getElementById('scout-header').textContent = `${data.player} | ${data.team} // ${data.position}`;
         document.getElementById('scout-stats').innerHTML = `
           <div class="stat-box"><div class="stat-label">PPG</div><div class="stat-value">${s.ppg.toFixed(1)}</div></div>
@@ -578,8 +603,16 @@
           <div class="stat-box"><div class="stat-label">FG%</div><div class="stat-value">${(s.fg_pct * 100).toFixed(1)}%</div></div>
           <div class="stat-box"><div class="stat-label">TS%</div><div class="stat-value">${s.ts_pct ? (s.ts_pct * 100).toFixed(1) + '%' : 'N/A'}</div></div>
         `;
-        document.getElementById('scout-report').textContent = data.report;
+        
+        const reportEl = document.getElementById('scout-report');
         document.getElementById('scout-wrapper').style.display = 'block';
+        
+        // Temporarily treat HTML as plain text to decrypt, then render as HTML
+        const rawText = data.report;
+        reportEl.innerText = "";
+        decryptText(reportEl, rawText, 15);
+        setTimeout(() => { reportEl.innerHTML = rawText; }, 800); // Lock in HTML formatting after decrypt
+
       } catch(e) { 
         document.getElementById('scout-err').textContent = 'ERROR: ' + e.message;
         document.getElementById('scout-err').classList.add('visible');
@@ -601,8 +634,15 @@
         const res = await fetch(`${API}/compare?player_a=${encodeURIComponent(a)}&player_b=${encodeURIComponent(b)}&season=2025&context=${encodeURIComponent(ctx)}`);
         if (!res.ok) throw new Error(await res.text());
         const data = await res.json();
-        document.getElementById('comp-report').textContent = data.comparison;
+        
+        const reportEl = document.getElementById('comp-report');
         document.getElementById('comp-wrapper').style.display = 'block';
+        
+        const rawText = data.comparison;
+        reportEl.innerText = "";
+        decryptText(reportEl, rawText, 15);
+        setTimeout(() => { reportEl.innerHTML = rawText; }, 800);
+
       } catch(e) {
         document.getElementById('comp-err').textContent = 'ERROR: ' + e.message;
         document.getElementById('comp-err').classList.add('visible');
@@ -624,8 +664,15 @@
         const res = await fetch(`${API}/trade`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({outgoing: outList, incoming: inList, season: 2025, context: ctx}) });
         if (!res.ok) throw new Error(await res.text());
         const data = await res.json();
-        document.getElementById('trade-report').textContent = data.analysis;
+        
+        const reportEl = document.getElementById('trade-report');
         document.getElementById('trade-wrapper').style.display = 'block';
+        
+        const rawText = data.analysis;
+        reportEl.innerText = "";
+        decryptText(reportEl, rawText, 15);
+        setTimeout(() => { reportEl.innerHTML = rawText; }, 800);
+
       } catch(e) {
         document.getElementById('trade-err').textContent = 'ERROR: ' + e.message;
         document.getElementById('trade-err').classList.add('visible');
@@ -645,8 +692,15 @@
         const res = await fetch(`${API}/team/${encodeURIComponent(abbr)}?season=2025&question=${encodeURIComponent(q)}`);
         if (!res.ok) throw new Error(await res.text());
         const data = await res.json();
-        document.getElementById('team-report').textContent = data.report;
+        
+        const reportEl = document.getElementById('team-report');
         document.getElementById('team-wrapper').style.display = 'block';
+        
+        const rawText = data.report;
+        reportEl.innerText = "";
+        decryptText(reportEl, rawText, 15);
+        setTimeout(() => { reportEl.innerHTML = rawText; }, 800);
+
       } catch(e) {
         document.getElementById('team-err').textContent = 'ERROR: ' + e.message;
         document.getElementById('team-err').classList.add('visible');
@@ -667,10 +721,21 @@
         const data = await res.json();
         const div = document.getElementById('roster-reports');
         div.innerHTML = '';
-        for (const [name, report] of Object.entries(data.reports)) {
-          div.innerHTML += `<div class="panel"><h2 style="font-size:24px; color:var(--accent); margin-bottom:20px; border-bottom:2px solid var(--panel-border); padding-bottom:12px; text-transform:uppercase;">${name}</h2><pre class="report" style="background:transparent; padding:0; border:none;">${report}</pre></div>`;
-        }
         document.getElementById('roster-wrapper').style.display = 'block';
+        
+        for (const [name, report] of Object.entries(data.reports)) {
+          const cardId = `roster-card-${name.replace(/\s+/g, '-')}`;
+          div.innerHTML += `<div class="panel"><h2 style="font-size:24px; color:var(--accent); margin-bottom:20px; border-bottom:2px solid var(--panel-border); padding-bottom:12px; text-transform:uppercase;">${name}</h2><pre class="report" id="${cardId}" style="background:transparent; padding:0; border:none;"></pre></div>`;
+          
+          // Decrypt effect on each card
+          setTimeout(() => {
+             const el = document.getElementById(cardId);
+             if(el) {
+                decryptText(el, report, 20);
+                setTimeout(()=> { el.innerHTML = report; }, 800);
+             }
+          }, 50);
+        }
       } catch(e) {
         document.getElementById('roster-err').textContent = 'ERROR: ' + e.message;
         document.getElementById('roster-err').classList.add('visible');
@@ -686,7 +751,8 @@
       document.getElementById('chat-setup-panel').style.display = 'none';
       document.getElementById('chat-wrapper').style.display = 'flex';
       chatHistory = [];
-      document.getElementById('chat-messages').innerHTML = `<div style="color:var(--accent); text-align:center; font-size:12px; margin-bottom:16px; letter-spacing:2px;">SECURE CONNECTION ESTABLISHED: ${player.toUpperCase()}</div>`;
+      document.getElementById('chat-messages').innerHTML = `<div style="color:var(--accent); text-align:center; font-size:12px; margin-bottom:16px; letter-spacing:2px;" id="chat-init-msg"></div>`;
+      decryptText(document.getElementById('chat-init-msg'), `SECURE CONNECTION ESTABLISHED: ${player.toUpperCase()}`, 30);
       document.getElementById('chat-input').focus();
     }
 
@@ -708,7 +774,14 @@
         const res = await fetch(`${API}/chat`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({player, season:2025, message, history:chatHistory}) });
         document.getElementById(loadId)?.remove();
         const data = await res.json();
-        messages.innerHTML += `<div class="chat-bubble chat-ai">${data.reply.replace(/\n/g, '<br>')}</div>`;
+        
+        const replyId = 'reply-' + Date.now();
+        messages.innerHTML += `<div class="chat-bubble chat-ai" id="${replyId}"></div>`;
+        
+        const rawReply = data.reply.replace(/\n/g, '<br>');
+        decryptText(document.getElementById(replyId), data.reply, 15);
+        setTimeout(() => { document.getElementById(replyId).innerHTML = rawReply; }, 800);
+        
         chatHistory = data.history;
         messages.scrollTop = messages.scrollHeight;
       } catch(e) { document.getElementById(loadId).textContent = "CONNECTION ERROR."; }
