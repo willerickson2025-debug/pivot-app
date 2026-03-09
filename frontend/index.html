@@ -85,7 +85,7 @@
     .page { display: none; max-width: 1200px; margin: 0 auto; height: 100%; }
     .page.active { display: flex; flex-direction: column; }
     
-    /* COVER PAGE (MOBILE RESPONSIVE VIDEO) */
+    /* COVER PAGE */
     .page.cover-page.active { 
       display: flex; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; 
       max-width: none; justify-content: center; align-items: center; text-align: center; z-index: 10; 
@@ -182,7 +182,7 @@
 
   <div class="main">
     <div class="page cover-page active" id="page-home">
-      <video class="bg-video" autoplay loop muted playsinline webkit-playsinline preload="auto">
+      <video id="bgVideo" class="bg-video" autoplay loop muted playsinline webkit-playsinline preload="auto" poster="https://images.unsplash.com/photo-1546519638-68e109498ffc?q=80&w=2000&auto=format&fit=crop">
         <source src="/static/bg.mp4" type="video/mp4">
       </video>
       <div class="video-overlay"></div>
@@ -193,6 +193,7 @@
       <div class="dashboard-header"><div><div class="section-title">Player Intel</div><div class="section-subtitle">Data Synthesis</div></div></div>
       <div class="panel no-print"><div class="controls-row"><div class="input-group"><input class="input" id="scout-name" placeholder="Search Player" onkeyup="autocomplete(this, 'scout')"><div class="autocomp-list" id="scout-sugg"></div></div><input class="input" id="scout-question" placeholder="Directive"><button class="btn" onclick="generateScout()">Execute</button></div></div>
       <div class="loading" id="scout-load"><div class="spinner"></div> SYNTHESIZING...</div>
+      <div class="error" id="scout-err"></div>
       <div class="panel" id="scout-wrapper" style="display:none;"><div style="display:flex;justify-content:space-between;margin-bottom:40px;"><h1 id="scout-header"></h1><button class="btn" onclick="window.print()">PDF</button></div><div class="stats-grid" id="scout-stats"></div><pre class="report" id="scout-report"></pre></div>
     </div>
 
@@ -474,6 +475,14 @@
     }
 
     function closeModal() { document.getElementById('modal-bg').classList.remove('open'); document.body.style.overflow='auto'; }
+
+    // FORCE PLAY ON MOBILE TOUCH
+    window.addEventListener('touchstart', function() {
+        const video = document.getElementById('bgVideo');
+        if (video && video.paused) {
+            video.play().catch(e => console.log("Blocked by Low Power Mode"));
+        }
+    }, {once: true});
 
     window.addEventListener('load', () => {
       const active = localStorage.getItem('activePage') || 'home';
