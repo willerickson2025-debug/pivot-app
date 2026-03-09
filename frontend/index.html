@@ -187,7 +187,39 @@
     .list-chip { background: #000; border: 2px solid var(--panel-border); padding: 10px 16px; font-size: 12px; display: flex; align-items: center; gap: 12px; text-transform: uppercase; letter-spacing: 1px; }
     .list-chip span { cursor: pointer; color: var(--text-muted); transition: color 0.2s; font-size: 16px; line-height: 1; }
     .list-chip span:hover { color: var(--red); }
-
+/* SYSTEM STATUS TICKER */
+    .ticker-wrap {
+      background: #000000;
+      border-top: 2px solid var(--panel-border);
+      height: 36px;
+      flex-shrink: 0;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      position: relative;
+      z-index: 50;
+    }
+    .ticker-content {
+      display: flex;
+      white-space: nowrap;
+      animation: ticker 20s linear infinite;
+      will-change: transform;
+    }
+    .ticker-text {
+      font-family: var(--font-mono) !important;
+      font-size: 11px !important;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      padding-right: 40px;
+      font-weight: 700 !important;
+      text-shadow: 0 0 8px var(--accent-glow);
+    }
+    @keyframes ticker {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+    
     /* PRINT MEDIA */
     @media print {
       body { background: white; color: black; background-image: none; height: auto; overflow: visible; }
