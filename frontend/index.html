@@ -6,33 +6,35 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <title>PIVOT | Enterprise Intelligence</title>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap');
-    
     :root {
       --bg: #000000;
-      --panel-bg: #0a0a0a;
-      --panel-border: #1f1f1f;
+      --panel-bg: #080808;
+      --panel-border: #222222;
       --text-main: #ffffff;
-      --text-muted: #737373;
+      --text-muted: #666666;
       --accent: #39ff14; /* Pure Neon Green */
-      --accent-hover: #32e612;
-      --accent-glow: rgba(57, 255, 20, 0.2);
+      --accent-hover: #ffffff;
+      --accent-glow: rgba(57, 255, 20, 0.15);
       --red: #ff3333;
-      --font-ui: 'Inter', sans-serif;
-      --font-mono: 'JetBrains Mono', monospace;
     }
     
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    /* GLOBAL HELVETICA BOLD MANDATE */
+    * { 
+      box-sizing: border-box; 
+      margin: 0; 
+      padding: 0; 
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif !important;
+      font-weight: bold !important;
+    }
     
     body { 
       background-color: var(--bg); 
       background-image: 
-        linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), 
-        linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+        linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px), 
+        linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px);
       background-size: 40px 40px;
-      background-position: center center;
+      background-position: center top;
       color: var(--text-main); 
-      font-family: var(--font-ui); 
       font-size: 14px; 
       line-height: 1.5; 
       height: 100vh; 
@@ -42,116 +44,118 @@
     }
     
     /* ENTERPRISE TOP NAV */
-    .navbar { background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(12px); border-bottom: 1px solid var(--panel-border); display: flex; align-items: center; justify-content: space-between; padding: 0 40px; height: 72px; flex-shrink: 0; z-index: 50; }
+    .navbar { background: #000000; border-bottom: 2px solid var(--panel-border); display: flex; align-items: center; justify-content: space-between; padding: 0 40px; height: 72px; flex-shrink: 0; z-index: 50; }
     
-    /* BRAND - CLICKS BACK TO HOME */
-    .brand { font-family: var(--font-ui); font-weight: 900; font-size: 24px; letter-spacing: 2px; color: var(--text-main); cursor: pointer; transition: color 0.2s; display: flex; align-items: center; gap: 8px; }
+    .brand { font-size: 28px; letter-spacing: -1px; color: var(--text-main); cursor: pointer; transition: color 0.2s; display: flex; align-items: center; gap: 8px; text-transform: uppercase; }
     .brand:hover { color: var(--accent); }
     .brand span { color: var(--accent); }
     
     /* RIGHT HAND TABS */
-    .nav-links { display: flex; gap: 8px; height: 100%; }
+    .nav-links { display: flex; gap: 0; height: 100%; }
     .dropdown { position: relative; height: 100%; display: flex; align-items: center; }
-    .dropbtn { height: 100%; background: none; border: none; color: var(--text-muted); font-family: var(--font-mono); font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; padding: 0 24px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; border-bottom: 2px solid transparent; }
-    .dropdown:hover .dropbtn, .dropbtn.active { color: var(--text-main); border-bottom: 2px solid var(--accent); background: rgba(255,255,255,0.02); }
+    .dropbtn { height: 100%; background: none; border: none; color: var(--text-muted); font-size: 13px; text-transform: uppercase; letter-spacing: 1px; padding: 0 24px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; border-bottom: 3px solid transparent; }
+    .dropdown:hover .dropbtn, .dropbtn.active { color: var(--text-main); border-bottom: 3px solid var(--accent); background: var(--panel-bg); }
     .dropbtn::after { content: '▾'; font-size: 10px; margin-left: 8px; color: var(--accent); }
     
-    .dropdown-content { display: none; position: absolute; top: 72px; right: 0; background: var(--panel-bg); border: 1px solid var(--panel-border); border-top: none; min-width: 240px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.9); z-index: 100; border-radius: 0 0 4px 4px; overflow: hidden; }
+    .dropdown-content { display: none; position: absolute; top: 72px; right: 0; background: var(--panel-bg); border: 2px solid var(--panel-border); border-top: none; min-width: 240px; box-shadow: 0 20px 40px rgba(0,0,0,0.9); z-index: 100; }
     .dropdown:hover .dropdown-content { display: block; }
-    .dropdown-item { padding: 16px 24px; color: var(--text-muted); text-decoration: none; display: block; cursor: pointer; transition: all 0.2s; font-family: var(--font-ui); font-weight: 500; font-size: 14px; border-right: 2px solid transparent; text-align: right; }
-    .dropdown-item:hover, .dropdown-item.active { background: rgba(255,255,255,0.03); color: var(--text-main); border-right-color: var(--accent); }
+    .dropdown-item { padding: 16px 24px; color: var(--text-muted); text-decoration: none; display: block; cursor: pointer; transition: all 0.2s; font-size: 13px; text-transform: uppercase; border-right: 3px solid transparent; text-align: right; letter-spacing: 0.5px; }
+    .dropdown-item:hover, .dropdown-item.active { background: #111; color: var(--text-main); border-right-color: var(--accent); }
     
     /* MAIN CONTAINER */
     .main { flex: 1; padding: 40px; overflow-y: auto; }
-    .page { display: none; max-width: 1400px; margin: 0 auto; height: 100%; }
+    .page { display: none; max-width: 1200px; margin: 0 auto; height: 100%; }
     .page.active { display: flex; flex-direction: column; }
     
     /* COVER PAGE (HOME) */
     .cover-page { justify-content: center; align-items: center; text-align: center; height: 100%; }
-    .cover-title { font-size: 14vw; font-weight: 900; letter-spacing: -0.06em; line-height: 0.85; color: var(--text-main); margin: 0; text-shadow: 0 0 40px rgba(255,255,255,0.05); }
-    .cover-subtitle { color: var(--accent); font-family: var(--font-mono); font-size: 16px; letter-spacing: 8px; text-transform: uppercase; margin-top: 32px; font-weight: 700; text-shadow: 0 0 20px var(--accent-glow); }
+    .cover-title { font-size: 16vw; letter-spacing: -0.06em; line-height: 0.8; color: var(--text-main); margin: 0; text-transform: uppercase; }
+    .cover-subtitle { color: var(--accent); font-size: 18px; letter-spacing: 10px; text-transform: uppercase; margin-top: 24px; }
 
     /* DASHBOARD HEADERS */
-    .dashboard-header { margin-bottom: 24px; padding-bottom: 24px; border-bottom: 1px solid var(--panel-border); display: flex; justify-content: space-between; align-items: flex-end; }
-    .section-title { font-weight: 800; font-size: 32px; letter-spacing: -1px; color: var(--text-main); }
-    .section-subtitle { color: var(--text-muted); font-family: var(--font-mono); font-size: 12px; margin-top: 8px; text-transform: uppercase; letter-spacing: 1.5px; }
+    .dashboard-header { margin-bottom: 32px; padding-bottom: 16px; border-bottom: 2px solid var(--panel-border); display: flex; justify-content: space-between; align-items: flex-end; }
+    .section-title { font-size: 40px; letter-spacing: -1.5px; color: var(--text-main); text-transform: uppercase; line-height: 1; }
+    .section-subtitle { color: var(--accent); font-size: 12px; margin-top: 8px; text-transform: uppercase; letter-spacing: 2px; }
 
-    /* PANELS & INPUTS */
-    .panel { background: var(--panel-bg); border: 1px solid var(--panel-border); padding: 32px; margin-bottom: 24px; }
+    /* PANELS & INPUTS - BRUTALIST SHARP EDGES */
+    .panel { background: var(--panel-bg); border: 2px solid var(--panel-border); padding: 32px; margin-bottom: 24px; }
     
     .controls-row { display: flex; gap: 16px; flex-wrap: wrap; align-items: center; }
     .input-group { flex: 1; min-width: 250px; position: relative; }
-    .input { background: #000; border: 1px solid var(--panel-border); color: var(--text-main); padding: 14px 20px; font-size: 14px; width: 100%; font-family: var(--font-ui); transition: all 0.2s; border-radius: 0; }
-    .input:focus { outline: none; border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
-    .input::placeholder { color: #404040; }
+    .input { background: #000; border: 2px solid var(--panel-border); color: var(--text-main); padding: 16px 20px; font-size: 14px; width: 100%; transition: all 0.2s; text-transform: uppercase; letter-spacing: 0.5px; }
+    .input:focus { outline: none; border-color: var(--accent); }
+    .input::placeholder { color: #444; }
     
-    .btn { background: var(--accent); color: #000; padding: 14px 32px; border: none; cursor: pointer; font-weight: 800; font-size: 13px; transition: all 0.2s; text-transform: uppercase; letter-spacing: 1px; font-family: var(--font-mono); }
-    .btn:hover { background: var(--text-main); transform: translateY(-2px); box-shadow: 0 8px 20px var(--accent-glow); }
-    .btn-ghost { background: transparent; border: 1px solid var(--text-muted); color: var(--text-muted); padding: 12px 24px; cursor: pointer; font-weight: 700; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; transition: all 0.2s; font-family: var(--font-mono); }
+    .btn { background: var(--accent); color: #000; padding: 16px 32px; border: 2px solid var(--accent); cursor: pointer; font-size: 14px; transition: all 0.2s; text-transform: uppercase; letter-spacing: 1px; display: inline-block; text-align: center; }
+    .btn:hover { background: var(--text-main); border-color: var(--text-main); color: #000; }
+    .btn-ghost { background: transparent; border: 2px solid var(--text-muted); color: var(--text-muted); padding: 12px 24px; cursor: pointer; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; transition: all 0.2s; }
     .btn-ghost:hover { border-color: var(--accent); color: var(--accent); background: rgba(57, 255, 20, 0.05); }
 
     /* AUTOCOMPLETE */
-    .autocomp-list { position: absolute; top: calc(100% + 4px); left: 0; right: 0; background: var(--panel-bg); border: 1px solid var(--panel-border); max-height: 250px; overflow-y: auto; z-index: 20; display: none; box-shadow: 0 10px 30px rgba(0,0,0,0.9); }
+    .autocomp-list { position: absolute; top: calc(100% + 2px); left: 0; right: 0; background: var(--panel-bg); border: 2px solid var(--accent); max-height: 250px; overflow-y: auto; z-index: 20; display: none; }
     .autocomp-list.visible { display: block; }
-    .autocomp-item { padding: 14px 20px; cursor: pointer; border-bottom: 1px solid var(--panel-border); font-weight: 500; transition: background 0.2s; }
-    .autocomp-item:hover { background: #171717; color: var(--accent); padding-left: 24px; }
+    .autocomp-item { padding: 14px 20px; cursor: pointer; border-bottom: 1px solid var(--panel-border); font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; transition: all 0.1s; }
+    .autocomp-item:hover { background: var(--accent); color: #000; }
 
-    /* STATS GRID */
-    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 1px; background: var(--panel-border); border: 1px solid var(--panel-border); margin-bottom: 32px; }
+    /* STATS GRID - CONTINUOUS SHEET LOOK */
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 2px; background: var(--panel-border); border: 2px solid var(--panel-border); margin-bottom: 32px; }
     .stat-box { background: var(--panel-bg); padding: 24px 20px; text-align: center; }
-    .stat-label { font-size: 11px; color: var(--text-muted); font-family: var(--font-mono); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1.5px; }
-    .stat-value { font-size: 32px; color: var(--text-main); font-weight: 900; letter-spacing: -1px; }
+    .stat-label { font-size: 12px; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 2px; }
+    .stat-value { font-size: 40px; color: var(--text-main); letter-spacing: -2px; line-height: 1; }
 
-    /* REPORTS */
-    .report { white-space: pre-wrap; font-family: var(--font-ui); line-height: 1.8; color: #a3a3a3; font-size: 15px; }
-    .report strong { color: var(--text-main); font-weight: 700; }
-    .report h2 { color: var(--accent); font-size: 16px; margin: 40px 0 16px 0; border-bottom: 1px solid var(--panel-border); padding-bottom: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; font-family: var(--font-mono); }
+    /* REPORTS - READABLE BUT BOLD */
+    .report { white-space: pre-wrap; color: #b3b3b3; font-size: 15px; line-height: 1.8; letter-spacing: 0.2px; }
+    .report strong { color: var(--text-main); }
+    .report h2 { color: var(--accent); font-size: 18px; margin: 48px 0 16px 0; border-bottom: 2px solid var(--panel-border); padding-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }
     .report h2:first-child { margin-top: 0; }
 
     /* CHAT INTERFACE */
-    .chat-container { display: flex; flex-direction: column; height: 650px; background: var(--panel-bg); border: 1px solid var(--panel-border); overflow: hidden; }
-    .chat-messages { flex: 1; padding: 32px; overflow-y: auto; display: flex; flex-direction: column; gap: 20px; }
-    .chat-bubble { padding: 16px 24px; max-width: 80%; font-size: 15px; line-height: 1.6; font-weight: 500; }
-    .chat-user { align-self: flex-end; background: #1f1f1f; color: var(--text-main); border-left: 2px solid #404040; }
-    .chat-ai { align-self: flex-start; background: #000; border: 1px solid var(--panel-border); color: #d4d4d4; border-left: 2px solid var(--accent); }
-    .chat-input-area { padding: 24px; background: #050505; border-top: 1px solid var(--panel-border); display: flex; gap: 16px; }
+    .chat-container { display: flex; flex-direction: column; height: 600px; background: var(--panel-bg); border: 2px solid var(--panel-border); }
+    .chat-messages { flex: 1; padding: 32px; overflow-y: auto; display: flex; flex-direction: column; gap: 24px; }
+    .chat-bubble { padding: 16px 24px; max-width: 80%; font-size: 14px; line-height: 1.6; letter-spacing: 0.5px; }
+    .chat-user { align-self: flex-end; background: #222; color: var(--text-main); text-transform: uppercase; }
+    .chat-ai { align-self: flex-start; background: #000; border: 2px solid var(--panel-border); color: #ccc; border-left: 4px solid var(--accent); }
+    .chat-input-area { padding: 24px; background: #000; border-top: 2px solid var(--panel-border); display: flex; gap: 16px; }
 
-    /* LIVE GAMES & MODAL */
+    /* LIVE GAMES */
     .games-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 24px; }
-    .game-card { background: var(--panel-bg); border: 1px solid var(--panel-border); padding: 32px 24px; cursor: pointer; transition: all 0.2s; position: relative; overflow: hidden; }
-    .game-card::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 2px; background: transparent; transition: background 0.2s; }
-    .game-card:hover { transform: translateY(-4px); box-shadow: 0 20px 40px rgba(0,0,0,0.8); background: #121212; }
-    .game-card:hover::before { background: var(--accent); }
+    .game-card { background: var(--panel-bg); border: 2px solid var(--panel-border); padding: 32px 24px; cursor: pointer; transition: all 0.2s; position: relative; }
+    .game-card:hover { border-color: var(--accent); transform: translateY(-4px); background: #111; }
     
-    .game-status { font-family: var(--font-mono); font-size: 12px; color: var(--text-muted); margin-bottom: 24px; display: flex; justify-content: space-between; text-transform: uppercase; letter-spacing: 1px; }
-    .game-status.live { color: var(--accent); font-weight: bold; text-shadow: 0 0 10px var(--accent-glow); animation: pulse 2s infinite; }
-    @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
+    .game-status { font-size: 12px; color: var(--text-muted); margin-bottom: 24px; display: flex; justify-content: space-between; text-transform: uppercase; letter-spacing: 1.5px; }
+    .game-status.live { color: var(--bg); background: var(--accent); padding: 4px 8px; font-size: 10px; display: inline-block; }
     
     .game-teams { display: flex; justify-content: space-between; align-items: center; }
     .team-block { text-align: center; flex: 1; }
-    .team-name { font-size: 20px; font-weight: 800; color: var(--text-muted); letter-spacing: -0.5px; }
-    .team-score { font-size: 48px; font-weight: 900; font-family: var(--font-mono); margin-top: 8px; color: #333; line-height: 1; }
+    .team-name { font-size: 24px; color: var(--text-muted); letter-spacing: -1px; text-transform: uppercase; }
+    .team-score { font-size: 48px; margin-top: 4px; color: #333; line-height: 1; letter-spacing: -2px; }
     .score-high { color: var(--text-main); }
 
     /* MODAL */
-    .modal-bg { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.95); z-index: 999; display: none; align-items: center; justify-content: center; backdrop-filter: blur(10px); }
+    .modal-bg { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.95); z-index: 999; display: none; align-items: center; justify-content: center; }
     .modal-bg.open { display: flex; }
-    .modal { background: var(--bg); border: 1px solid var(--panel-border); width: 95vw; max-width: 1200px; max-height: 90vh; overflow-y: auto; padding: 48px; position: relative; box-shadow: 0 25px 50px -12px rgba(39, 255, 20, 0.05); }
-    .modal-close { position: absolute; top: 32px; right: 40px; cursor: pointer; color: var(--text-muted); font-size: 32px; font-weight: 300; transition: color 0.2s; line-height: 1; }
-    .modal-close:hover { color: var(--accent); }
+    .modal { background: #000; border: 2px solid var(--accent); width: 95vw; max-width: 1200px; max-height: 90vh; overflow-y: auto; padding: 48px; position: relative; }
+    .modal-close { position: absolute; top: 24px; right: 32px; cursor: pointer; color: var(--text-muted); font-size: 40px; transition: color 0.2s; line-height: 1; }
+    .modal-close:hover { color: var(--red); }
+    
+    /* TABLES (Inside Modals) */
+    table { width: 100%; border-collapse: collapse; text-align: left; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; }
+    th { padding: 16px; color: var(--text-muted); border-bottom: 2px solid var(--panel-border); }
+    td { padding: 16px; color: var(--text-main); border-bottom: 1px solid var(--panel-border); }
+    tr:hover td { background: #111; color: var(--accent); }
     
     /* UTILS */
-    .loading { display: none; align-items: center; justify-content: center; gap: 16px; font-size: 13px; color: var(--accent); margin: 32px 0; font-family: var(--font-mono); font-weight: 700; letter-spacing: 2px; }
+    .loading { display: none; align-items: center; justify-content: center; gap: 16px; font-size: 14px; color: var(--accent); margin: 32px 0; letter-spacing: 2px; text-transform: uppercase; }
     .loading.visible { display: flex; }
-    .spinner { border: 2px solid rgba(57, 255, 20, 0.2); border-top: 2px solid var(--accent); border-radius: 50%; width: 24px; height: 24px; animation: spin 0.6s linear infinite; }
+    .spinner { border: 3px solid rgba(57, 255, 20, 0.2); border-top: 3px solid var(--accent); width: 24px; height: 24px; animation: spin 0.5s linear infinite; border-radius: 50%; }
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-    .error { display: none; background: rgba(255, 51, 51, 0.1); border: 1px solid var(--red); color: var(--red); padding: 16px 24px; margin-bottom: 24px; font-family: var(--font-mono); font-size: 13px; font-weight: 600; letter-spacing: 0.5px; }
+    .error { display: none; background: #1a0000; border: 2px solid var(--red); color: var(--red); padding: 16px 24px; margin-bottom: 24px; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; }
     .error.visible { display: block; }
     
     /* LIST INPUT CHIPS */
-    .list-input { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
-    .list-chip { background: #171717; border: 1px solid #333; padding: 8px 16px; font-size: 13px; display: flex; align-items: center; gap: 12px; font-family: var(--font-mono); }
-    .list-chip span { cursor: pointer; color: var(--text-muted); font-weight: bold; transition: color 0.2s; }
+    .list-input { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+    .list-chip { background: #000; border: 2px solid var(--panel-border); padding: 10px 16px; font-size: 12px; display: flex; align-items: center; gap: 12px; text-transform: uppercase; letter-spacing: 1px; }
+    .list-chip span { cursor: pointer; color: var(--text-muted); transition: color 0.2s; font-size: 16px; line-height: 1; }
     .list-chip span:hover { color: var(--red); }
 
     /* PRINT MEDIA */
@@ -161,10 +165,12 @@
       .main { padding: 0; }
       .panel, .modal { border: none; box-shadow: none; padding: 0; background: white; display: block !important; }
       .report, .stat-value, .stat-label { color: black; }
-      .report h2 { color: black; border-bottom: 2px solid black; }
+      .report h2 { color: black; border-bottom: 4px solid black; }
+      .stats-grid { border: 4px solid black; gap: 4px; background: black; }
+      .stat-box { background: white; }
       .page { display: none !important; }
       .page.active { display: block !important; }
-      .modal-bg { position: static; background: transparent; display: block; backdrop-filter: none; }
+      .modal-bg { position: static; background: transparent; display: block; }
       .modal-close { display: none; }
     }
   </style>
@@ -208,20 +214,20 @@
       <div class="dashboard-header">
         <div>
           <div class="section-title">Player Intelligence</div>
-          <div class="section-subtitle">Generate comprehensive scouting data & analytics</div>
+          <div class="section-subtitle">Data Synthesis & Reporting</div>
         </div>
       </div>
       
       <div class="panel no-print">
         <div class="controls-row">
           <div class="input-group">
-            <input class="input" id="scout-name" placeholder="Search player (e.g. Luka Doncic)" onkeyup="autocomplete(this, 'scout')">
+            <input class="input" id="scout-name" placeholder="Search Player" onkeyup="autocomplete(this, 'scout')">
             <div class="autocomp-list" id="scout-sugg"></div>
           </div>
           <div class="input-group">
-            <input class="input" id="scout-question" placeholder="Custom directive? (e.g. Playoff scalability)">
+            <input class="input" id="scout-question" placeholder="Custom Directive (Optional)">
           </div>
-          <button class="btn" onclick="generateScout()">Execute Report</button>
+          <button class="btn" onclick="generateScout()">Execute</button>
         </div>
       </div>
       
@@ -230,7 +236,7 @@
       
       <div class="panel" id="scout-wrapper" style="display:none;">
         <div style="display:flex; justify-content: space-between; align-items: flex-start; margin-bottom: 40px; padding-bottom: 24px;">
-          <h1 id="scout-header" style="font-size: 36px; font-weight: 900; letter-spacing: -1px; margin:0; text-transform: uppercase;"></h1>
+          <h1 id="scout-header" style="font-size: 36px; letter-spacing: -1px; margin:0; text-transform: uppercase;"></h1>
           <button class="btn-ghost no-print" onclick="window.print()">Export PDF</button>
         </div>
         <div class="stats-grid" id="scout-stats"></div>
@@ -242,7 +248,7 @@
       <div class="dashboard-header">
         <div>
           <div class="section-title">Head-to-Head</div>
-          <div class="section-subtitle">Statistical & stylistic comparison engine</div>
+          <div class="section-subtitle">Matchup Evaluation Engine</div>
         </div>
       </div>
       <div class="panel no-print">
@@ -256,7 +262,7 @@
             <div class="autocomp-list" id="comp-b-sugg"></div>
           </div>
           <div class="input-group">
-            <input class="input" id="comp-context" placeholder="Context? (e.g. Franchise cornerstone)">
+            <input class="input" id="comp-context" placeholder="Context Focus (Optional)">
           </div>
           <button class="btn" onclick="generateCompare()">Run Matchup</button>
         </div>
@@ -273,26 +279,26 @@
       <div class="dashboard-header">
         <div>
           <div class="section-title">Trade Machine</div>
-          <div class="section-subtitle">Evaluate roster value delta & fit</div>
+          <div class="section-subtitle">Roster Value Delta</div>
         </div>
       </div>
       <div class="panel no-print">
         <div style="display:flex; gap: 24px; margin-bottom: 24px;">
           <div class="input-group" style="flex:1;">
-             <div style="font-family:var(--font-mono); font-size:12px; color:var(--text-muted); margin-bottom:12px; font-weight:700;">OUTGOING ASSETS</div>
+             <div style="color:var(--text-muted); margin-bottom:12px; font-size: 12px; letter-spacing: 2px;">OUTGOING ASSETS</div>
              <div class="list-input" id="trade-out-list">
-               <input class="input" id="trade-out" placeholder="Type name & press Enter..." onkeyup="handleListInput(this, 'trade-out-list', event)">
+               <input class="input" id="trade-out" placeholder="Type & Enter..." onkeyup="handleListInput(this, 'trade-out-list', event)">
              </div>
           </div>
           <div class="input-group" style="flex:1;">
-             <div style="font-family:var(--font-mono); font-size:12px; color:var(--text-muted); margin-bottom:12px; font-weight:700;">INCOMING ASSETS</div>
+             <div style="color:var(--text-muted); margin-bottom:12px; font-size: 12px; letter-spacing: 2px;">INCOMING ASSETS</div>
              <div class="list-input" id="trade-in-list">
-               <input class="input" id="trade-in" placeholder="Type name & press Enter..." onkeyup="handleListInput(this, 'trade-in-list', event)">
+               <input class="input" id="trade-in" placeholder="Type & Enter..." onkeyup="handleListInput(this, 'trade-in-list', event)">
              </div>
           </div>
         </div>
         <div class="controls-row">
-          <input class="input" style="flex:1" id="trade-context" placeholder="Strategic Goal? (e.g. Salary dump, contending push)">
+          <input class="input" style="flex:1" id="trade-context" placeholder="Strategic Goal (e.g. Salary Dump)">
           <button class="btn" onclick="generateTrade()">Evaluate Scenario</button>
         </div>
       </div>
@@ -307,8 +313,8 @@
     <div class="page" id="page-team">
       <div class="dashboard-header">
         <div>
-          <div class="section-title">Franchise Intelligence</div>
-          <div class="section-subtitle">Macro-level team analysis</div>
+          <div class="section-title">Franchise Intel</div>
+          <div class="section-subtitle">Macro-level Roster Analysis</div>
         </div>
       </div>
       <div class="panel no-print">
@@ -317,7 +323,7 @@
             <input class="input" id="team-abbr" placeholder="Abbreviation (e.g. BOS)">
           </div>
           <div class="input-group">
-            <input class="input" id="team-question" placeholder="Focus? (e.g. Offseason blueprint)">
+            <input class="input" id="team-question" placeholder="Focus (Optional)">
           </div>
           <button class="btn" onclick="generateTeam()">Compile Intel</button>
         </div>
@@ -334,7 +340,7 @@
        <div class="dashboard-header">
         <div>
           <div class="section-title">Concurrent Roster Build</div>
-          <div class="section-subtitle">Generate 15 scouting cards simultaneously</div>
+          <div class="section-subtitle">15-Man Pipeline Generation</div>
         </div>
       </div>
       <div class="panel no-print">
@@ -347,8 +353,8 @@
       </div>
       <div class="loading" id="roster-load"><div class="spinner"></div> ORCHESTRATING MULTI-AGENT ANALYSIS...</div>
       <div class="error" id="roster-err"></div>
-      <div class="panel" id="roster-wrapper" style="display:none; background:transparent; border:none; padding:0;">
-        <div style="text-align: right; margin-bottom: 32px;"><button class="btn-ghost no-print" onclick="window.print()">Export Full Package PDF</button></div>
+      <div id="roster-wrapper" style="display:none; margin-top: 24px;">
+        <div style="text-align: right; margin-bottom: 24px;"><button class="btn-ghost no-print" onclick="window.print()">Export Full Package PDF</button></div>
         <div id="roster-reports"></div>
       </div>
     </div>
@@ -357,13 +363,13 @@
        <div class="dashboard-header no-print">
         <div>
           <div class="section-title">AI Analyst Desk</div>
-          <div class="section-subtitle">Interactive context-aware chat</div>
+          <div class="section-subtitle">Context-Aware Interrogation</div>
         </div>
       </div>
        <div class="panel no-print" id="chat-setup-panel">
          <div class="controls-row">
            <div class="input-group">
-             <input class="input" id="chat-player" placeholder="Load Player Profile into Context (e.g. Anthony Edwards)" onkeyup="autocomplete(this, 'chat')">
+             <input class="input" id="chat-player" placeholder="Load Player Profile (e.g. Anthony Edwards)" onkeyup="autocomplete(this, 'chat')">
              <div class="autocomp-list" id="chat-sugg"></div>
            </div>
            <button class="btn" onclick="startChat()">Initialize Connection</button>
@@ -374,7 +380,7 @@
          <div id="chat-messages" class="chat-messages">
             </div>
          <div class="chat-input-area">
-           <input class="input" id="chat-input" placeholder="Query the AI Analyst..." onkeyup="if(event.keyCode===13)sendChat()">
+           <input class="input" style="border:none; border-bottom: 2px solid var(--panel-border);" id="chat-input" placeholder="Query the AI Analyst..." onkeyup="if(event.keyCode===13)sendChat()">
            <button class="btn" onclick="sendChat()">Send</button>
          </div>
        </div>
@@ -383,20 +389,19 @@
     <div class="page" id="page-games">
        <div class="dashboard-header">
         <div>
-          <div class="section-title">Live Action</div>
-          <div class="section-subtitle">Real-time box scores & daily schedule</div>
+          <div class="section-title">Live Data</div>
+          <div class="section-subtitle">Real-time Pipeline & Schedule</div>
         </div>
         <button class="btn-ghost no-print" onclick="loadGames()" style="display:flex; align-items:center; gap:8px;">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.92-10.26l5.58 5.69"/></svg>
-          <span style="color:var(--text-main);">Sync Data</span>
+          SYNC FEED
         </button>
       </div>
       <div class="loading" id="games-load"><div class="spinner"></div> POLLING DATA PIPELINE...</div>
       
       <div class="games-grid" id="games-grid"></div>
       
-      <div id="games-empty" style="display:none; padding: 80px 20px; text-align: center; border: 1px dashed var(--panel-border); background: var(--panel-bg);">
-        <div style="font-family: var(--font-mono); color: var(--text-muted); font-size: 13px; letter-spacing: 3px;">SYSTEM_IDLE: NO GAMES SCHEDULED TODAY</div>
+      <div id="games-empty" style="display:none; padding: 80px 20px; text-align: center; border: 2px dashed var(--panel-border); background: var(--panel-bg);">
+        <div style="color: var(--text-muted); font-size: 14px; letter-spacing: 3px;">SYSTEM IDLE: NO GAMES SCHEDULED TODAY</div>
       </div>
     </div>
     
@@ -406,8 +411,8 @@
     <div class="modal" onclick="event.stopPropagation()">
       <div class="modal-close" onclick="closeModal()">×</div>
       <div style="margin-bottom: 48px; text-align:center;">
-        <h2 class="section-title" id="modal-name" style="justify-content:center; font-size: 40px; letter-spacing: -1px; margin-bottom: 12px; line-height: 1;"></h2>
-        <div style="font-family: var(--font-mono); color: var(--accent); font-size: 15px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;" id="modal-meta"></div>
+        <h2 class="section-title" id="modal-name" style="justify-content:center; font-size: 48px; margin-bottom: 12px;"></h2>
+        <div style="color: var(--accent); font-size: 16px; letter-spacing: 3px;" id="modal-meta"></div>
       </div>
       <div id="modal-stats"></div>
     </div>
@@ -475,7 +480,7 @@
     async function generateScout() {
       const name = document.getElementById('scout-name').value.trim();
       const q = document.getElementById('scout-question').value.trim();
-      if (!name) return alert('Enter player name');
+      if (!name) return alert('ENTER PLAYER NAME');
       
       document.getElementById('scout-load').classList.add('visible');
       document.getElementById('scout-wrapper').style.display = 'none';
@@ -486,7 +491,7 @@
         if (!res.ok) throw new Error(await res.text());
         const data = await res.json();
         const s = data.stats;
-        document.getElementById('scout-header').textContent = `${data.player} | ${data.team} · ${data.position}`;
+        document.getElementById('scout-header').textContent = `${data.player} | ${data.team} // ${data.position}`;
         document.getElementById('scout-stats').innerHTML = `
           <div class="stat-box"><div class="stat-label">PPG</div><div class="stat-value">${s.ppg.toFixed(1)}</div></div>
           <div class="stat-box"><div class="stat-label">RPG</div><div class="stat-value">${s.rpg.toFixed(1)}</div></div>
@@ -497,7 +502,7 @@
         document.getElementById('scout-report').textContent = data.report;
         document.getElementById('scout-wrapper').style.display = 'block';
       } catch(e) { 
-        document.getElementById('scout-err').textContent = 'Error: ' + e.message;
+        document.getElementById('scout-err').textContent = 'ERROR: ' + e.message;
         document.getElementById('scout-err').classList.add('visible');
       } 
       finally { document.getElementById('scout-load').classList.remove('visible'); }
@@ -507,7 +512,7 @@
       const a = document.getElementById('comp-a').value.trim();
       const b = document.getElementById('comp-b').value.trim();
       const ctx = document.getElementById('comp-context').value.trim();
-      if (!a || !b) return alert('Enter both players');
+      if (!a || !b) return alert('ENTER BOTH PLAYERS');
       
       document.getElementById('comp-load').classList.add('visible');
       document.getElementById('comp-wrapper').style.display = 'none';
@@ -520,7 +525,7 @@
         document.getElementById('comp-report').textContent = data.comparison;
         document.getElementById('comp-wrapper').style.display = 'block';
       } catch(e) {
-        document.getElementById('comp-err').textContent = 'Error: ' + e.message;
+        document.getElementById('comp-err').textContent = 'ERROR: ' + e.message;
         document.getElementById('comp-err').classList.add('visible');
       } 
       finally { document.getElementById('comp-load').classList.remove('visible'); }
@@ -530,7 +535,7 @@
       const outList = Array.from(document.getElementById('trade-out-list').querySelectorAll('.list-chip')).map(c => c.textContent.replace('×','').trim());
       const inList = Array.from(document.getElementById('trade-in-list').querySelectorAll('.list-chip')).map(c => c.textContent.replace('×','').trim());
       const ctx = document.getElementById('trade-context').value.trim();
-      if (!outList.length || !inList.length) return alert('Need players on both sides');
+      if (!outList.length || !inList.length) return alert('REQUIRE PLAYERS ON BOTH SIDES');
       
       document.getElementById('trade-load').classList.add('visible');
       document.getElementById('trade-wrapper').style.display = 'none';
@@ -543,7 +548,7 @@
         document.getElementById('trade-report').textContent = data.analysis;
         document.getElementById('trade-wrapper').style.display = 'block';
       } catch(e) {
-        document.getElementById('trade-err').textContent = 'Error: ' + e.message;
+        document.getElementById('trade-err').textContent = 'ERROR: ' + e.message;
         document.getElementById('trade-err').classList.add('visible');
       } finally { document.getElementById('trade-load').classList.remove('visible'); }
     }
@@ -551,7 +556,7 @@
     async function generateTeam() {
       const abbr = document.getElementById('team-abbr').value.trim();
       const q = document.getElementById('team-question').value.trim();
-      if(!abbr) return alert("Need abbreviation");
+      if(!abbr) return alert("REQUIRE ABBREVIATION");
       
       document.getElementById('team-load').classList.add('visible');
       document.getElementById('team-wrapper').style.display = 'none';
@@ -564,14 +569,14 @@
         document.getElementById('team-report').textContent = data.report;
         document.getElementById('team-wrapper').style.display = 'block';
       } catch(e) {
-        document.getElementById('team-err').textContent = 'Error: ' + e.message;
+        document.getElementById('team-err').textContent = 'ERROR: ' + e.message;
         document.getElementById('team-err').classList.add('visible');
       } finally { document.getElementById('team-load').classList.remove('visible'); }
     }
 
     async function generateRoster() {
       const abbr = document.getElementById('roster-abbr').value.trim();
-      if(!abbr) return alert("Need abbreviation");
+      if(!abbr) return alert("REQUIRE ABBREVIATION");
       
       document.getElementById('roster-load').classList.add('visible');
       document.getElementById('roster-wrapper').style.display = 'none';
@@ -584,11 +589,11 @@
         const div = document.getElementById('roster-reports');
         div.innerHTML = '';
         for (const [name, report] of Object.entries(data.reports)) {
-          div.innerHTML += `<div class="panel"><h2 style="font-size:24px; color:var(--accent); font-family:var(--font-mono); font-weight:800; margin-bottom:20px; border-bottom:1px solid var(--panel-border); padding-bottom:12px; text-transform:uppercase;">${name}</h2><pre class="report" style="background:transparent; padding:0; border:none;">${report}</pre></div>`;
+          div.innerHTML += `<div class="panel"><h2 style="font-size:24px; color:var(--accent); margin-bottom:20px; border-bottom:2px solid var(--panel-border); padding-bottom:12px; text-transform:uppercase;">${name}</h2><pre class="report" style="background:transparent; padding:0; border:none;">${report}</pre></div>`;
         }
         document.getElementById('roster-wrapper').style.display = 'block';
       } catch(e) {
-        document.getElementById('roster-err').textContent = 'Error: ' + e.message;
+        document.getElementById('roster-err').textContent = 'ERROR: ' + e.message;
         document.getElementById('roster-err').classList.add('visible');
       } finally { document.getElementById('roster-load').classList.remove('visible'); }
     }
@@ -597,12 +602,12 @@
     let chatHistory = [];
     function startChat() {
       const player = document.getElementById('chat-player').value.trim();
-      if (!player) return alert('Enter player name');
+      if (!player) return alert('ENTER PLAYER NAME');
       
       document.getElementById('chat-setup-panel').style.display = 'none';
       document.getElementById('chat-wrapper').style.display = 'flex';
       chatHistory = [];
-      document.getElementById('chat-messages').innerHTML = `<div style="color:var(--accent); text-align:center; font-family:var(--font-mono); font-size:12px; margin-bottom:16px; letter-spacing:1px;">SECURE CONNECTION ESTABLISHED: ${player.toUpperCase()}</div>`;
+      document.getElementById('chat-messages').innerHTML = `<div style="color:var(--accent); text-align:center; font-size:12px; margin-bottom:16px; letter-spacing:2px;">SECURE CONNECTION ESTABLISHED: ${player.toUpperCase()}</div>`;
       document.getElementById('chat-input').focus();
     }
 
@@ -617,7 +622,7 @@
       messages.scrollTop = messages.scrollHeight;
       
       const loadId = 'load-' + Date.now();
-      messages.innerHTML += `<div id="${loadId}" style="align-self: flex-start; color: var(--accent); font-size: 12px; font-family: var(--font-mono); font-weight: bold;">Processing...</div>`;
+      messages.innerHTML += `<div id="${loadId}" style="align-self: flex-start; color: var(--accent); font-size: 12px; letter-spacing: 1px;">PROCESSING...</div>`;
       messages.scrollTop = messages.scrollHeight;
 
       try {
@@ -627,7 +632,7 @@
         messages.innerHTML += `<div class="chat-bubble chat-ai">${data.reply.replace(/\n/g, '<br>')}</div>`;
         chatHistory = data.history;
         messages.scrollTop = messages.scrollHeight;
-      } catch(e) { document.getElementById(loadId).textContent = "Connection Error."; }
+      } catch(e) { document.getElementById(loadId).textContent = "CONNECTION ERROR."; }
     }
 
     // LIVE GAMES (WITH INTELLIGENT FALLBACK)
@@ -657,10 +662,10 @@
           const isLive = (g.status || '').includes('Qtr') || (g.status || '').includes('Half');
           return `
           <div class="game-card" onclick='openBoxScore(${JSON.stringify(g).replace(/'/g, "&apos;")})'>
-            <div class="game-status ${isLive ? 'live' : ''}">${isLive ? '● LIVE IN PLAY' : 'SCHEDULED'} <span style="color:var(--text-main); font-weight:bold;">${g.time || g.status}</span></div>
+            <div class="game-status"><span class="${isLive ? 'live' : ''}">${isLive ? 'LIVE' : 'SCHED'}</span> <span>${g.time || g.status}</span></div>
             <div class="game-teams">
               <div class="team-block"><div class="team-name">${a.abbreviation||'AWY'}</div><div class="team-score ${g.visitor_team_score > g.home_team_score ? 'score-high':''}">${g.visitor_team_score||'—'}</div></div>
-              <div style="color:var(--panel-border); font-weight:bold; font-size:14px; font-family:var(--font-mono);">VS</div>
+              <div style="color:var(--text-muted); font-size:14px;">VS</div>
               <div class="team-block"><div class="team-name">${h.abbreviation||'HME'}</div><div class="team-score ${g.home_team_score > g.visitor_team_score ? 'score-high':''}">${g.home_team_score||'—'}</div></div>
             </div>
           </div>`;
@@ -670,31 +675,31 @@
 
     function openBoxScore(game) {
       const h = game.home_team || {}; const a = game.visitor_team || {};
-      document.getElementById('modal-name').textContent = `${a.full_name} vs ${h.full_name}`;
+      document.getElementById('modal-name').textContent = `${a.full_name} VS ${h.full_name}`;
       document.getElementById('modal-meta').textContent = `${game.time || game.status}`;
       
       // Graceful Line Score fallback when BDL hasn't synced players
       function renderTable(team) {
         if(!team.players || team.players.length === 0) {
            return `
-            <div style="background:var(--panel-bg); border:1px solid var(--panel-border); padding:32px; text-align:center; margin-bottom:24px;">
-              <h3 style="color:var(--text-main); margin-bottom:12px; font-size:24px;">${team.full_name}</h3>
-              <div style="color:var(--text-muted); font-family:var(--font-mono); font-size:13px; text-transform:uppercase; letter-spacing:1px;">Player data syncing from provider...</div>
+            <div style="background:var(--panel-bg); border:2px solid var(--panel-border); padding:32px; text-align:center; margin-bottom:24px;">
+              <h3 style="color:var(--text-main); margin-bottom:12px; font-size:24px; text-transform:uppercase;">${team.full_name}</h3>
+              <div style="color:var(--text-muted); font-size:13px; text-transform:uppercase; letter-spacing:2px;">DATA SYNC IN PROGRESS...</div>
             </div>`;
         }
         
         const active = team.players.filter(p => p.min && p.min !== '00').sort((x,y) => y.pts - x.pts);
-        return `<h3 style="margin:40px 0 16px; color:var(--text-main); font-size:24px; font-weight:800; letter-spacing:-0.5px;">${team.full_name}</h3>
-        <div style="border: 1px solid var(--panel-border); background: var(--panel-bg); overflow:hidden;">
-          <table style="width:100%; text-align:left; font-family:var(--font-mono); font-size:14px; border-collapse: collapse;">
-            <tr style="background: #171717; color: var(--text-muted); border-bottom: 1px solid var(--panel-border);">
-              <th style="padding:16px 20px; font-weight:normal;">PLAYER</th><th style="padding:16px; font-weight:normal;">MIN</th><th style="padding:16px; color:var(--text-main); font-weight:bold;">PTS</th><th style="padding:16px; font-weight:normal;">REB</th><th style="padding:16px; font-weight:normal;">AST</th><th style="padding:16px; font-weight:normal;">FG</th>
+        return `<h3 style="margin:40px 0 16px; color:var(--text-main); font-size:28px; letter-spacing:-1px;">${team.full_name}</h3>
+        <div style="border: 2px solid var(--panel-border); background: var(--panel-bg); overflow:hidden;">
+          <table>
+            <tr style="background: #111; color: var(--text-muted);">
+              <th>PLAYER</th><th>MIN</th><th style="color:var(--text-main);">PTS</th><th>REB</th><th>AST</th><th>FG</th>
             </tr>
-            ${active.map(p => `<tr style="border-bottom: 1px solid var(--panel-border); transition: background 0.2s;" onmouseover="this.style.background='#171717'" onmouseout="this.style.background='transparent'">
-              <td style="padding:16px 20px; color:var(--text-main); font-family:var(--font-ui); font-weight:600;">${p.player.first_name} ${p.player.last_name}</td>
-              <td style="padding:16px; color:var(--text-muted);">${p.min}</td>
-              <td style="padding:16px; font-weight:900; font-size:16px; color: ${p.pts>=20 ? 'var(--accent)' : 'var(--text-main)'};">${p.pts}</td>
-              <td style="padding:16px; color:var(--text-muted);">${p.reb}</td><td style="padding:16px; color:var(--text-muted);">${p.ast}</td><td style="padding:16px; color:var(--text-muted);">${p.fgm}-${p.fga}</td>
+            ${active.map(p => `<tr>
+              <td style="color:var(--text-main);">${p.player.first_name} ${p.player.last_name}</td>
+              <td style="color:var(--text-muted);">${p.min}</td>
+              <td style="font-size:16px; color: ${p.pts>=20 ? 'var(--accent)' : 'var(--text-main)'};">${p.pts}</td>
+              <td style="color:var(--text-muted);">${p.reb}</td><td style="color:var(--text-muted);">${p.ast}</td><td style="color:var(--text-muted);">${p.fgm}-${p.fga}</td>
             </tr>`).join('')}
           </table>
         </div>`;
