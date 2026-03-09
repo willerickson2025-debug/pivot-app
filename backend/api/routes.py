@@ -3,7 +3,8 @@ import httpx
 import os
 from typing import Optional, Any
 from ..engine.cache import cget, cset, make_key
-
+from fastapi import FastAPI
+app = FastAPI()
 # --- CONFIG & ERRORS ---
 BDL_API_BASE = "https://api.balldontlie.io/v1"
 API_KEY = os.getenv("BDL_API_KEY")
