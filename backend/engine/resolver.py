@@ -10,16 +10,44 @@ logger = logging.getLogger(__name__)
 
 async def find_player(name: str, season: int) -> Optional[PlayerProfile]:
     players = await search_players(name)
+    # ... (keep your existing exact match logic here) ...
     
-    # If the full name returns nothing (due to a typo), try just the last name
-    if not players and len(name.split()) > 1:
-        players = await search_players(name.split()[-1])
+    if not matched: return None
 
-    if not players:
-        return None
+    pid = matched["id"]
+    # Fetch Season Avg and Recent Logs in parallel
+    raw_stats, recent_logs = await asyncio.gather(
+        get_season_averages(pid, season),
+        get_recent_stats(pid, 10)
+    )
 
-    name_lower = name.lower().replace("-", " ")
-    matched = None
+    # Calculate L10 (Last 10) Averages
+    if recent_logs:
+        l10_pts = sum(g['pts'] for g in recent_logs) / len(recent_logs)
+        l10_ast = sum(g['ast'] for g in recent_logs) / len(recent_logs)
+        # Trend calculation: (Recent - Season)
+        pts_trend = l10_pts - raw_stats.get('pts', 0)
+    else:
+        pts_trend = 0
+
+    # Build the profile with the new trend data
+    profile = PlayerProfile.build(player_data=matched, raw_stats=raw_stats, season=season)
+    
+    # Inject Trend and Position Rank into the object for the AI
+    profile.momentum = {
+        "pts_delta": round(pts_trend, 1),
+        "status": "HEATING UP" if pts_trend > 2.5 else ("SLUMPING" if pts_trend < -2.5 else "STABLE")
+    }
+    
+    # Static League Normalization logic (Position-based)
+    pos = matched.get("position", "")
+    fg = raw_stats.get("fg_pct", 0)
+    if "G" in pos: # Guards: 45% is good
+        profile.percentile = "ELITE" if fg > 0.48 else "ABOVE AVG" if fg > 0.44 else "BELOW AVG"
+    else: # Bigs: 50% is the baseline
+        profile.percentile = "ELITE" if fg > 0.58 else "ABOVE AVG" if fg > 0.52 else "BELOW AVG"
+
+    return profile
     
     # 1. Try Exact Match
     for p in players:

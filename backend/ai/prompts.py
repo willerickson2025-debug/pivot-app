@@ -24,6 +24,10 @@ def analyze_prompt(p: PlayerProfile, question: str | None = None) -> str:
     i = p.identity
     
     base = f"""Generate a comprehensive professional scouting report for {i.name}.
+    momentum_str = f"MOMENTUM: {p.momentum['status']} ({p.momentum['pts_delta']:+.1f} PPG vs Season Avg)"
+    rank_str = f"EFFICIENCY RANK: {p.percentile} for {i.position} position"
+    
+    # Add these to the base string you send to Claude
 
 IDENTITY
 Name: {i.name} | Team: {i.team} | Position: {i.position}

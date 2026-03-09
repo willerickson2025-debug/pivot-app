@@ -186,3 +186,22 @@ async def get_player_game_log(player_id: int, season: int) -> list[dict]:
     except (BDLError, httpx.HTTPStatusError) as e:
         logger.warning("Game log unavailable: %s", e)
         return []
+    
+    async def get_recent_stats(player_id: int, limit: int = 10) -> list[dict]:
+    """Fetches the last X game box scores for a specific player."""
+    key = f"bdl:recent:{player_id}:{limit}"
+    cached = cget(key)
+    if cached is not None:
+        return cached
+
+    # Fetch game logs for the current season
+    data = await _get("/stats", {
+        "player_ids[]": [player_id],
+        "per_page": limit,
+        "order_by": "date",
+        "direction": "desc"
+    })
+    
+    result = data.get("data", [])
+    cset(key, result, ttl=3600) # Cache logs for 1 hour
+    return result
