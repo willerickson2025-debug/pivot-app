@@ -1,199 +1,1429 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-  <title>PIVOT | Enterprise Intelligence</title>
-  <style>
-    :root {
-      --bg: #000000;
-      --panel-bg: #080808;
-      --panel-border: #222222;
-      --text-main: #ffffff;
-      --text-muted: #666666;
-      --accent: #39ff14;
-      --accent-glow: rgba(57, 255, 20, 0.15);
-      --red: #ff3333;
-    }
-    
-    * { 
-      box-sizing: border-box; margin: 0; padding: 0; 
-      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif !important;
-      font-weight: bold !important;
-    }
-    
-    body { 
-      background-color: var(--bg); 
-      color: var(--text-main); font-size: 14px; line-height: 1.5; 
-      height: 100vh; display: flex; flex-direction: column; overflow: hidden; 
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PIVOT — NBA Intelligence</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #080808;
+  --surface: #111;
+  --surface2: #181818;
+  --surface3: #202020;
+  --border: #1e1e1e;
+  --border2: #2a2a2a;
+  --accent: #c8ff00;
+  --accent-dim: rgba(200,255,0,0.12);
+  --accent-glow: rgba(200,255,0,0.25);
+  --red: #ff4444;
+  --green: #00e676;
+  --blue: #4488ff;
+  --orange: #ff8c42;
+  --text: #f0f0f0;
+  --text2: #888;
+  --text3: #444;
+  --mono: 'DM Mono', monospace;
+  --sans: 'Inter', sans-serif;
+  --display: 'Bebas Neue', sans-serif;
+  --radius: 2px;
+}
 
-    /* CRT SCANLINE OVERLAY */
-    body::after {
-      content: " "; position: absolute; top: 0; left: 0; bottom: 0; right: 0;
-      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%);
-      z-index: 100; background-size: 100% 3px; pointer-events: none; opacity: 0.3;
-    }
-    
-    .navbar { 
-      background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(12px); 
-      border-bottom: 2px solid var(--panel-border); 
-      display: flex; align-items: center; justify-content: space-between; 
-      padding: 0 40px; height: 72px; flex-shrink: 0; z-index: 60; 
-    }
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
 
-    .main { flex: 1; padding: 40px; overflow-y: auto; position: relative; z-index: 20; padding-bottom: 80px; }
-    .page { display: none; max-width: 1200px; margin: 0 auto; }
-    .page.active { display: flex; flex-direction: column; }
-    
-    /* THE TICKER FIX - ABSOLUTE LOCK */
-    .ticker-wrap { 
-      position: fixed; bottom: 0; left: 0; width: 100%;
-      background: #000; border-top: 2px solid var(--panel-border); 
-      height: 36px; overflow: hidden; display: flex; align-items: center; z-index: 1000; 
-    }
-    .ticker-content { display: flex; white-space: nowrap; animation: ticker 25s linear infinite; }
-    .ticker-text { font-size: 11px; color: var(--accent); text-transform: uppercase; letter-spacing: 3px; padding-right: 60px; }
-    @keyframes ticker { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
 
-    /* STATS GRID FIX */
-    .stats-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 2px; background: var(--panel-border); border: 2px solid var(--panel-border); margin-bottom: 32px; }
-    .stat-box { background: var(--panel-bg); padding: 24px 10px; text-align: center; min-height: 100px; display: flex; flex-direction: column; justify-content: center; }
-    .stat-label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 8px; }
-    .stat-value { font-size: 32px; letter-spacing: -1px; line-height: 1; }
+/* Scanline overlay */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px);
+  pointer-events: none;
+  z-index: 9999;
+}
 
-    .page.cover-page.active { display: flex; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; max-width: none; justify-content: center; align-items: center; z-index: 10; background: #000; }
-    .bg-video { position: absolute; top: 50%; left: 50%; min-width: 100%; min-height: 100%; transform: translate(-50%, -50%); object-fit: cover; opacity: 0.75; filter: grayscale(100%); }
-    .video-overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: radial-gradient(circle, transparent 0%, rgba(0,0,0,0.9) 100%); }
-    
-    .loading { display: none; color: var(--accent); padding: 20px; text-align: center; text-transform: uppercase; letter-spacing: 2px; }
-    .loading.visible { display: block; }
-    .error-box { background: #1a0000; border: 1px solid var(--red); color: var(--red); padding: 16px; margin-bottom: 24px; font-size: 12px; }
-  </style>
+/* ── LAYOUT ── */
+.app { display: flex; height: 100vh; overflow: hidden; }
+
+/* ── SIDEBAR ── */
+.sidebar {
+  width: 220px;
+  min-width: 220px;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  z-index: 100;
+}
+
+.logo-wrap {
+  padding: 28px 24px 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.logo {
+  font-family: var(--display);
+  font-size: 38px;
+  letter-spacing: 6px;
+  color: var(--accent);
+  line-height: 1;
+  text-shadow: 0 0 40px var(--accent-glow);
+}
+
+.logo-sub {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 3px;
+  color: var(--text3);
+  text-transform: uppercase;
+  margin-top: 4px;
+}
+
+.nav { flex: 1; padding: 16px 0; }
+
+.nav-section {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 3px;
+  color: var(--text3);
+  text-transform: uppercase;
+  padding: 16px 24px 8px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 24px;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--text2);
+  transition: all 0.15s;
+  border-left: 2px solid transparent;
+  font-weight: 400;
+}
+
+.nav-item:hover { color: var(--text); background: var(--surface2); }
+.nav-item.active { color: var(--accent); border-left-color: var(--accent); background: var(--accent-dim); }
+
+.nav-icon { font-size: 16px; width: 20px; text-align: center; }
+
+.sidebar-bottom {
+  padding: 16px 24px;
+  border-top: 1px solid var(--border);
+}
+
+.season-selector {
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 11px;
+  padding: 8px 12px;
+  width: 100%;
+  cursor: pointer;
+  outline: none;
+  letter-spacing: 1px;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23444'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+}
+
+.season-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 2px;
+  color: var(--text3);
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+/* ── MAIN CONTENT ── */
+.main {
+  flex: 1;
+  overflow-y: auto;
+  background: var(--bg);
+}
+
+.main::-webkit-scrollbar { width: 4px; }
+.main::-webkit-scrollbar-track { background: var(--bg); }
+.main::-webkit-scrollbar-thumb { background: var(--border2); }
+
+/* ── TOP BAR ── */
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: rgba(8,8,8,0.95);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+  padding: 16px 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.page-title {
+  font-family: var(--display);
+  font-size: 22px;
+  letter-spacing: 3px;
+  color: var(--text);
+}
+
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.live-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: var(--green);
+  border: 1px solid var(--green);
+  padding: 4px 10px;
+}
+
+.live-dot {
+  width: 6px;
+  height: 6px;
+  background: var(--green);
+  border-radius: 50%;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+/* ── PAGE SECTIONS ── */
+.page { display: none; padding: 40px; }
+.page.active { display: block; }
+
+/* ── SEARCH BAR ── */
+.search-wrap {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 32px;
+}
+
+.search-field {
+  flex: 1;
+  position: relative;
+}
+
+.search-field input {
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  color: var(--text);
+  padding: 14px 18px;
+  font-family: var(--sans);
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.search-field input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent-dim), 0 0 20px var(--accent-dim);
+}
+
+.search-field input::placeholder { color: var(--text3); }
+
+.field-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 2px;
+  color: var(--text3);
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+/* ── BUTTONS ── */
+.btn {
+  font-family: var(--display);
+  font-size: 16px;
+  letter-spacing: 3px;
+  padding: 14px 32px;
+  background: var(--accent);
+  color: #000;
+  border: none;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+  flex-shrink: 0;
+  align-self: flex-end;
+}
+
+.btn:hover { filter: brightness(1.1); transform: translateY(-1px); box-shadow: 0 6px 20px var(--accent-glow); }
+.btn:active { transform: translateY(0); }
+.btn:disabled { background: var(--border2); color: var(--text3); cursor: not-allowed; transform: none; box-shadow: none; filter: none; }
+
+.btn-ghost {
+  background: transparent;
+  color: var(--text2);
+  border: 1px solid var(--border2);
+  font-size: 13px;
+  letter-spacing: 2px;
+  padding: 10px 20px;
+  font-family: var(--mono);
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+
+.btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+.btn-ghost.active { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
+
+/* ── STAT CARDS ── */
+.stat-row {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  margin-bottom: 32px;
+}
+
+.stat-card {
+  background: var(--surface);
+  padding: 20px;
+  text-align: center;
+}
+
+.stat-val {
+  font-family: var(--display);
+  font-size: 36px;
+  color: var(--accent);
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.stat-lbl {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 2px;
+  color: var(--text3);
+  text-transform: uppercase;
+}
+
+/* ── REPORT OUTPUT ── */
+.output-wrap {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  display: none;
+}
+
+.output-wrap.visible { display: block; }
+
+.output-header {
+  padding: 28px 32px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.player-name {
+  font-family: var(--display);
+  font-size: 48px;
+  letter-spacing: 4px;
+  line-height: 1;
+  color: var(--text);
+}
+
+.player-meta {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text2);
+  letter-spacing: 2px;
+  margin-top: 8px;
+  text-transform: uppercase;
+}
+
+.report-body {
+  padding: 32px;
+  font-size: 14px;
+  line-height: 1.85;
+  color: #bbb;
+}
+
+.report-body h2 {
+  font-family: var(--display);
+  font-size: 18px;
+  letter-spacing: 3px;
+  color: var(--accent);
+  margin: 28px 0 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border2);
+}
+
+.report-body h2:first-child { margin-top: 0; }
+
+.report-body strong { color: var(--text); font-weight: 600; }
+
+.report-body p { margin-bottom: 12px; }
+
+/* ── LOADING ── */
+.loading {
+  display: none;
+  align-items: center;
+  gap: 16px;
+  padding: 32px;
+  color: var(--text3);
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+}
+
+.loading.visible { display: flex; }
+
+.spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--border2);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── ERROR ── */
+.error {
+  display: none;
+  padding: 14px 18px;
+  border: 1px solid var(--red);
+  color: var(--red);
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 1px;
+  margin-bottom: 20px;
+}
+
+.error.visible { display: block; }
+
+/* ── SECTION HEADER ── */
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.section-title {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 3px;
+  color: var(--text3);
+  text-transform: uppercase;
+}
+
+/* ── DIVIDER ── */
+.divider { height: 1px; background: var(--border); margin: 32px 0; }
+
+/* ── GRID ── */
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 20px; }
+.three-col { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+
+/* ── TRADE INPUTS ── */
+.trade-side {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 24px;
+}
+
+.trade-side-title {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 3px;
+  color: var(--text3);
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+
+.player-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  min-height: 40px;
+  margin-bottom: 12px;
+}
+
+.tag {
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  padding: 6px 12px;
+  font-family: var(--mono);
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text);
+}
+
+.tag-x { cursor: pointer; color: var(--text3); font-size: 14px; line-height: 1; }
+.tag-x:hover { color: var(--red); }
+
+.add-row { display: flex; gap: 8px; }
+
+/* ── ROSTER GRID ── */
+.roster-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.roster-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 20px;
+  cursor: pointer;
+  transition: all 0.15s;
+  animation: fadeUp 0.3s ease forwards;
+  opacity: 0;
+}
+
+.roster-card:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.5); }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.rc-name { font-family: var(--display); font-size: 20px; letter-spacing: 2px; margin-bottom: 4px; }
+.rc-meta { font-family: var(--mono); font-size: 9px; color: var(--text3); letter-spacing: 1px; margin-bottom: 14px; text-transform: uppercase; }
+.rc-stats { display: flex; gap: 14px; }
+.rc-stat-val { font-family: var(--display); font-size: 22px; color: var(--accent); line-height: 1; }
+.rc-stat-lbl { font-family: var(--mono); font-size: 9px; color: var(--text3); letter-spacing: 1px; }
+
+/* ── CHAT ── */
+.chat-container {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 200px);
+  min-height: 500px;
+}
+
+.chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-bottom: none;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.chat-messages::-webkit-scrollbar { width: 3px; }
+.chat-messages::-webkit-scrollbar-thumb { background: var(--border2); }
+
+.msg { max-width: 80%; }
+
+.msg-user { align-self: flex-end; }
+.msg-ai { align-self: flex-start; }
+
+.msg-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 2px;
+  color: var(--text3);
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.msg-bubble {
+  padding: 14px 18px;
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.msg-user .msg-bubble {
+  background: var(--accent);
+  color: #000;
+  font-weight: 500;
+}
+
+.msg-ai .msg-bubble {
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  color: var(--text);
+}
+
+.chat-input-area {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 16px;
+  display: flex;
+  gap: 12px;
+}
+
+.chat-input-area input {
+  flex: 1;
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  color: var(--text);
+  padding: 12px 16px;
+  font-family: var(--sans);
+  font-size: 14px;
+  outline: none;
+}
+
+.chat-input-area input:focus { border-color: var(--accent); }
+
+/* ── GAMES ── */
+.games-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
+  margin-top: 24px;
+}
+
+.game-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 24px;
+}
+
+.game-status {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 2px;
+  color: var(--green);
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+
+.game-status.final { color: var(--text3); }
+
+.game-teams {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.game-team { text-align: center; }
+.game-team-name { font-family: var(--display); font-size: 24px; letter-spacing: 2px; }
+.game-team-score { font-family: var(--display); font-size: 48px; color: var(--accent); line-height: 1; }
+.game-vs { font-family: var(--mono); font-size: 12px; color: var(--text3); }
+
+/* ── COMPARE STATS TABLE ── */
+.compare-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 24px;
+  font-family: var(--mono);
+  font-size: 12px;
+}
+
+.compare-table th {
+  padding: 12px 16px;
+  text-align: center;
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: var(--text3);
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--border);
+}
+
+.compare-table th:first-child { text-align: left; }
+
+.compare-table td {
+  padding: 10px 16px;
+  text-align: center;
+  border-bottom: 1px solid var(--border);
+  color: var(--text2);
+}
+
+.compare-table td:first-child { text-align: left; color: var(--text3); }
+.compare-table td.winner { color: var(--accent); font-weight: 500; }
+.compare-table tr:hover td { background: var(--surface2); }
+
+/* ── MODAL ── */
+.modal-bg {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.85);
+  backdrop-filter: blur(6px);
+  z-index: 1000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+}
+
+.modal-bg.open { display: flex; }
+
+.modal {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  max-width: 860px;
+  width: 100%;
+  max-height: 85vh;
+  overflow-y: auto;
+  position: relative;
+}
+
+.modal::-webkit-scrollbar { width: 3px; }
+.modal::-webkit-scrollbar-thumb { background: var(--border2); }
+
+.modal-header {
+  padding: 28px 32px;
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  background: var(--surface);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  color: var(--text3);
+  font-size: 22px;
+  cursor: pointer;
+  font-family: var(--mono);
+  transition: color 0.15s;
+  padding: 0;
+}
+
+.modal-close:hover { color: var(--accent); }
+
+.modal-body { padding: 32px; }
+
+/* ── DASHBOARD ── */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.dash-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 24px;
+}
+
+.dash-card-title {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 3px;
+  color: var(--text3);
+  text-transform: uppercase;
+  margin-bottom: 20px;
+}
+
+.quick-search {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.quick-search input {
+  flex: 1;
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  color: var(--text);
+  padding: 10px 14px;
+  font-size: 13px;
+  outline: none;
+}
+
+.quick-search input:focus { border-color: var(--accent); }
+
+.recent-list { display: flex; flex-direction: column; gap: 8px; }
+
+.recent-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: var(--surface2);
+  cursor: pointer;
+  transition: all 0.15s;
+  font-size: 13px;
+}
+
+.recent-item:hover { border-left: 2px solid var(--accent); padding-left: 12px; }
+.recent-item-name { font-weight: 500; }
+.recent-item-team { font-family: var(--mono); font-size: 10px; color: var(--text3); }
+</style>
 </head>
 <body>
 
-  <nav class="navbar">
-    <div class="brand" onclick="switchPage('home')">PIVOT <span>//</span></div>
-    <div style="display:flex;">
-      <button class="btn-ghost" onclick="switchPage('scout')" style="background:none; border:none; color:white; padding: 20px; cursor:pointer;">PLAYER INTEL</button>
-      <button class="btn-ghost" onclick="switchPage('games')" style="background:none; border:none; color:white; padding: 20px; cursor:pointer;">LIVE DATA</button>
-    </div>
-  </nav>
+<div class="app">
 
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="logo-wrap">
+      <div class="logo">PIVOT</div>
+      <div class="logo-sub">NBA Intelligence</div>
+    </div>
+    <nav class="nav">
+      <div class="nav-section">Analysis</div>
+      <div class="nav-item active" onclick="goTo('scout')">
+        <span class="nav-icon">◎</span> Scout Player
+      </div>
+      <div class="nav-item" onclick="goTo('compare')">
+        <span class="nav-icon">⇄</span> Compare
+      </div>
+      <div class="nav-item" onclick="goTo('trade')">
+        <span class="nav-icon">↔</span> Trade Analyzer
+      </div>
+      <div class="nav-item" onclick="goTo('team')">
+        <span class="nav-icon">◈</span> Team Report
+      </div>
+      <div class="nav-item" onclick="goTo('roster')">
+        <span class="nav-icon">⚡</span> Roster Package
+      </div>
+      <div class="nav-section">Intelligence</div>
+      <div class="nav-item" onclick="goTo('chat')">
+        <span class="nav-icon">◇</span> AI Analyst
+      </div>
+      <div class="nav-item" onclick="goTo('games')">
+        <span class="nav-icon">◉</span> Live Games
+      </div>
+    </nav>
+    <div class="sidebar-bottom">
+      <div class="season-label">Season</div>
+      <select class="season-selector" id="global-season">
+        <option value="2025">2025 — 26</option>
+        <option value="2024">2024 — 25</option>
+        <option value="2023">2023 — 24</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- MAIN -->
   <div class="main">
-    <div class="page cover-page active" id="page-home">
-      <video id="bgVideo" class="bg-video" autoplay loop muted playsinline webkit-playsinline preload="auto">
-        <source src="/static/bg.mp4" type="video/mp4">
-      </video>
-      <div class="video-overlay"></div>
-      <div style="position:relative; z-index:2;">
-        <h1 style="font-size:16vw; line-height:0.8;">PIVOT</h1>
-        <div style="color:var(--accent); letter-spacing:10px; margin-top:20px;">PRO INTELLIGENCE</div>
+
+    <!-- TOP BAR -->
+    <div class="topbar">
+      <div class="page-title" id="page-title">SCOUT PLAYER</div>
+      <div class="topbar-right">
+        <div class="live-badge"><div class="live-dot"></div>LIVE</div>
       </div>
     </div>
 
-    <div class="page" id="page-scout">
-      <div class="dashboard-header"><div class="section-title">Player Intel</div></div>
-      <div class="panel">
-        <div class="controls-row">
-          <input class="input" id="scout-name" placeholder="Target Name" style="flex:1;">
-          <button class="btn" onclick="generateScout()">Initiate Scan</button>
+    <!-- SCOUT -->
+    <div class="page active" id="page-scout">
+      <div class="search-wrap">
+        <div class="search-field">
+          <div class="field-label">Player Name</div>
+          <input type="text" id="scout-name" placeholder="e.g. Shai Gilgeous-Alexander" onkeydown="if(event.key==='Enter')runScout()">
+        </div>
+        <div class="search-field" style="max-width:180px">
+          <div class="field-label">Question (optional)</div>
+          <input type="text" id="scout-q" placeholder="e.g. Trade value?">
+        </div>
+        <div style="align-self:flex-end">
+          <button class="btn" id="scout-btn" onclick="runScout()">Generate</button>
         </div>
       </div>
-      <div class="loading" id="scout-load">ENCRYPTING DATASTREAM...</div>
-      <div id="scout-error-container"></div>
-      <div class="panel" id="scout-wrapper" style="display:none;">
-        <h1 id="scout-header" style="margin-bottom:30px;"></h1>
-        <div class="stats-grid" id="scout-stats"></div>
-        <pre class="report" id="scout-report" style="white-space: pre-wrap; color: #ccc; line-height: 1.6;"></pre>
+      <div class="error" id="scout-err"></div>
+      <div class="loading" id="scout-load"><div class="spinner"></div>Generating scouting report...</div>
+      <div class="output-wrap" id="scout-out">
+        <div class="output-header">
+          <div>
+            <div class="player-name" id="scout-pname"></div>
+            <div class="player-meta" id="scout-pmeta"></div>
+          </div>
+          <button class="btn-ghost" onclick="runScout(true)">↺ Refresh</button>
+        </div>
+        <div class="stat-row" id="scout-stats"></div>
+        <div class="report-body" id="scout-report"></div>
       </div>
     </div>
 
+    <!-- COMPARE -->
+    <div class="page" id="page-compare">
+      <div class="two-col" style="margin-bottom:20px">
+        <div>
+          <div class="field-label">Player A</div>
+          <input type="text" class="search-field" id="cmp-a" placeholder="e.g. Luka Doncic" style="width:100%;background:var(--surface);border:1px solid var(--border2);color:var(--text);padding:14px 18px;font-size:14px;outline:none;">
+        </div>
+        <div>
+          <div class="field-label">Player B</div>
+          <input type="text" class="search-field" id="cmp-b" placeholder="e.g. Jayson Tatum" style="width:100%;background:var(--surface);border:1px solid var(--border2);color:var(--text);padding:14px 18px;font-size:14px;outline:none;">
+        </div>
+      </div>
+      <div class="search-wrap">
+        <div class="search-field">
+          <div class="field-label">Context (optional)</div>
+          <input type="text" id="cmp-ctx" placeholder="e.g. Playoff performance, trade value, max contract">
+        </div>
+        <div style="align-self:flex-end">
+          <button class="btn" id="cmp-btn" onclick="runCompare()">Compare</button>
+        </div>
+      </div>
+      <div class="error" id="cmp-err"></div>
+      <div class="loading" id="cmp-load"><div class="spinner"></div>Running comparison analysis...</div>
+      <div class="output-wrap" id="cmp-out">
+        <div class="output-header">
+          <div class="player-name" id="cmp-title" style="font-size:32px"></div>
+        </div>
+        <div style="padding:0 32px 0">
+          <table class="compare-table" id="cmp-table"></table>
+        </div>
+        <div class="report-body" id="cmp-report"></div>
+      </div>
+    </div>
+
+    <!-- TRADE -->
+    <div class="page" id="page-trade">
+      <div class="two-col" style="margin-bottom:20px">
+        <div class="trade-side">
+          <div class="trade-side-title">⬆ Sending Out</div>
+          <div class="player-tags" id="out-tags"></div>
+          <div class="add-row">
+            <input type="text" id="out-input" placeholder="Add player..." style="flex:1;background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:10px 14px;font-size:13px;outline:none;" onkeydown="if(event.key==='Enter')addTag('out')">
+            <button class="btn-ghost" onclick="addTag('out')" style="padding:10px 16px">+</button>
+          </div>
+        </div>
+        <div class="trade-side">
+          <div class="trade-side-title">⬇ Receiving</div>
+          <div class="player-tags" id="in-tags"></div>
+          <div class="add-row">
+            <input type="text" id="in-input" placeholder="Add player..." style="flex:1;background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:10px 14px;font-size:13px;outline:none;" onkeydown="if(event.key==='Enter')addTag('in')">
+            <button class="btn-ghost" onclick="addTag('in')" style="padding:10px 16px">+</button>
+          </div>
+        </div>
+      </div>
+      <div class="search-wrap">
+        <div class="search-field">
+          <div class="field-label">Context (optional)</div>
+          <input type="text" id="trade-ctx" placeholder="e.g. We need rim protection, salary flexibility important">
+        </div>
+        <div style="align-self:flex-end">
+          <button class="btn" id="trade-btn" onclick="runTrade()">Evaluate Trade</button>
+        </div>
+      </div>
+      <div class="error" id="trade-err"></div>
+      <div class="loading" id="trade-load"><div class="spinner"></div>Evaluating trade proposal...</div>
+      <div class="output-wrap" id="trade-out">
+        <div class="output-header">
+          <div class="player-name" id="trade-title" style="font-size:28px"></div>
+        </div>
+        <div class="report-body" id="trade-report"></div>
+      </div>
+    </div>
+
+    <!-- TEAM -->
+    <div class="page" id="page-team">
+      <div class="search-wrap">
+        <div class="search-field" style="max-width:200px">
+          <div class="field-label">Team Abbreviation</div>
+          <input type="text" id="team-abbr" placeholder="OKC, BOS, LAL..." onkeydown="if(event.key==='Enter')runTeam()">
+        </div>
+        <div class="search-field">
+          <div class="field-label">Question (optional)</div>
+          <input type="text" id="team-q" placeholder="e.g. How do they defend in the half court?">
+        </div>
+        <div style="align-self:flex-end">
+          <button class="btn" id="team-btn" onclick="runTeam()">Scout Team</button>
+        </div>
+      </div>
+      <div class="error" id="team-err"></div>
+      <div class="loading" id="team-load"><div class="spinner"></div><span id="team-load-txt">Loading team...</span></div>
+      <div class="output-wrap" id="team-out">
+        <div class="output-header">
+          <div>
+            <div class="player-name" id="team-name"></div>
+            <div class="player-meta" id="team-meta"></div>
+          </div>
+        </div>
+        <div class="stat-row" id="team-leaders"></div>
+        <div class="report-body" id="team-report"></div>
+      </div>
+    </div>
+
+    <!-- ROSTER PACKAGE -->
+    <div class="page" id="page-roster">
+      <div class="search-wrap">
+        <div class="search-field" style="max-width:200px">
+          <div class="field-label">Team Abbreviation</div>
+          <input type="text" id="roster-abbr" placeholder="OKC, BOS, LAL...">
+        </div>
+        <div style="align-self:flex-end">
+          <button class="btn" id="roster-btn" onclick="runRoster()">⚡ Generate All Reports</button>
+        </div>
+      </div>
+      <div style="margin-bottom:24px">
+        <p style="font-size:13px;color:var(--text3);line-height:1.6">Generates individual AI scouting reports for every player on the roster concurrently. <span style="color:var(--accent)">~10 seconds for 15 players.</span></p>
+      </div>
+      <div class="error" id="roster-err"></div>
+      <div class="loading" id="roster-load"><div class="spinner"></div><span id="roster-load-txt">Running concurrent pipeline...</span></div>
+      <div id="roster-results" style="display:none">
+        <div class="section-header">
+          <div class="section-title" id="roster-title"></div>
+        </div>
+        <div class="roster-grid" id="roster-grid"></div>
+      </div>
+    </div>
+
+    <!-- CHAT -->
+    <div class="page" id="page-chat">
+      <div class="search-wrap" style="margin-bottom:20px">
+        <div class="search-field">
+          <div class="field-label">Load Player</div>
+          <input type="text" id="chat-player" placeholder="Enter player name to start session..." onkeydown="if(event.key==='Enter')loadChat()">
+        </div>
+        <div style="align-self:flex-end">
+          <button class="btn" id="chat-load-btn" onclick="loadChat()">Load</button>
+        </div>
+      </div>
+      <div class="error" id="chat-err"></div>
+      <div id="chat-ui" style="display:none">
+        <div style="margin-bottom:16px;display:flex;align-items:center;justify-content:space-between">
+          <div>
+            <div style="font-family:var(--display);font-size:28px;letter-spacing:3px" id="chat-pname"></div>
+            <div style="font-family:var(--mono);font-size:10px;color:var(--text3);letter-spacing:2px;margin-top:4px" id="chat-pmeta"></div>
+          </div>
+          <button class="btn-ghost" onclick="clearChat()">New Session</button>
+        </div>
+        <div class="chat-container">
+          <div class="chat-messages" id="chat-msgs"></div>
+          <div class="chat-input-area">
+            <input type="text" id="chat-input" placeholder="Ask anything about this player..." onkeydown="if(event.key==='Enter')sendChat()">
+            <button class="btn" id="chat-send" onclick="sendChat()">Send</button>
+          </div>
+        </div>
+      </div>
+      <div class="loading" id="chat-load"><div class="spinner"></div>Thinking...</div>
+    </div>
+
+    <!-- GAMES -->
     <div class="page" id="page-games">
-       <div class="dashboard-header"><div class="section-title">Live Pipeline</div></div>
-       <div id="games-grid" style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;"></div>
+      <div class="section-header">
+        <div class="section-title">Today's Games</div>
+        <button class="btn-ghost" onclick="loadGames()">↺ Refresh</button>
+      </div>
+      <div class="loading" id="games-load"><div class="spinner"></div>Loading games...</div>
+      <div class="error" id="games-err"></div>
+      <div class="games-grid" id="games-grid"></div>
+      <div id="games-empty" style="display:none;padding:40px;text-align:center;color:var(--text3);font-family:var(--mono);font-size:12px;letter-spacing:2px">NO GAMES SCHEDULED TODAY</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-bg" id="modal-bg" onclick="closeModal(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <div style="font-family:var(--display);font-size:36px;letter-spacing:3px" id="modal-name"></div>
+        <div style="font-family:var(--mono);font-size:10px;color:var(--text3);letter-spacing:2px;margin-top:6px" id="modal-meta"></div>
+      </div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="stat-row" id="modal-stats" style="margin-bottom:24px"></div>
+      <div class="report-body" id="modal-report"></div>
     </div>
   </div>
+</div>
 
-  <div class="ticker-wrap">
-    <div class="ticker-content">
-      <div class="ticker-text">PIVOT_CORE_ONLINE // DATA_PIPELINE: ACTIVE // BDL_API_SYNC: CONTINUOUS // LATENCY: 12MS // SYS_LOAD: 2.4% // SECURE_DATALINK_ESTABLISHED // LLM_NODE: CLAUDE-SONNET // </div>
-      <div class="ticker-text">PIVOT_CORE_ONLINE // DATA_PIPELINE: ACTIVE // BDL_API_SYNC: CONTINUOUS // LATENCY: 12MS // SYS_LOAD: 2.4% // SECURE_DATALINK_ESTABLISHED // LLM_NODE: CLAUDE-SONNET // </div>
-    </div>
-  </div>
+<script>
+const API = 'http://localhost:8000/api';
+let tradeOut = [], tradeIn = [];
+let chatHistory = [], chatPlayer = null;
 
-  <script>
-    const API = '/api';
-    function switchPage(p) {
-      document.querySelectorAll('.page').forEach(pg => pg.classList.remove('active'));
-      document.getElementById(`page-${p}`).classList.add('active');
-      if (p === 'games') loadGames();
+// ── Navigation ─────────────────────────────────────────────────────────────
+const pageTitles = {
+  scout: 'SCOUT PLAYER', compare: 'HEAD-TO-HEAD COMPARE',
+  trade: 'TRADE ANALYZER', team: 'TEAM REPORT',
+  roster: 'ROSTER PACKAGE', chat: 'AI ANALYST', games: 'LIVE GAMES'
+};
+
+function goTo(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  document.getElementById('page-title').textContent = pageTitles[page];
+  event.currentTarget.classList.add('active');
+  if (page === 'games') loadGames();
+}
+
+function getSeason() { return parseInt(document.getElementById('global-season').value); }
+
+// ── Helpers ────────────────────────────────────────────────────────────────
+function showLoad(id, txt) {
+  const el = document.getElementById(id + '-load');
+  if (txt && document.getElementById(id + '-load-txt')) document.getElementById(id + '-load-txt').textContent = txt;
+  el.classList.add('visible');
+  const err = document.getElementById(id + '-err');
+  if (err) err.classList.remove('visible');
+  const btn = document.getElementById(id + '-btn');
+  if (btn) btn.disabled = true;
+}
+
+function hideLoad(id) {
+  document.getElementById(id + '-load').classList.remove('visible');
+  const btn = document.getElementById(id + '-btn');
+  if (btn) btn.disabled = false;
+}
+
+function showErr(id, msg) {
+  const el = document.getElementById(id + '-err');
+  el.textContent = '⚠ ' + msg;
+  el.classList.add('visible');
+}
+
+function renderStats(id, stats) {
+  const fields = [
+    {k:'ppg',l:'PPG'},{k:'rpg',l:'RPG'},{k:'apg',l:'APG'},
+    {k:'fg_pct',l:'FG%',pct:true},{k:'ts_pct',l:'TS%',pct:true},{k:'gp',l:'GP',int:true}
+  ];
+  document.getElementById(id).innerHTML = fields.map(f => {
+    let v = stats[f.k];
+    const display = v == null || v === 0 && f.k !== 'gp' ? 'N/A'
+      : f.pct ? (v*100).toFixed(1)+'%'
+      : f.int ? parseInt(v)
+      : Number(v).toFixed(1);
+    return `<div class="stat-card"><div class="stat-val">${display}</div><div class="stat-lbl">${f.l}</div></div>`;
+  }).join('');
+}
+
+function renderReport(id, text) {
+  if (!text) return;
+  let html = text
+    .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.*?)\*/g, '<em>$1</em>')
+    .split('\n').filter(l => l.trim()).map(l => l.startsWith('<h2>') ? l : `<p>${l}</p>`).join('');
+  document.getElementById(id).innerHTML = html;
+}
+
+// ── Scout ──────────────────────────────────────────────────────────────────
+async function runScout(force = false) {
+  const name = document.getElementById('scout-name').value.trim();
+  const q = document.getElementById('scout-q').value.trim();
+  if (!name) return;
+  showLoad('scout');
+  try {
+    let url = `${API}/player/${encodeURIComponent(name)}?season=${getSeason()}${force?'&force=true':''}`;
+    if (q) url += `&question=${encodeURIComponent(q)}`;
+    const res = await fetch(url);
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || 'Not found');
+    document.getElementById('scout-pname').textContent = data.player;
+    document.getElementById('scout-pmeta').textContent = `${data.team} · ${data.position} · ${getSeason()} SEASON`;
+    renderStats('scout-stats', data.stats);
+    renderReport('scout-report', data.report);
+    document.getElementById('scout-out').classList.add('visible');
+  } catch(e) { showErr('scout', e.message); }
+  finally { hideLoad('scout'); }
+}
+
+// ── Compare ────────────────────────────────────────────────────────────────
+async function runCompare() {
+  const a = document.getElementById('cmp-a').value.trim();
+  const b = document.getElementById('cmp-b').value.trim();
+  const ctx = document.getElementById('cmp-ctx').value.trim();
+  if (!a || !b) return;
+  showLoad('cmp');
+  try {
+    let url = `${API}/compare?player_a=${encodeURIComponent(a)}&player_b=${encodeURIComponent(b)}&season=${getSeason()}`;
+    if (ctx) url += `&context=${encodeURIComponent(ctx)}`;
+    const res = await fetch(url);
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || 'Error');
+    document.getElementById('cmp-title').textContent = `${data.player_a}  vs  ${data.player_b}`;
+    const sa = data.stats_a, sb = data.stats_b;
+    const rows = [
+      ['Points',sa.ppg,sb.ppg],['Rebounds',sa.rpg,sb.rpg],['Assists',sa.apg,sb.apg],
+      ['FG%',sa.fg_pct,sb.fg_pct,true],['TS%',sa.ts_pct,sb.ts_pct,true]
+    ];
+    const fmt = (v, pct) => v == null ? 'N/A' : pct ? (v*100).toFixed(1)+'%' : Number(v).toFixed(1);
+    document.getElementById('cmp-table').innerHTML =
+      `<tr><th>STAT</th><th>${data.player_a.split(' ').pop()}</th><th>${data.player_b.split(' ').pop()}</th><th>EDGE</th></tr>` +
+      rows.map(([l,va,vb,pct])=>{
+        const aw = va > vb, bw = vb > va;
+        return `<tr><td>${l}</td><td class="${aw?'winner':''}">${fmt(va,pct)}</td><td class="${bw?'winner':''}">${fmt(vb,pct)}</td><td style="color:var(--accent);font-size:10px">${aw?'← A':bw?'B →':'TIE'}</td></tr>`;
+      }).join('');
+    renderReport('cmp-report', data.comparison);
+    document.getElementById('cmp-out').classList.add('visible');
+  } catch(e) { showErr('cmp', e.message); }
+  finally { hideLoad('cmp'); }
+}
+
+// ── Trade ──────────────────────────────────────────────────────────────────
+function addTag(side) {
+  const input = document.getElementById(side + '-input');
+  const name = input.value.trim();
+  if (!name) return;
+  if (side === 'out') tradeOut.push(name); else tradeIn.push(name);
+  input.value = '';
+  renderTags();
+}
+
+function removeTag(side, name) {
+  if (side === 'out') tradeOut = tradeOut.filter(n=>n!==name);
+  else tradeIn = tradeIn.filter(n=>n!==name);
+  renderTags();
+}
+
+function renderTags() {
+  ['out','in'].forEach(side => {
+    const list = side === 'out' ? tradeOut : tradeIn;
+    document.getElementById(side + '-tags').innerHTML = list.map(n =>
+      `<div class="tag">${n}<span class="tag-x" onclick="removeTag('${side}','${n}')">×</span></div>`
+    ).join('');
+  });
+}
+
+async function runTrade() {
+  if (!tradeOut.length || !tradeIn.length) { showErr('trade', 'Add players on both sides.'); return; }
+  const ctx = document.getElementById('trade-ctx').value.trim();
+  showLoad('trade');
+  try {
+    const res = await fetch(`${API}/trade`, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({outgoing:tradeOut, incoming:tradeIn, season:getSeason(), context:ctx})
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || 'Error');
+    document.getElementById('trade-title').textContent =
+      `${data.outgoing.join(', ')}  →  ${data.incoming.join(', ')}`;
+    renderReport('trade-report', data.analysis);
+    document.getElementById('trade-out').classList.add('visible');
+  } catch(e) { showErr('trade', e.message); }
+  finally { hideLoad('trade'); }
+}
+
+// ── Team ───────────────────────────────────────────────────────────────────
+async function runTeam() {
+  const abbr = document.getElementById('team-abbr').value.trim().toUpperCase();
+  const q = document.getElementById('team-q').value.trim();
+  if (!abbr) return;
+  showLoad('team', `Loading ${abbr} roster...`);
+  try {
+    let url = `${API}/team/${abbr}?season=${getSeason()}`;
+    if (q) url += `&question=${encodeURIComponent(q)}`;
+    const res = await fetch(url);
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || 'Not found');
+    document.getElementById('team-name').textContent = data.team;
+    document.getElementById('team-meta').textContent = `${abbr} · ${data.roster_size} PLAYERS · ${getSeason()} SEASON`;
+    const leaders = data.leaders || {};
+    const leaderFields = [
+      {k:'scoring',l:'SCORING LEADER'},{k:'rebounding',l:'REBOUNDS'},{k:'assists',l:'ASSISTS'},
+      {k:'defense',l:'DEFENSE'},{k:'efficiency',l:'EFFICIENCY'}
+    ];
+    document.getElementById('team-leaders').innerHTML = leaderFields.map(f =>
+      `<div class="stat-card"><div class="stat-val" style="font-size:18px;letter-spacing:1px">${(leaders[f.k]||'N/A').split(' ').pop()}</div><div class="stat-lbl">${f.l}</div></div>`
+    ).join('');
+    renderReport('team-report', data.report);
+    document.getElementById('team-out').classList.add('visible');
+  } catch(e) { showErr('team', e.message); }
+  finally { hideLoad('team'); }
+}
+
+// ── Roster Package ─────────────────────────────────────────────────────────
+async function runRoster() {
+  const abbr = document.getElementById('roster-abbr').value.trim().toUpperCase();
+  if (!abbr) return;
+  document.getElementById('roster-results').style.display = 'none';
+  showLoad('roster', `Generating ${abbr} roster package — all players concurrent...`);
+  try {
+    const res = await fetch(`${API}/team/${abbr}/roster?season=${getSeason()}`);
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || 'Not found');
+    document.getElementById('roster-title').textContent =
+      `${data.team} — ${data.players_covered} reports generated`;
+    const grid = document.getElementById('roster-grid');
+    grid.innerHTML = '';
+    const rosterStats = data.roster_stats || [];
+    Object.entries(data.reports || {}).forEach(([name, report], i) => {
+      const stat = rosterStats.find(r => r.name === name) || {};
+      const card = document.createElement('div');
+      card.className = 'roster-card';
+      card.style.animationDelay = `${i * 0.04}s`;
+      card.innerHTML = `
+        <div class="rc-name">${name}</div>
+        <div class="rc-meta">${stat.position || ''}</div>
+        <div class="rc-stats">
+          <div class="rc-stat"><div class="rc-stat-val">${Number(stat.ppg||0).toFixed(1)}</div><div class="rc-stat-lbl">PPG</div></div>
+          <div class="rc-stat"><div class="rc-stat-val">${Number(stat.rpg||0).toFixed(1)}</div><div class="rc-stat-lbl">RPG</div></div>
+          <div class="rc-stat"><div class="rc-stat-val">${Number(stat.apg||0).toFixed(1)}</div><div class="rc-stat-lbl">APG</div></div>
+          <div class="rc-stat"><div class="rc-stat-val">${stat.gp||0}</div><div class="rc-stat-lbl">GP</div></div>
+        </div>`;
+      card.onclick = () => openModal(name, stat, report);
+      grid.appendChild(card);
+    });
+    document.getElementById('roster-results').style.display = 'block';
+  } catch(e) { showErr('roster', e.message); }
+  finally { hideLoad('roster'); }
+}
+
+// ── Modal ──────────────────────────────────────────────────────────────────
+function openModal(name, stats, report) {
+  document.getElementById('modal-name').textContent = name;
+  document.getElementById('modal-meta').textContent = `${stats.position || ''} · FULL SCOUTING REPORT`;
+  renderStats('modal-stats', stats);
+  renderReport('modal-report', report);
+  document.getElementById('modal-bg').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal(e) {
+  if (!e || e.target === document.getElementById('modal-bg') || e.currentTarget.classList.contains('modal-close')) {
+    document.getElementById('modal-bg').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+}
+
+// ── Chat ───────────────────────────────────────────────────────────────────
+async function loadChat() {
+  const name = document.getElementById('chat-player').value.trim();
+  if (!name) return;
+  document.getElementById('chat-load-btn').disabled = true;
+  document.getElementById('chat-load').classList.add('visible');
+  document.getElementById('chat-err').classList.remove('visible');
+  try {
+    const res = await fetch(`${API}/player/${encodeURIComponent(name)}?season=${getSeason()}`);
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || 'Not found');
+    chatPlayer = data;
+    chatHistory = [];
+    document.getElementById('chat-pname').textContent = data.player;
+    document.getElementById('chat-pmeta').textContent = `${data.team} · ${data.position} · ${getSeason()} SEASON`;
+    document.getElementById('chat-msgs').innerHTML = '';
+    document.getElementById('chat-ui').style.display = 'block';
+    appendMsg('ai', `Scouting file loaded for **${data.player}**. I have their full ${getSeason()} stats. Ask me anything — trade value, fit analysis, contract situation, comparables, weaknesses, anything.`);
+  } catch(e) {
+    document.getElementById('chat-err').textContent = '⚠ ' + e.message;
+    document.getElementById('chat-err').classList.add('visible');
+  } finally {
+    document.getElementById('chat-load-btn').disabled = false;
+    document.getElementById('chat-load').classList.remove('visible');
+  }
+}
+
+function clearChat() {
+  chatHistory = [];
+  document.getElementById('chat-msgs').innerHTML = '';
+  document.getElementById('chat-ui').style.display = 'none';
+  document.getElementById('chat-player').value = '';
+  chatPlayer = null;
+}
+
+function appendMsg(role, text) {
+  const win = document.getElementById('chat-msgs');
+  const div = document.createElement('div');
+  div.className = 'msg msg-' + (role === 'user' ? 'user' : 'ai');
+  const formatted = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+  div.innerHTML = `<div class="msg-label">${role === 'user' ? 'YOU' : 'PIVOT'}</div><div class="msg-bubble">${formatted}</div>`;
+  win.appendChild(div);
+  win.scrollTop = win.scrollHeight;
+}
+
+async function sendChat() {
+  const input = document.getElementById('chat-input');
+  const msg = input.value.trim();
+  if (!msg || !chatPlayer) return;
+  input.value = '';
+  appendMsg('user', msg);
+  document.getElementById('chat-send').disabled = true;
+  document.getElementById('chat-load').classList.add('visible');
+  try {
+    const res = await fetch(`${API}/chat`, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({player: chatPlayer.player, season: getSeason(), message: msg, history: chatHistory})
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || 'Error');
+    chatHistory = data.history;
+    appendMsg('ai', data.reply);
+  } catch(e) { appendMsg('ai', '⚠ ' + e.message); }
+  finally {
+    document.getElementById('chat-send').disabled = false;
+    document.getElementById('chat-load').classList.remove('visible');
+  }
+}
+
+// ── Games ──────────────────────────────────────────────────────────────────
+async function loadGames() {
+  document.getElementById('games-load').classList.add('visible');
+  document.getElementById('games-err').classList.remove('visible');
+  document.getElementById('games-empty').style.display = 'none';
+  try {
+    const res = await fetch(`${API}/games/today`);
+    const data = await res.json();
+    const games = data.games || [];
+    const grid = document.getElementById('games-grid');
+    if (!games.length) {
+      grid.innerHTML = '';
+      document.getElementById('games-empty').style.display = 'block';
+      return;
     }
-
-    function animateValue(id, end) {
-      const obj = document.getElementById(id);
-      if (!obj) return;
-      let start = 0;
-      const timer = setInterval(() => {
-        start += (end / 20);
-        obj.innerHTML = start.toFixed(1);
-        if (start >= end) { obj.innerHTML = end.toFixed(1); clearInterval(timer); }
-      }, 30);
-    }
-
-    async function generateScout() {
-      const name = document.getElementById('scout-name').value;
-      const loader = document.getElementById('scout-load');
-      const errorContainer = document.getElementById('scout-error-container');
-      
-      loader.classList.add('visible');
-      errorContainer.innerHTML = '';
-      document.getElementById('scout-wrapper').style.display = 'none';
-
-      try {
-        const res = await fetch(`${API}/player/${encodeURIComponent(name)}?season=2025`);
-        const data = await res.json();
-        
-        if (data.report && data.report.includes("Error code: 400")) {
-            throw new Error(data.report);
-        }
-
-        document.getElementById('scout-header').textContent = data.player;
-        const trendVal = data.momentum ? data.momentum.pts_delta : 0.0;
-
-        document.getElementById('scout-stats').innerHTML = `
-          <div class="stat-box"><div class="stat-label">PPG</div><div class="stat-value" id="v-ppg">0.0</div></div>
-          <div class="stat-box"><div class="stat-label">RPG</div><div class="stat-value" id="v-rpg">0.0</div></div>
-          <div class="stat-box"><div class="stat-label">APG</div><div class="stat-value" id="v-apg">0.0</div></div>
-          <div class="stat-box"><div class="stat-label">FG%</div><div class="stat-value" id="v-fg">0.0%</div></div>
-          <div class="stat-box"><div class="stat-label">TREND</div><div class="stat-value" id="v-trend" style="color:${trendVal >= 0 ? 'var(--accent)' : 'var(--red)'}">0.0</div></div>
-        `;
-        
-        document.getElementById('scout-wrapper').style.display = 'block';
-        animateValue("v-ppg", data.stats.ppg); animateValue("v-rpg", data.stats.rpg); animateValue("v-apg", data.stats.apg);
-        animateValue("v-trend", trendVal);
-        document.getElementById('v-fg').textContent = (data.stats.fg_pct * 100).toFixed(1) + '%';
-        document.getElementById('scout-report').textContent = data.report;
-
-      } catch(e) {
-        errorContainer.innerHTML = `<div class="error-box">SYSTEM FAULT: ${e.message}</div>`;
-      } finally { loader.classList.remove('visible'); }
-    }
-
-    async function loadGames() {
-      const res = await fetch(`${API}/games/today`);
-      const data = await res.json();
-      document.getElementById('games-grid').innerHTML = (data.games || []).map(g => `
-        <div class="panel" style="text-align:center;">
-          <div>${g.visitor_team.abbreviation} @ ${g.home_team.abbreviation}</div>
-          <div style="font-size:24px; color:var(--accent);">${g.visitor_team_score || 0} - ${g.home_team_score || 0}</div>
+    grid.innerHTML = games.map(g => {
+      const home = g.home_team || {};
+      const away = g.visitor_team || {};
+      const hs = g.home_team_score;
+      const as = g.visitor_team_score;
+      const status = g.status || 'Scheduled';
+      const isLive = status.includes('Qtr') || status.includes('Half');
+      const isFinal = status === 'Final';
+      return `<div class="game-card">
+        <div class="game-status ${isFinal?'final':''}">${isLive ? '⬤ LIVE — ' : ''}${status.toUpperCase()}</div>
+        <div class="game-teams">
+          <div class="game-team">
+            <div class="game-team-name">${away.abbreviation || 'AWY'}</div>
+            <div class="game-team-score">${as || '—'}</div>
+          </div>
+          <div class="game-vs">@</div>
+          <div class="game-team">
+            <div class="game-team-name">${home.abbreviation || 'HME'}</div>
+            <div class="game-team-score">${hs || '—'}</div>
+          </div>
         </div>
-      `).join('');
-    }
+      </div>`;
+    }).join('');
+  } catch(e) {
+    document.getElementById('games-err').textContent = '⚠ ' + e.message;
+    document.getElementById('games-err').classList.add('visible');
+  } finally {
+    document.getElementById('games-load').classList.remove('visible');
+  }
+}
 
-    window.addEventListener('touchstart', () => { document.getElementById('bgVideo').play(); }, {once: true});
-  </script>
+// ── Keyboard shortcuts ─────────────────────────────────────────────────────
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeModal();
+});
+
+// ── Init ───────────────────────────────────────────────────────────────────
+loadGames();
+</script>
 </body>
 </html>
