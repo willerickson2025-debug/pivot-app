@@ -79,3 +79,13 @@ async def get_roster(team_id: int) -> list[dict]:
     result = data.get("data", [])
     cset(key, result, ttl=86400)
     return result
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
+
+# 1. Point FastAPI to your frontend folder
+app.mount("/frontend", StaticFiles(directory="frontend"), name="frontend")
+
+# 2. Create a "Home" route that loads your HTML
+@app.get("/")
+async def read_index():
+    return FileResponse("frontend/index.html")
