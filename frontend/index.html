@@ -686,9 +686,65 @@ async function loadGames() {
     }
 
     function openBoxScore(game) {
-      const h = game.home_team || {}; const a = game.visitor_team || {};
-      document.getElementById('modal-name').textContent = `${a.full_name} VS ${h.full_name}`;
-      document.getElementById('modal-meta').textContent = `${game.time || game.status}`;
+  const h = game.home_team || {}; const a = game.visitor_team || {};
+  document.getElementById('modal-name').textContent = `${a.full_name} VS ${h.full_name}`;
+  document.getElementById('modal-meta').textContent = `${game.time || game.status}`;
+  document.getElementById('modal-stats').innerHTML = '<div style="color:var(--text-muted);text-align:center;padding:32px;letter-spacing:2px;font-size:13px;">LOADING BOX SCORE...</div>';
+  document.getElementById('modal-bg').classList.add('open');
+  document.body.style.overflow = 'hidden';
+
+  // If players already loaded (live game), render immediately
+  if (h.players && h.players.length > 0) {
+    document.getElementById('modal-stats').innerHTML = renderTable(a) + renderTable(h);
+    return;
+  }
+
+  // Fetch box score for completed games
+  fetch(`${API}/games/boxscore/${game.id}`)
+    .then(r => r.json())
+    .then(data => {
+      const g = data.data || data;
+      if (g && g.home_team && g.home_team.players && g.home_team.players.length) {
+        document.getElementById('modal-stats').innerHTML = renderTable(g.visitor_team) + renderTable(g.home_team);
+      } else {
+        document.getElementById('modal-stats').innerHTML = '<div style="color:var(--text-muted);text-align:center;padding:32px;letter-spacing:2px;font-size:13px;">BOX SCORE NOT AVAILABLE</div>';
+      }
+    })
+    .catch(() => {
+      document.getElementById('modal-stats').innerHTML = '<div style="color:var(--red);text-align:center;padding:32px;letter-spacing:2px;font-size:13px;">FAILED TO LOAD BOX SCORE</div>';
+    });
+}
+
+function renderTable(team) {
+  if (!team.players || team.players.length === 0) {
+    return `<div style="background:var(--panel-bg);border:2px solid var(--panel-border);padding:32px;text-align:center;margin-bottom:24px;"><h3 style="color:var(--text-main);margin-bottom:12px;font-size:24px;text-transform:uppercase;">${team.full_name}</h3><div style="color:var(--text-muted);font-size:13px;text-transform:uppercase;letter-spacing:2px;">NO DATA AVAILABLE</div></div>`;
+  }
+  const active = team.players.filter(p => p.min && p.min !== '00').sort((x,y) => y.pts - x.pts);
+  return `<h3 style="margin:40px 0 16px;color:var(--text-main);font-size:28px;letter-spacing:-1px;">${team.full_name}</h3>
+  <div style="border:2px solid var(--panel-border);background:var(--panel-bg);overflow:hidden;">
+    <table>
+      <tr style="background:#111;color:var(--text-muted);">
+        <th>PLAYER</th><th>MIN</th><th style="color:var(--text-main);">PTS</th><th>REB</th><th>AST</th><th>STL</th><th>BLK</th><th>TO</th><th>FG</th><th>3PT</th><th>+/-</th>
+      </tr>
+      ${active.map(p => {
+        const pm = p.plus_minus;
+        return `<tr>
+          <td style="color:var(--text-main);">${p.player.first_name} ${p.player.last_name}</td>
+          <td style="color:var(--text-muted);">${p.min}</td>
+          <td style="font-size:16px;color:${p.pts>=20?'var(--accent)':'var(--text-main)'};">${p.pts}</td>
+          <td style="color:var(--text-muted);">${p.reb}</td>
+          <td style="color:var(--text-muted);">${p.ast}</td>
+          <td style="color:var(--text-muted);">${p.stl}</td>
+          <td style="color:var(--text-muted);">${p.blk}</td>
+          <td style="color:${p.turnover>=3?'var(--red)':'var(--text-muted)'};">${p.turnover}</td>
+          <td style="color:var(--text-muted);">${p.fgm}-${p.fga}</td>
+          <td style="color:var(--text-muted);">${p.fg3m}-${p.fg3a}</td>
+          <td style="color:${pm>0?'var(--accent)':pm<0?'var(--red)':'var(--text-muted)'};">${pm>0?'+':''}${pm}</td>
+        </tr>`;
+      }).join('')}
+    </table>
+  </div>`;
+}
       
       // Graceful Line Score fallback when BDL hasn't synced players
       function renderTable(team) {
@@ -720,7 +776,7 @@ async function loadGames() {
       document.getElementById('modal-stats').innerHTML = renderTable(a) + renderTable(h);
       document.getElementById('modal-bg').classList.add('open');
       document.body.style.overflow = 'hidden';
-    }
+    
 
     function closeModal() {
       document.getElementById('modal-bg').classList.remove('open');
