@@ -1,14 +1,15 @@
 import os
 from fastapi import FastAPI, HTTPException
+from fastapi.responses import HTMLResponse, FileResponse
+from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
-# Importing your existing engine logic
+# These point to your specific project structure
 from ..engine import bdl 
 from ..ai import claude
 
 app = FastAPI(title="PIVOT Pro Intelligence")
 
-# --- PITCH-READY SECURITY (CORS) ---
-# Allows your frontend to talk to your backend without "Cross-Origin" errors
+# 1. ALLOW THE UI TO TALK TO THE ENGINE
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -16,47 +17,34 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-@app.get("/api/health")
-async def health_check():
-    """Confirms the system is live for the pitch."""
-    return {
-        "status": "online",
-        "system": "PIVOT Core",
-        "engine": "Active"
-    }
+# 2. THE PITCH UI (Directly serves your HTML)
+@app.get("/", response_class=HTMLResponse)
+async def get_dashboard():
+    # Looks for index.html in your public folder
+    index_path = os.path.join("public", "index.html")
+    if os.path.exists(index_path):
+        with open(index_path, "r") as f:
+            return f.read()
+    return "<h1>PIVOT: Dashboard Error - 'public/index.html' not found.</h1>"
 
+# 3. THE DATA ENGINE
 @app.get("/api/search")
-async def search_players(q: str):
-    """Searches for players via the BallDontLie engine."""
+async def search(q: str):
     try:
-        players = await bdl.search_players(q)
-        return {"data": players}
+        data = await bdl.search_players(q)
+        return {"data": data}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/api/intel/{player_id}")
-async def get_player_intel(player_id: int):
-    """
-    The Money Maker: Fetches stats and generates the 
-    AI Intelligence report for the pitch.
-    """
+async def player_intel(player_id: int):
     try:
-        # 1. Get raw data
         stats = await bdl.get_recent_stats(player_id)
-        averages = await bdl.get_season_averages(player_id, 2023) # Update season as needed
-        
-        # 2. Generate AI Report
-        report = await claude.generate_report(stats, averages)
-        
-        return {
-            "player_id": player_id,
-            "stats": stats,
-            "averages": averages,
-            "intelligence_report": report
-        }
+        avgs = await bdl.get_season_averages(player_id, 2023)
+        report = await claude.generate_report(stats, avgs)
+        return {"intelligence": report, "stats": stats}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"AI Engine Error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"AI Engine Offline: {str(e)}")
 
-# --- VERCEL REQUIREMENT ---
-# This allows Vercel to see the app as a module
+# This allows Vercel to find your app
 handler = app
