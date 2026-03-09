@@ -1,91 +1,62 @@
-import asyncio
-import httpx
 import os
-from typing import Optional, Any
-from ..engine.cache import cget, cset, make_key
-from fastapi import FastAPI
-app = FastAPI()
-# --- CONFIG & ERRORS ---
-BDL_API_BASE = "https://api.balldontlie.io/v1"
-API_KEY = os.getenv("BDL_API_KEY")
+from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+# Importing your existing engine logic
+from ..engine import bdl 
+from ..ai import claude
 
-class BDLNotFound(Exception):
-    """Raised when data is missing from the BDL pipeline."""
-    pass
+app = FastAPI(title="PIVOT Pro Intelligence")
 
-async def _get(endpoint: str, params: Optional[dict] = None) -> dict:
-    """Core HTTP handler for Balldontlie API calls."""
-    headers = {"Authorization": API_KEY} if API_KEY else {}
-    async with httpx.AsyncClient(timeout=20.0) as client:
-        response = await client.get(f"{BDL_API_BASE}{endpoint}", params=params, headers=headers)
-        if response.status_code == 404:
-            raise BDLNotFound(f"Resource {endpoint} not found.")
-        response.raise_for_status()
-        return response.json()
+# --- PITCH-READY SECURITY (CORS) ---
+# Allows your frontend to talk to your backend without "Cross-Origin" errors
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
-# --- PLAYER DATA ---
-async def search_players(query: str) -> list[dict]:
-    """Search for players by name."""
-    key = make_key("bdl:search", q=query)
-    cached = cget(key)
-    if cached is not None: return cached
-    
-    data = await _get("/players", {"search": query})
-    result = data.get("data", [])
-    cset(key, result, ttl=86400)
-    return result
+@app.get("/api/health")
+async def health_check():
+    """Confirms the system is live for the pitch."""
+    return {
+        "status": "online",
+        "system": "PIVOT Core",
+        "engine": "Active"
+    }
 
-async def get_season_averages(player_id: int, season: int) -> dict:
-    """Fetch seasonal stat averages for a specific player."""
-    key = make_key("bdl:avg", pid=player_id, s=season)
-    cached = cget(key)
-    if cached is not None: return cached
+@app.get("/api/search")
+async def search_players(q: str):
+    """Searches for players via the BallDontLie engine."""
+    try:
+        players = await bdl.search_players(q)
+        return {"data": players}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
-    data = await _get("/season_averages", {"season": season, "player_ids[]": [player_id]})
-    stats_list = data.get("data", [])
-    result = stats_list[0] if stats_list else {}
-    cset(key, result, ttl=3600)
-    return result
+@app.get("/api/intel/{player_id}")
+async def get_player_intel(player_id: int):
+    """
+    The Money Maker: Fetches stats and generates the 
+    AI Intelligence report for the pitch.
+    """
+    try:
+        # 1. Get raw data
+        stats = await bdl.get_recent_stats(player_id)
+        averages = await bdl.get_season_averages(player_id, 2023) # Update season as needed
+        
+        # 2. Generate AI Report
+        report = await claude.generate_report(stats, averages)
+        
+        return {
+            "player_id": player_id,
+            "stats": stats,
+            "averages": averages,
+            "intelligence_report": report
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"AI Engine Error: {str(e)}")
 
-# --- RECENT FORM TRACKING (THE FIX IS HERE) ---
-async def get_recent_stats(player_id: int, limit: int = 10) -> list[dict]:
-    """Fetches the last X game box scores for a specific player."""
-    # Ensure this block is indented properly (4 spaces)
-    key = make_key("bdl:recent", pid=player_id, limit=limit)
-    cached = cget(key)
-    if cached is not None:
-        return cached
-
-    # Fetch game logs for the current season
-    data = await _get("/stats", {
-        "player_ids[]": [player_id],
-        "per_page": limit,
-        "order_by": "date",
-        "direction": "desc"
-    })
-    
-    result = data.get("data", [])
-    cset(key, result, ttl=3600) # Cache logs for 1 hour
-    return result
-
-# --- TEAM & ROSTER ---
-async def get_roster(team_id: int) -> list[dict]:
-    """Retrieves current roster for a team."""
-    key = make_key("bdl:roster", tid=team_id)
-    cached = cget(key)
-    if cached is not None: return cached
-
-    data = await _get("/players", {"team_ids[]": [team_id], "per_page": 50})
-    result = data.get("data", [])
-    cset(key, result, ttl=86400)
-    return result
-from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
-
-# 1. Point FastAPI to your frontend folder
-app.mount("/frontend", StaticFiles(directory="frontend"), name="frontend")
-
-# 2. Create a "Home" route that loads your HTML
-@app.get("/")
-async def read_index():
-    return FileResponse("frontend/index.html")
+# --- VERCEL REQUIREMENT ---
+# This allows Vercel to see the app as a module
+handler = app
