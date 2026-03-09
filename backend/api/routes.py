@@ -77,7 +77,13 @@ async def get_player(
     profile = await find_player(name, season)
     if not profile:
         raise HTTPException(404, f"Player '{name}' not found.")
-    report = await ai_analyze(profile, question, force=force)
+    
+    # PYTHON-LEVEL INTERCEPT: Kill the AI request if the player is inactive
+    if profile.gp == 0:
+        report = f"SYSTEM OVERRIDE: {profile.identity.name} has logged 0 minutes in the {season} season. The player is currently inactive, out of the rotation, or out of the league. Generative scouting report aborted to preserve data integrity."
+    else:
+        report = await ai_analyze(profile, question, force=force)
+        
     return {
         "player": profile.identity.name,
         "team": profile.identity.team,
@@ -116,7 +122,13 @@ async def compare(
         raise HTTPException(404, f"'{player_a}' not found.")
     if not pb:
         raise HTTPException(404, f"'{player_b}' not found.")
-    report = await ai_compare(pa, pb, context, force=force)
+        
+    # PYTHON-LEVEL INTERCEPT: Prevent AI hallucination on mismatched data
+    if pa.gp == 0 or pb.gp == 0:
+        report = f"SYSTEM OVERRIDE: Invalid matchup. {pa.identity.name} has {pa.gp} GP and {pb.identity.name} has {pb.gp} GP. PIVOT requires active rotation data to run comparative analytics. Comparison aborted."
+    else:
+        report = await ai_compare(pa, pb, context, force=force)
+        
     return {
         "player_a": pa.identity.name, "team_a": pa.identity.team,
         "player_b": pb.identity.name, "team_b": pb.identity.team,
