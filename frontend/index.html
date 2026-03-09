@@ -43,8 +43,15 @@
       overflow: hidden; 
     }
     
-    /* ENTERPRISE TOP NAV */
-    .navbar { background: #000000; border-bottom: 2px solid var(--panel-border); display: flex; align-items: center; justify-content: space-between; padding: 0 40px; height: 72px; flex-shrink: 0; z-index: 50; }
+    /* ENTERPRISE TOP NAV (FROSTED GLASS) */
+    .navbar { 
+      background: rgba(0, 0, 0, 0.4); 
+      backdrop-filter: blur(16px); 
+      border-bottom: 2px solid var(--panel-border); 
+      display: flex; align-items: center; justify-content: space-between; 
+      padding: 0 40px; height: 72px; flex-shrink: 0; 
+      position: relative; z-index: 50; 
+    }
     
     .brand { font-size: 28px; letter-spacing: -1px; color: var(--text-main); cursor: pointer; transition: color 0.2s; display: flex; align-items: center; gap: 8px; text-transform: uppercase; }
     .brand:hover { color: var(--accent); }
@@ -54,7 +61,7 @@
     .nav-links { display: flex; gap: 0; height: 100%; }
     .dropdown { position: relative; height: 100%; display: flex; align-items: center; }
     .dropbtn { height: 100%; background: none; border: none; color: var(--text-muted); font-size: 13px; text-transform: uppercase; letter-spacing: 1px; padding: 0 24px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; border-bottom: 3px solid transparent; }
-    .dropdown:hover .dropbtn, .dropbtn.active { color: var(--text-main); border-bottom: 3px solid var(--accent); background: var(--panel-bg); }
+    .dropdown:hover .dropbtn, .dropbtn.active { color: var(--text-main); border-bottom: 3px solid var(--accent); background: rgba(0,0,0,0.6); }
     .dropbtn::after { content: '▾'; font-size: 10px; margin-left: 8px; color: var(--accent); }
     
     .dropdown-content { display: none; position: absolute; top: 72px; right: 0; background: var(--panel-bg); border: 2px solid var(--panel-border); border-top: none; min-width: 240px; box-shadow: 0 20px 40px rgba(0,0,0,0.9); z-index: 100; }
@@ -63,24 +70,35 @@
     .dropdown-item:hover, .dropdown-item.active { background: #111; color: var(--text-main); border-right-color: var(--accent); }
     
     /* MAIN CONTAINER */
-    .main { flex: 1; padding: 40px; overflow-y: auto; }
+    .main { flex: 1; padding: 40px; overflow-y: auto; position: relative; z-index: 20; }
     .page { display: none; max-width: 1200px; margin: 0 auto; height: 100%; }
     .page.active { display: flex; flex-direction: column; }
     
-    /* COVER PAGE (HOME) */
-    .cover-page { justify-content: center; align-items: center; text-align: center; height: 100%; position: relative; overflow: hidden; }
+    /* COVER PAGE (EDGE TO EDGE FULL SCREEN) */
+    .page.cover-page.active { 
+      display: flex; 
+      position: fixed; /* Breaks out of the padding */
+      top: 0; left: 0; width: 100vw; height: 100vh; 
+      max-width: none; margin: 0; padding: 0;
+      justify-content: center; align-items: center; text-align: center; 
+      z-index: 10; /* Sits beneath the navbar */
+      overflow: hidden; 
+    }
     
-    /* BACKGROUND VIDEO STYLING */
+    /* BACKGROUND VIDEO (BRIGHTER & FULL COVERAGE) */
     .bg-video {
-      position: absolute; top: 50%; left: 50%; min-width: 100%; min-height: 100%; width: auto; height: auto;
-      transform: translateX(-50%) translateY(-50%); object-fit: cover; z-index: 0; opacity: 0.35;
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      object-fit: cover; z-index: 0; 
+      opacity: 0.75; /* Cranked up brightness significantly */
       filter: grayscale(100%) contrast(120%); pointer-events: none;
     }
     .video-overlay {
       position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-      background: linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.9) 100%); z-index: 1; pointer-events: none;
+      /* Soft radial gradient so the center is bright and edges are dark */
+      background: radial-gradient(circle, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.85) 100%); 
+      z-index: 1; pointer-events: none;
     }
-    .cover-content { position: relative; z-index: 2; }
+    .cover-content { position: relative; z-index: 2; margin-top: 72px; /* Offset to center it below navbar */ }
     .cover-title { font-size: 16vw; letter-spacing: -0.06em; line-height: 0.8; color: var(--text-main); margin: 0; text-transform: uppercase; }
     .cover-subtitle { color: var(--accent); font-size: 18px; letter-spacing: 10px; text-transform: uppercase; margin-top: 24px; text-shadow: 0 0 20px rgba(57, 255, 20, 0.4); }
 
