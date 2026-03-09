@@ -68,9 +68,21 @@
     .page.active { display: flex; flex-direction: column; }
     
     /* COVER PAGE (HOME) */
-    .cover-page { justify-content: center; align-items: center; text-align: center; height: 100%; }
+    .cover-page { justify-content: center; align-items: center; text-align: center; height: 100%; position: relative; overflow: hidden; }
+    
+    /* BACKGROUND VIDEO STYLING */
+    .bg-video {
+      position: absolute; top: 50%; left: 50%; min-width: 100%; min-height: 100%; width: auto; height: auto;
+      transform: translateX(-50%) translateY(-50%); object-fit: cover; z-index: 0; opacity: 0.35;
+      filter: grayscale(100%) contrast(120%); pointer-events: none;
+    }
+    .video-overlay {
+      position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+      background: linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.9) 100%); z-index: 1; pointer-events: none;
+    }
+    .cover-content { position: relative; z-index: 2; }
     .cover-title { font-size: 16vw; letter-spacing: -0.06em; line-height: 0.8; color: var(--text-main); margin: 0; text-transform: uppercase; }
-    .cover-subtitle { color: var(--accent); font-size: 18px; letter-spacing: 10px; text-transform: uppercase; margin-top: 24px; }
+    .cover-subtitle { color: var(--accent); font-size: 18px; letter-spacing: 10px; text-transform: uppercase; margin-top: 24px; text-shadow: 0 0 20px rgba(57, 255, 20, 0.4); }
 
     /* DASHBOARD HEADERS */
     .dashboard-header { margin-bottom: 32px; padding-bottom: 16px; border-bottom: 2px solid var(--panel-border); display: flex; justify-content: space-between; align-items: flex-end; }
@@ -206,8 +218,15 @@
   <div class="main">
     
     <div class="page cover-page active" id="page-home">
-      <h1 class="cover-title">PIVOT</h1>
-      <div class="cover-subtitle">Pro Basketball Intelligence</div>
+      <video class="bg-video" autoplay loop muted playsinline>
+        <source src="/static/bg.mp4" type="video/mp4">
+      </video>
+      <div class="video-overlay"></div>
+      
+      <div class="cover-content">
+        <h1 class="cover-title">PIVOT</h1>
+        <div class="cover-subtitle">Pro Basketball Intelligence</div>
+      </div>
     </div>
 
     <div class="page" id="page-scout">
