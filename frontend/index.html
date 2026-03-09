@@ -1,1429 +1,760 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PIVOT — NBA Intelligence</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-<style>
-:root {
-  --bg: #080808;
-  --surface: #111;
-  --surface2: #181818;
-  --surface3: #202020;
-  --border: #1e1e1e;
-  --border2: #2a2a2a;
-  --accent: #c8ff00;
-  --accent-dim: rgba(200,255,0,0.12);
-  --accent-glow: rgba(200,255,0,0.25);
-  --red: #ff4444;
-  --green: #00e676;
-  --blue: #4488ff;
-  --orange: #ff8c42;
-  --text: #f0f0f0;
-  --text2: #888;
-  --text3: #444;
-  --mono: 'DM Mono', monospace;
-  --sans: 'Inter', sans-serif;
-  --display: 'Bebas Neue', sans-serif;
-  --radius: 2px;
-}
-
-* { margin: 0; padding: 0; box-sizing: border-box; }
-html { scroll-behavior: smooth; }
-
-body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: var(--sans);
-  min-height: 100vh;
-  overflow-x: hidden;
-}
-
-/* Scanline overlay */
-body::after {
-  content: '';
-  position: fixed;
-  inset: 0;
-  background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px);
-  pointer-events: none;
-  z-index: 9999;
-}
-
-/* ── LAYOUT ── */
-.app { display: flex; height: 100vh; overflow: hidden; }
-
-/* ── SIDEBAR ── */
-.sidebar {
-  width: 220px;
-  min-width: 220px;
-  background: var(--surface);
-  border-right: 1px solid var(--border);
-  display: flex;
-  flex-direction: column;
-  padding: 0;
-  z-index: 100;
-}
-
-.logo-wrap {
-  padding: 28px 24px 20px;
-  border-bottom: 1px solid var(--border);
-}
-
-.logo {
-  font-family: var(--display);
-  font-size: 38px;
-  letter-spacing: 6px;
-  color: var(--accent);
-  line-height: 1;
-  text-shadow: 0 0 40px var(--accent-glow);
-}
-
-.logo-sub {
-  font-family: var(--mono);
-  font-size: 9px;
-  letter-spacing: 3px;
-  color: var(--text3);
-  text-transform: uppercase;
-  margin-top: 4px;
-}
-
-.nav { flex: 1; padding: 16px 0; }
-
-.nav-section {
-  font-family: var(--mono);
-  font-size: 9px;
-  letter-spacing: 3px;
-  color: var(--text3);
-  text-transform: uppercase;
-  padding: 16px 24px 8px;
-}
-
-.nav-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 24px;
-  cursor: pointer;
-  font-size: 13px;
-  color: var(--text2);
-  transition: all 0.15s;
-  border-left: 2px solid transparent;
-  font-weight: 400;
-}
-
-.nav-item:hover { color: var(--text); background: var(--surface2); }
-.nav-item.active { color: var(--accent); border-left-color: var(--accent); background: var(--accent-dim); }
-
-.nav-icon { font-size: 16px; width: 20px; text-align: center; }
-
-.sidebar-bottom {
-  padding: 16px 24px;
-  border-top: 1px solid var(--border);
-}
-
-.season-selector {
-  background: var(--surface2);
-  border: 1px solid var(--border2);
-  color: var(--text);
-  font-family: var(--mono);
-  font-size: 11px;
-  padding: 8px 12px;
-  width: 100%;
-  cursor: pointer;
-  outline: none;
-  letter-spacing: 1px;
-  appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23444'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 10px center;
-}
-
-.season-label {
-  font-family: var(--mono);
-  font-size: 9px;
-  letter-spacing: 2px;
-  color: var(--text3);
-  text-transform: uppercase;
-  margin-bottom: 6px;
-}
-
-/* ── MAIN CONTENT ── */
-.main {
-  flex: 1;
-  overflow-y: auto;
-  background: var(--bg);
-}
-
-.main::-webkit-scrollbar { width: 4px; }
-.main::-webkit-scrollbar-track { background: var(--bg); }
-.main::-webkit-scrollbar-thumb { background: var(--border2); }
-
-/* ── TOP BAR ── */
-.topbar {
-  position: sticky;
-  top: 0;
-  z-index: 50;
-  background: rgba(8,8,8,0.95);
-  backdrop-filter: blur(10px);
-  border-bottom: 1px solid var(--border);
-  padding: 16px 40px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.page-title {
-  font-family: var(--display);
-  font-size: 22px;
-  letter-spacing: 3px;
-  color: var(--text);
-}
-
-.topbar-right {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.live-badge {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-family: var(--mono);
-  font-size: 10px;
-  letter-spacing: 2px;
-  color: var(--green);
-  border: 1px solid var(--green);
-  padding: 4px 10px;
-}
-
-.live-dot {
-  width: 6px;
-  height: 6px;
-  background: var(--green);
-  border-radius: 50%;
-  animation: pulse 1.5s infinite;
-}
-
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.3; }
-}
-
-/* ── PAGE SECTIONS ── */
-.page { display: none; padding: 40px; }
-.page.active { display: block; }
-
-/* ── SEARCH BAR ── */
-.search-wrap {
-  display: flex;
-  gap: 12px;
-  margin-bottom: 32px;
-}
-
-.search-field {
-  flex: 1;
-  position: relative;
-}
-
-.search-field input {
-  width: 100%;
-  background: var(--surface);
-  border: 1px solid var(--border2);
-  color: var(--text);
-  padding: 14px 18px;
-  font-family: var(--sans);
-  font-size: 14px;
-  outline: none;
-  transition: border-color 0.2s, box-shadow 0.2s;
-}
-
-.search-field input:focus {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 1px var(--accent-dim), 0 0 20px var(--accent-dim);
-}
-
-.search-field input::placeholder { color: var(--text3); }
-
-.field-label {
-  font-family: var(--mono);
-  font-size: 9px;
-  letter-spacing: 2px;
-  color: var(--text3);
-  text-transform: uppercase;
-  margin-bottom: 6px;
-}
-
-/* ── BUTTONS ── */
-.btn {
-  font-family: var(--display);
-  font-size: 16px;
-  letter-spacing: 3px;
-  padding: 14px 32px;
-  background: var(--accent);
-  color: #000;
-  border: none;
-  cursor: pointer;
-  transition: all 0.15s;
-  white-space: nowrap;
-  flex-shrink: 0;
-  align-self: flex-end;
-}
-
-.btn:hover { filter: brightness(1.1); transform: translateY(-1px); box-shadow: 0 6px 20px var(--accent-glow); }
-.btn:active { transform: translateY(0); }
-.btn:disabled { background: var(--border2); color: var(--text3); cursor: not-allowed; transform: none; box-shadow: none; filter: none; }
-
-.btn-ghost {
-  background: transparent;
-  color: var(--text2);
-  border: 1px solid var(--border2);
-  font-size: 13px;
-  letter-spacing: 2px;
-  padding: 10px 20px;
-  font-family: var(--mono);
-  cursor: pointer;
-  transition: all 0.15s;
-  white-space: nowrap;
-}
-
-.btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
-.btn-ghost.active { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
-
-/* ── STAT CARDS ── */
-.stat-row {
-  display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  gap: 1px;
-  background: var(--border);
-  border: 1px solid var(--border);
-  margin-bottom: 32px;
-}
-
-.stat-card {
-  background: var(--surface);
-  padding: 20px;
-  text-align: center;
-}
-
-.stat-val {
-  font-family: var(--display);
-  font-size: 36px;
-  color: var(--accent);
-  line-height: 1;
-  margin-bottom: 4px;
-}
-
-.stat-lbl {
-  font-family: var(--mono);
-  font-size: 9px;
-  letter-spacing: 2px;
-  color: var(--text3);
-  text-transform: uppercase;
-}
-
-/* ── REPORT OUTPUT ── */
-.output-wrap {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  display: none;
-}
-
-.output-wrap.visible { display: block; }
-
-.output-header {
-  padding: 28px 32px;
-  border-bottom: 1px solid var(--border);
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 24px;
-}
-
-.player-name {
-  font-family: var(--display);
-  font-size: 48px;
-  letter-spacing: 4px;
-  line-height: 1;
-  color: var(--text);
-}
-
-.player-meta {
-  font-family: var(--mono);
-  font-size: 11px;
-  color: var(--text2);
-  letter-spacing: 2px;
-  margin-top: 8px;
-  text-transform: uppercase;
-}
-
-.report-body {
-  padding: 32px;
-  font-size: 14px;
-  line-height: 1.85;
-  color: #bbb;
-}
-
-.report-body h2 {
-  font-family: var(--display);
-  font-size: 18px;
-  letter-spacing: 3px;
-  color: var(--accent);
-  margin: 28px 0 12px;
-  padding-bottom: 8px;
-  border-bottom: 1px solid var(--border2);
-}
-
-.report-body h2:first-child { margin-top: 0; }
-
-.report-body strong { color: var(--text); font-weight: 600; }
-
-.report-body p { margin-bottom: 12px; }
-
-/* ── LOADING ── */
-.loading {
-  display: none;
-  align-items: center;
-  gap: 16px;
-  padding: 32px;
-  color: var(--text3);
-  font-family: var(--mono);
-  font-size: 11px;
-  letter-spacing: 3px;
-  text-transform: uppercase;
-}
-
-.loading.visible { display: flex; }
-
-.spinner {
-  width: 18px;
-  height: 18px;
-  border: 2px solid var(--border2);
-  border-top-color: var(--accent);
-  border-radius: 50%;
-  animation: spin 0.7s linear infinite;
-  flex-shrink: 0;
-}
-
-@keyframes spin { to { transform: rotate(360deg); } }
-
-/* ── ERROR ── */
-.error {
-  display: none;
-  padding: 14px 18px;
-  border: 1px solid var(--red);
-  color: var(--red);
-  font-family: var(--mono);
-  font-size: 11px;
-  letter-spacing: 1px;
-  margin-bottom: 20px;
-}
-
-.error.visible { display: block; }
-
-/* ── SECTION HEADER ── */
-.section-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 20px;
-}
-
-.section-title {
-  font-family: var(--mono);
-  font-size: 10px;
-  letter-spacing: 3px;
-  color: var(--text3);
-  text-transform: uppercase;
-}
-
-/* ── DIVIDER ── */
-.divider { height: 1px; background: var(--border); margin: 32px 0; }
-
-/* ── GRID ── */
-.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 20px; }
-.three-col { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
-
-/* ── TRADE INPUTS ── */
-.trade-side {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  padding: 24px;
-}
-
-.trade-side-title {
-  font-family: var(--mono);
-  font-size: 10px;
-  letter-spacing: 3px;
-  color: var(--text3);
-  text-transform: uppercase;
-  margin-bottom: 16px;
-}
-
-.player-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  min-height: 40px;
-  margin-bottom: 12px;
-}
-
-.tag {
-  background: var(--surface2);
-  border: 1px solid var(--border2);
-  padding: 6px 12px;
-  font-family: var(--mono);
-  font-size: 11px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: var(--text);
-}
-
-.tag-x { cursor: pointer; color: var(--text3); font-size: 14px; line-height: 1; }
-.tag-x:hover { color: var(--red); }
-
-.add-row { display: flex; gap: 8px; }
-
-/* ── ROSTER GRID ── */
-.roster-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 12px;
-  margin-top: 24px;
-}
-
-.roster-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  padding: 20px;
-  cursor: pointer;
-  transition: all 0.15s;
-  animation: fadeUp 0.3s ease forwards;
-  opacity: 0;
-}
-
-.roster-card:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.5); }
-
-@keyframes fadeUp {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.rc-name { font-family: var(--display); font-size: 20px; letter-spacing: 2px; margin-bottom: 4px; }
-.rc-meta { font-family: var(--mono); font-size: 9px; color: var(--text3); letter-spacing: 1px; margin-bottom: 14px; text-transform: uppercase; }
-.rc-stats { display: flex; gap: 14px; }
-.rc-stat-val { font-family: var(--display); font-size: 22px; color: var(--accent); line-height: 1; }
-.rc-stat-lbl { font-family: var(--mono); font-size: 9px; color: var(--text3); letter-spacing: 1px; }
-
-/* ── CHAT ── */
-.chat-container {
-  display: flex;
-  flex-direction: column;
-  height: calc(100vh - 200px);
-  min-height: 500px;
-}
-
-.chat-messages {
-  flex: 1;
-  overflow-y: auto;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-bottom: none;
-  padding: 24px;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.chat-messages::-webkit-scrollbar { width: 3px; }
-.chat-messages::-webkit-scrollbar-thumb { background: var(--border2); }
-
-.msg { max-width: 80%; }
-
-.msg-user { align-self: flex-end; }
-.msg-ai { align-self: flex-start; }
-
-.msg-label {
-  font-family: var(--mono);
-  font-size: 9px;
-  letter-spacing: 2px;
-  color: var(--text3);
-  text-transform: uppercase;
-  margin-bottom: 6px;
-}
-
-.msg-bubble {
-  padding: 14px 18px;
-  font-size: 13px;
-  line-height: 1.7;
-}
-
-.msg-user .msg-bubble {
-  background: var(--accent);
-  color: #000;
-  font-weight: 500;
-}
-
-.msg-ai .msg-bubble {
-  background: var(--surface2);
-  border: 1px solid var(--border2);
-  color: var(--text);
-}
-
-.chat-input-area {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  padding: 16px;
-  display: flex;
-  gap: 12px;
-}
-
-.chat-input-area input {
-  flex: 1;
-  background: var(--surface2);
-  border: 1px solid var(--border2);
-  color: var(--text);
-  padding: 12px 16px;
-  font-family: var(--sans);
-  font-size: 14px;
-  outline: none;
-}
-
-.chat-input-area input:focus { border-color: var(--accent); }
-
-/* ── GAMES ── */
-.games-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 16px;
-  margin-top: 24px;
-}
-
-.game-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  padding: 24px;
-}
-
-.game-status {
-  font-family: var(--mono);
-  font-size: 9px;
-  letter-spacing: 2px;
-  color: var(--green);
-  text-transform: uppercase;
-  margin-bottom: 16px;
-}
-
-.game-status.final { color: var(--text3); }
-
-.game-teams {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.game-team { text-align: center; }
-.game-team-name { font-family: var(--display); font-size: 24px; letter-spacing: 2px; }
-.game-team-score { font-family: var(--display); font-size: 48px; color: var(--accent); line-height: 1; }
-.game-vs { font-family: var(--mono); font-size: 12px; color: var(--text3); }
-
-/* ── COMPARE STATS TABLE ── */
-.compare-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-bottom: 24px;
-  font-family: var(--mono);
-  font-size: 12px;
-}
-
-.compare-table th {
-  padding: 12px 16px;
-  text-align: center;
-  font-size: 10px;
-  letter-spacing: 2px;
-  color: var(--text3);
-  text-transform: uppercase;
-  border-bottom: 1px solid var(--border);
-}
-
-.compare-table th:first-child { text-align: left; }
-
-.compare-table td {
-  padding: 10px 16px;
-  text-align: center;
-  border-bottom: 1px solid var(--border);
-  color: var(--text2);
-}
-
-.compare-table td:first-child { text-align: left; color: var(--text3); }
-.compare-table td.winner { color: var(--accent); font-weight: 500; }
-.compare-table tr:hover td { background: var(--surface2); }
-
-/* ── MODAL ── */
-.modal-bg {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.85);
-  backdrop-filter: blur(6px);
-  z-index: 1000;
-  display: none;
-  align-items: center;
-  justify-content: center;
-  padding: 40px;
-}
-
-.modal-bg.open { display: flex; }
-
-.modal {
-  background: var(--surface);
-  border: 1px solid var(--border2);
-  max-width: 860px;
-  width: 100%;
-  max-height: 85vh;
-  overflow-y: auto;
-  position: relative;
-}
-
-.modal::-webkit-scrollbar { width: 3px; }
-.modal::-webkit-scrollbar-thumb { background: var(--border2); }
-
-.modal-header {
-  padding: 28px 32px;
-  border-bottom: 1px solid var(--border);
-  position: sticky;
-  top: 0;
-  background: var(--surface);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.modal-close {
-  background: none;
-  border: none;
-  color: var(--text3);
-  font-size: 22px;
-  cursor: pointer;
-  font-family: var(--mono);
-  transition: color 0.15s;
-  padding: 0;
-}
-
-.modal-close:hover { color: var(--accent); }
-
-.modal-body { padding: 32px; }
-
-/* ── DASHBOARD ── */
-.dashboard-grid {
-  display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: 24px;
-  margin-bottom: 24px;
-}
-
-.dash-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  padding: 24px;
-}
-
-.dash-card-title {
-  font-family: var(--mono);
-  font-size: 9px;
-  letter-spacing: 3px;
-  color: var(--text3);
-  text-transform: uppercase;
-  margin-bottom: 20px;
-}
-
-.quick-search {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 20px;
-}
-
-.quick-search input {
-  flex: 1;
-  background: var(--surface2);
-  border: 1px solid var(--border2);
-  color: var(--text);
-  padding: 10px 14px;
-  font-size: 13px;
-  outline: none;
-}
-
-.quick-search input:focus { border-color: var(--accent); }
-
-.recent-list { display: flex; flex-direction: column; gap: 8px; }
-
-.recent-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px 14px;
-  background: var(--surface2);
-  cursor: pointer;
-  transition: all 0.15s;
-  font-size: 13px;
-}
-
-.recent-item:hover { border-left: 2px solid var(--accent); padding-left: 12px; }
-.recent-item-name { font-weight: 500; }
-.recent-item-team { font-family: var(--mono); font-size: 10px; color: var(--text3); }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <title>PIVOT | Enterprise Intelligence</title>
+  <style>
+    :root {
+      --bg: #000000;
+      --panel-bg: #080808;
+      --panel-border: #222222;
+      --text-main: #ffffff;
+      --text-muted: #666666;
+      --accent: #39ff14; /* Pure Neon Green */
+      --accent-hover: #ffffff;
+      --accent-glow: rgba(57, 255, 20, 0.15);
+      --red: #ff3333;
+    }
+    
+    /* GLOBAL HELVETICA BOLD MANDATE */
+    * { 
+      box-sizing: border-box; 
+      margin: 0; 
+      padding: 0; 
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif !important;
+      font-weight: bold !important;
+    }
+    
+    body { 
+      background-color: var(--bg); 
+      background-image: 
+        linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px), 
+        linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px);
+      background-size: 40px 40px;
+      background-position: center top;
+      color: var(--text-main); 
+      font-size: 14px; 
+      line-height: 1.5; 
+      height: 100vh; 
+      display: flex; 
+      flex-direction: column; 
+      overflow: hidden; 
+    }
+    
+    /* ENTERPRISE TOP NAV */
+    .navbar { background: #000000; border-bottom: 2px solid var(--panel-border); display: flex; align-items: center; justify-content: space-between; padding: 0 40px; height: 72px; flex-shrink: 0; z-index: 50; }
+    
+    .brand { font-size: 28px; letter-spacing: -1px; color: var(--text-main); cursor: pointer; transition: color 0.2s; display: flex; align-items: center; gap: 8px; text-transform: uppercase; }
+    .brand:hover { color: var(--accent); }
+    .brand span { color: var(--accent); }
+    
+    /* RIGHT HAND TABS */
+    .nav-links { display: flex; gap: 0; height: 100%; }
+    .dropdown { position: relative; height: 100%; display: flex; align-items: center; }
+    .dropbtn { height: 100%; background: none; border: none; color: var(--text-muted); font-size: 13px; text-transform: uppercase; letter-spacing: 1px; padding: 0 24px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; border-bottom: 3px solid transparent; }
+    .dropdown:hover .dropbtn, .dropbtn.active { color: var(--text-main); border-bottom: 3px solid var(--accent); background: var(--panel-bg); }
+    .dropbtn::after { content: '▾'; font-size: 10px; margin-left: 8px; color: var(--accent); }
+    
+    .dropdown-content { display: none; position: absolute; top: 72px; right: 0; background: var(--panel-bg); border: 2px solid var(--panel-border); border-top: none; min-width: 240px; box-shadow: 0 20px 40px rgba(0,0,0,0.9); z-index: 100; }
+    .dropdown:hover .dropdown-content { display: block; }
+    .dropdown-item { padding: 16px 24px; color: var(--text-muted); text-decoration: none; display: block; cursor: pointer; transition: all 0.2s; font-size: 13px; text-transform: uppercase; border-right: 3px solid transparent; text-align: right; letter-spacing: 0.5px; }
+    .dropdown-item:hover, .dropdown-item.active { background: #111; color: var(--text-main); border-right-color: var(--accent); }
+    
+    /* MAIN CONTAINER */
+    .main { flex: 1; padding: 40px; overflow-y: auto; }
+    .page { display: none; max-width: 1200px; margin: 0 auto; height: 100%; }
+    .page.active { display: flex; flex-direction: column; }
+    
+    /* COVER PAGE (HOME) */
+    .cover-page { justify-content: center; align-items: center; text-align: center; height: 100%; }
+    .cover-title { font-size: 16vw; letter-spacing: -0.06em; line-height: 0.8; color: var(--text-main); margin: 0; text-transform: uppercase; }
+    .cover-subtitle { color: var(--accent); font-size: 18px; letter-spacing: 10px; text-transform: uppercase; margin-top: 24px; }
+
+    /* DASHBOARD HEADERS */
+    .dashboard-header { margin-bottom: 32px; padding-bottom: 16px; border-bottom: 2px solid var(--panel-border); display: flex; justify-content: space-between; align-items: flex-end; }
+    .section-title { font-size: 40px; letter-spacing: -1.5px; color: var(--text-main); text-transform: uppercase; line-height: 1; }
+    .section-subtitle { color: var(--accent); font-size: 12px; margin-top: 8px; text-transform: uppercase; letter-spacing: 2px; }
+
+    /* PANELS & INPUTS */
+    .panel { background: var(--panel-bg); border: 2px solid var(--panel-border); padding: 32px; margin-bottom: 24px; }
+    
+    .controls-row { display: flex; gap: 16px; flex-wrap: wrap; align-items: center; }
+    .input-group { flex: 1; min-width: 250px; position: relative; }
+    .input { background: #000; border: 2px solid var(--panel-border); color: var(--text-main); padding: 16px 20px; font-size: 14px; width: 100%; transition: all 0.2s; text-transform: uppercase; letter-spacing: 0.5px; }
+    .input:focus { outline: none; border-color: var(--accent); }
+    .input::placeholder { color: #444; }
+    
+    .btn { background: var(--accent); color: #000; padding: 16px 32px; border: 2px solid var(--accent); cursor: pointer; font-size: 14px; transition: all 0.2s; text-transform: uppercase; letter-spacing: 1px; display: inline-block; text-align: center; }
+    .btn:hover { background: var(--text-main); border-color: var(--text-main); color: #000; }
+    .btn-ghost { background: transparent; border: 2px solid var(--text-muted); color: var(--text-muted); padding: 12px 24px; cursor: pointer; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; transition: all 0.2s; }
+    .btn-ghost:hover { border-color: var(--accent); color: var(--accent); background: rgba(57, 255, 20, 0.05); }
+
+    /* AUTOCOMPLETE */
+    .autocomp-list { position: absolute; top: calc(100% + 2px); left: 0; right: 0; background: var(--panel-bg); border: 2px solid var(--accent); max-height: 250px; overflow-y: auto; z-index: 20; display: none; }
+    .autocomp-list.visible { display: block; }
+    .autocomp-item { padding: 14px 20px; cursor: pointer; border-bottom: 1px solid var(--panel-border); font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; transition: all 0.1s; }
+    .autocomp-item:hover { background: var(--accent); color: #000; }
+
+    /* STATS GRID */
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 2px; background: var(--panel-border); border: 2px solid var(--panel-border); margin-bottom: 32px; }
+    .stat-box { background: var(--panel-bg); padding: 24px 20px; text-align: center; }
+    .stat-label { font-size: 12px; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 2px; }
+    .stat-value { font-size: 40px; color: var(--text-main); letter-spacing: -2px; line-height: 1; }
+
+    /* REPORTS */
+    .report { white-space: pre-wrap; color: #b3b3b3; font-size: 15px; line-height: 1.8; letter-spacing: 0.2px; }
+    .report strong { color: var(--text-main); }
+    .report h2 { color: var(--accent); font-size: 18px; margin: 48px 0 16px 0; border-bottom: 2px solid var(--panel-border); padding-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }
+    .report h2:first-child { margin-top: 0; }
+
+    /* CHAT INTERFACE */
+    .chat-container { display: flex; flex-direction: column; height: 600px; background: var(--panel-bg); border: 2px solid var(--panel-border); }
+    .chat-messages { flex: 1; padding: 32px; overflow-y: auto; display: flex; flex-direction: column; gap: 24px; }
+    .chat-bubble { padding: 16px 24px; max-width: 80%; font-size: 14px; line-height: 1.6; letter-spacing: 0.5px; }
+    .chat-user { align-self: flex-end; background: #222; color: var(--text-main); text-transform: uppercase; }
+    .chat-ai { align-self: flex-start; background: #000; border: 2px solid var(--panel-border); color: #ccc; border-left: 4px solid var(--accent); }
+    .chat-input-area { padding: 24px; background: #000; border-top: 2px solid var(--panel-border); display: flex; gap: 16px; }
+
+    /* LIVE GAMES */
+    .games-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 24px; }
+    .game-card { background: var(--panel-bg); border: 2px solid var(--panel-border); padding: 32px 24px; cursor: pointer; transition: all 0.2s; position: relative; }
+    .game-card:hover { border-color: var(--accent); transform: translateY(-4px); background: #111; }
+    
+    .game-status { font-size: 12px; color: var(--text-muted); margin-bottom: 24px; display: flex; justify-content: space-between; text-transform: uppercase; letter-spacing: 1.5px; }
+    .game-status.live { color: var(--bg); background: var(--accent); padding: 4px 8px; font-size: 10px; display: inline-block; }
+    
+    .game-teams { display: flex; justify-content: space-between; align-items: center; }
+    .team-block { text-align: center; flex: 1; }
+    .team-name { font-size: 24px; color: var(--text-muted); letter-spacing: -1px; text-transform: uppercase; }
+    .team-score { font-size: 48px; margin-top: 4px; color: #333; line-height: 1; letter-spacing: -2px; }
+    .score-high { color: var(--text-main); }
+
+    /* MODAL */
+    .modal-bg { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.95); z-index: 999; display: none; align-items: center; justify-content: center; }
+    .modal-bg.open { display: flex; }
+    .modal { background: #000; border: 2px solid var(--accent); width: 95vw; max-width: 1200px; max-height: 90vh; overflow-y: auto; padding: 48px; position: relative; }
+    .modal-close { position: absolute; top: 24px; right: 32px; cursor: pointer; color: var(--text-muted); font-size: 40px; transition: color 0.2s; line-height: 1; }
+    .modal-close:hover { color: var(--red); }
+    
+    /* TABLES */
+    table { width: 100%; border-collapse: collapse; text-align: left; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; }
+    th { padding: 16px; color: var(--text-muted); border-bottom: 2px solid var(--panel-border); }
+    td { padding: 16px; color: var(--text-main); border-bottom: 1px solid var(--panel-border); }
+    tr:hover td { background: #111; color: var(--accent); }
+    
+    /* UTILS */
+    .loading { display: none; align-items: center; justify-content: center; gap: 16px; font-size: 14px; color: var(--accent); margin: 32px 0; letter-spacing: 2px; text-transform: uppercase; }
+    .loading.visible { display: flex; }
+    .spinner { border: 3px solid rgba(57, 255, 20, 0.2); border-top: 3px solid var(--accent); width: 24px; height: 24px; animation: spin 0.5s linear infinite; border-radius: 50%; }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    .error { display: none; background: #1a0000; border: 2px solid var(--red); color: var(--red); padding: 16px 24px; margin-bottom: 24px; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; }
+    .error.visible { display: block; }
+    
+    /* LIST INPUT CHIPS */
+    .list-input { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+    .list-chip { background: #000; border: 2px solid var(--panel-border); padding: 10px 16px; font-size: 12px; display: flex; align-items: center; gap: 12px; text-transform: uppercase; letter-spacing: 1px; }
+    .list-chip span { cursor: pointer; color: var(--text-muted); transition: color 0.2s; font-size: 16px; line-height: 1; }
+    .list-chip span:hover { color: var(--red); }
+
+    /* PRINT MEDIA */
+    @media print {
+      body { background: white; color: black; background-image: none; height: auto; overflow: visible; }
+      .navbar, .controls-row, .btn, .btn-ghost, .autocomp-list, .dashboard-header { display: none !important; }
+      .main { padding: 0; }
+      .panel, .modal { border: none; box-shadow: none; padding: 0; background: white; display: block !important; }
+      .report, .stat-value, .stat-label { color: black; }
+      .report h2 { color: black; border-bottom: 4px solid black; }
+      .stats-grid { border: 4px solid black; gap: 4px; background: black; }
+      .stat-box { background: white; }
+      .page { display: none !important; }
+      .page.active { display: block !important; }
+      .modal-bg { position: static; background: transparent; display: block; }
+      .modal-close { display: none; }
+    }
+  </style>
 </head>
 <body>
 
-<div class="app">
-
-  <!-- SIDEBAR -->
-  <div class="sidebar">
-    <div class="logo-wrap">
-      <div class="logo">PIVOT</div>
-      <div class="logo-sub">NBA Intelligence</div>
+  <nav class="navbar no-print">
+    <div class="brand" onclick="switchPage('home', null, null)">PIVOT <span>//</span></div>
+    
+    <div class="nav-links">
+      <div class="dropdown">
+        <button class="dropbtn" id="nav-player">Player Intel</button>
+        <div class="dropdown-content">
+          <a class="dropdown-item" onclick="switchPage('scout', 'nav-player', this)">Scout Profile</a>
+          <a class="dropdown-item" onclick="switchPage('compare', 'nav-player', this)">H2H Comparison</a>
+          <a class="dropdown-item" onclick="switchPage('chat', 'nav-player', this)">AI Analyst Desk</a>
+        </div>
+      </div>
+      <div class="dropdown">
+        <button class="dropbtn" id="nav-team">Team Intel</button>
+        <div class="dropdown-content">
+          <a class="dropdown-item" onclick="switchPage('team', 'nav-team', this)">Franchise Report</a>
+          <a class="dropdown-item" onclick="switchPage('roster', 'nav-team', this)">Roster Package</a>
+          <a class="dropdown-item" onclick="switchPage('trade', 'nav-team', this)">Trade Machine</a>
+        </div>
+      </div>
+      <div class="dropdown">
+        <button class="dropbtn" id="nav-live" onclick="switchPage('games', 'nav-live', this)">Live Data</button>
+      </div>
     </div>
-    <nav class="nav">
-      <div class="nav-section">Analysis</div>
-      <div class="nav-item active" onclick="goTo('scout')">
-        <span class="nav-icon">◎</span> Scout Player
-      </div>
-      <div class="nav-item" onclick="goTo('compare')">
-        <span class="nav-icon">⇄</span> Compare
-      </div>
-      <div class="nav-item" onclick="goTo('trade')">
-        <span class="nav-icon">↔</span> Trade Analyzer
-      </div>
-      <div class="nav-item" onclick="goTo('team')">
-        <span class="nav-icon">◈</span> Team Report
-      </div>
-      <div class="nav-item" onclick="goTo('roster')">
-        <span class="nav-icon">⚡</span> Roster Package
-      </div>
-      <div class="nav-section">Intelligence</div>
-      <div class="nav-item" onclick="goTo('chat')">
-        <span class="nav-icon">◇</span> AI Analyst
-      </div>
-      <div class="nav-item" onclick="goTo('games')">
-        <span class="nav-icon">◉</span> Live Games
-      </div>
-    </nav>
-    <div class="sidebar-bottom">
-      <div class="season-label">Season</div>
-      <select class="season-selector" id="global-season">
-        <option value="2025">2025 — 26</option>
-        <option value="2024">2024 — 25</option>
-        <option value="2023">2023 — 24</option>
-      </select>
-    </div>
-  </div>
+  </nav>
 
-  <!-- MAIN -->
   <div class="main">
-
-    <!-- TOP BAR -->
-    <div class="topbar">
-      <div class="page-title" id="page-title">SCOUT PLAYER</div>
-      <div class="topbar-right">
-        <div class="live-badge"><div class="live-dot"></div>LIVE</div>
-      </div>
+    
+    <div class="page cover-page active" id="page-home">
+      <h1 class="cover-title">PIVOT</h1>
+      <div class="cover-subtitle">Pro Basketball Intelligence</div>
     </div>
 
-    <!-- SCOUT -->
-    <div class="page active" id="page-scout">
-      <div class="search-wrap">
-        <div class="search-field">
-          <div class="field-label">Player Name</div>
-          <input type="text" id="scout-name" placeholder="e.g. Shai Gilgeous-Alexander" onkeydown="if(event.key==='Enter')runScout()">
-        </div>
-        <div class="search-field" style="max-width:180px">
-          <div class="field-label">Question (optional)</div>
-          <input type="text" id="scout-q" placeholder="e.g. Trade value?">
-        </div>
-        <div style="align-self:flex-end">
-          <button class="btn" id="scout-btn" onclick="runScout()">Generate</button>
+    <div class="page" id="page-scout">
+      <div class="dashboard-header">
+        <div>
+          <div class="section-title">Player Intelligence</div>
+          <div class="section-subtitle">Data Synthesis & Reporting</div>
         </div>
       </div>
+      
+      <div class="panel no-print">
+        <div class="controls-row">
+          <div class="input-group">
+            <input class="input" id="scout-name" placeholder="Search Player" onkeyup="autocomplete(this, 'scout')">
+            <div class="autocomp-list" id="scout-sugg"></div>
+          </div>
+          <div class="input-group">
+            <input class="input" id="scout-question" placeholder="Custom Directive (Optional)">
+          </div>
+          <button class="btn" onclick="generateScout()">Execute</button>
+        </div>
+      </div>
+      
+      <div class="loading" id="scout-load"><div class="spinner"></div> SYNTHESIZING INTELLIGENCE...</div>
       <div class="error" id="scout-err"></div>
-      <div class="loading" id="scout-load"><div class="spinner"></div>Generating scouting report...</div>
-      <div class="output-wrap" id="scout-out">
-        <div class="output-header">
-          <div>
-            <div class="player-name" id="scout-pname"></div>
-            <div class="player-meta" id="scout-pmeta"></div>
-          </div>
-          <button class="btn-ghost" onclick="runScout(true)">↺ Refresh</button>
+      
+      <div class="panel" id="scout-wrapper" style="display:none;">
+        <div style="display:flex; justify-content: space-between; align-items: flex-start; margin-bottom: 40px; padding-bottom: 24px;">
+          <h1 id="scout-header" style="font-size: 36px; letter-spacing: -1px; margin:0; text-transform: uppercase;"></h1>
+          <button class="btn-ghost no-print" onclick="window.print()">Export PDF</button>
         </div>
-        <div class="stat-row" id="scout-stats"></div>
-        <div class="report-body" id="scout-report"></div>
+        <div class="stats-grid" id="scout-stats"></div>
+        <pre class="report" id="scout-report"></pre>
       </div>
     </div>
 
-    <!-- COMPARE -->
     <div class="page" id="page-compare">
-      <div class="two-col" style="margin-bottom:20px">
+      <div class="dashboard-header">
         <div>
-          <div class="field-label">Player A</div>
-          <input type="text" class="search-field" id="cmp-a" placeholder="e.g. Luka Doncic" style="width:100%;background:var(--surface);border:1px solid var(--border2);color:var(--text);padding:14px 18px;font-size:14px;outline:none;">
-        </div>
-        <div>
-          <div class="field-label">Player B</div>
-          <input type="text" class="search-field" id="cmp-b" placeholder="e.g. Jayson Tatum" style="width:100%;background:var(--surface);border:1px solid var(--border2);color:var(--text);padding:14px 18px;font-size:14px;outline:none;">
+          <div class="section-title">Head-to-Head</div>
+          <div class="section-subtitle">Matchup Evaluation Engine</div>
         </div>
       </div>
-      <div class="search-wrap">
-        <div class="search-field">
-          <div class="field-label">Context (optional)</div>
-          <input type="text" id="cmp-ctx" placeholder="e.g. Playoff performance, trade value, max contract">
-        </div>
-        <div style="align-self:flex-end">
-          <button class="btn" id="cmp-btn" onclick="runCompare()">Compare</button>
+      <div class="panel no-print">
+        <div class="controls-row">
+          <div class="input-group">
+            <input class="input" id="comp-a" placeholder="Player A" onkeyup="autocomplete(this, 'comp-a')">
+            <div class="autocomp-list" id="comp-a-sugg"></div>
+          </div>
+          <div class="input-group">
+            <input class="input" id="comp-b" placeholder="Player B" onkeyup="autocomplete(this, 'comp-b')">
+            <div class="autocomp-list" id="comp-b-sugg"></div>
+          </div>
+          <div class="input-group">
+            <input class="input" id="comp-context" placeholder="Context Focus (Optional)">
+          </div>
+          <button class="btn" onclick="generateCompare()">Run Matchup</button>
         </div>
       </div>
-      <div class="error" id="cmp-err"></div>
-      <div class="loading" id="cmp-load"><div class="spinner"></div>Running comparison analysis...</div>
-      <div class="output-wrap" id="cmp-out">
-        <div class="output-header">
-          <div class="player-name" id="cmp-title" style="font-size:32px"></div>
-        </div>
-        <div style="padding:0 32px 0">
-          <table class="compare-table" id="cmp-table"></table>
-        </div>
-        <div class="report-body" id="cmp-report"></div>
+      <div class="loading" id="comp-load"><div class="spinner"></div> ANALYZING DIFFERENTIALS...</div>
+      <div class="error" id="comp-err"></div>
+      <div class="panel" id="comp-wrapper" style="display:none;">
+        <div style="text-align: right; margin-bottom: 24px;"><button class="btn-ghost no-print" onclick="window.print()">Export PDF</button></div>
+        <pre class="report" id="comp-report"></pre>
       </div>
     </div>
 
-    <!-- TRADE -->
     <div class="page" id="page-trade">
-      <div class="two-col" style="margin-bottom:20px">
-        <div class="trade-side">
-          <div class="trade-side-title">⬆ Sending Out</div>
-          <div class="player-tags" id="out-tags"></div>
-          <div class="add-row">
-            <input type="text" id="out-input" placeholder="Add player..." style="flex:1;background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:10px 14px;font-size:13px;outline:none;" onkeydown="if(event.key==='Enter')addTag('out')">
-            <button class="btn-ghost" onclick="addTag('out')" style="padding:10px 16px">+</button>
-          </div>
-        </div>
-        <div class="trade-side">
-          <div class="trade-side-title">⬇ Receiving</div>
-          <div class="player-tags" id="in-tags"></div>
-          <div class="add-row">
-            <input type="text" id="in-input" placeholder="Add player..." style="flex:1;background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:10px 14px;font-size:13px;outline:none;" onkeydown="if(event.key==='Enter')addTag('in')">
-            <button class="btn-ghost" onclick="addTag('in')" style="padding:10px 16px">+</button>
-          </div>
+      <div class="dashboard-header">
+        <div>
+          <div class="section-title">Trade Machine</div>
+          <div class="section-subtitle">Roster Value Delta</div>
         </div>
       </div>
-      <div class="search-wrap">
-        <div class="search-field">
-          <div class="field-label">Context (optional)</div>
-          <input type="text" id="trade-ctx" placeholder="e.g. We need rim protection, salary flexibility important">
+      <div class="panel no-print">
+        <div style="display:flex; gap: 24px; margin-bottom: 24px;">
+          <div class="input-group" style="flex:1;">
+             <div style="color:var(--text-muted); margin-bottom:12px; font-size: 12px; letter-spacing: 2px;">OUTGOING ASSETS</div>
+             <div class="list-input" id="trade-out-list">
+               <input class="input" id="trade-out" placeholder="Type & Enter..." onkeyup="handleListInput(this, 'trade-out-list', event)">
+             </div>
+          </div>
+          <div class="input-group" style="flex:1;">
+             <div style="color:var(--text-muted); margin-bottom:12px; font-size: 12px; letter-spacing: 2px;">INCOMING ASSETS</div>
+             <div class="list-input" id="trade-in-list">
+               <input class="input" id="trade-in" placeholder="Type & Enter..." onkeyup="handleListInput(this, 'trade-in-list', event)">
+             </div>
+          </div>
         </div>
-        <div style="align-self:flex-end">
-          <button class="btn" id="trade-btn" onclick="runTrade()">Evaluate Trade</button>
+        <div class="controls-row">
+          <input class="input" style="flex:1" id="trade-context" placeholder="Strategic Goal (e.g. Salary Dump)">
+          <button class="btn" onclick="generateTrade()">Evaluate Scenario</button>
         </div>
       </div>
+      <div class="loading" id="trade-load"><div class="spinner"></div> SIMULATING TRADE LOGIC...</div>
       <div class="error" id="trade-err"></div>
-      <div class="loading" id="trade-load"><div class="spinner"></div>Evaluating trade proposal...</div>
-      <div class="output-wrap" id="trade-out">
-        <div class="output-header">
-          <div class="player-name" id="trade-title" style="font-size:28px"></div>
-        </div>
-        <div class="report-body" id="trade-report"></div>
+      <div class="panel" id="trade-wrapper" style="display:none;">
+         <div style="text-align: right; margin-bottom: 24px;"><button class="btn-ghost no-print" onclick="window.print()">Export PDF</button></div>
+        <pre class="report" id="trade-report"></pre>
       </div>
     </div>
 
-    <!-- TEAM -->
     <div class="page" id="page-team">
-      <div class="search-wrap">
-        <div class="search-field" style="max-width:200px">
-          <div class="field-label">Team Abbreviation</div>
-          <input type="text" id="team-abbr" placeholder="OKC, BOS, LAL..." onkeydown="if(event.key==='Enter')runTeam()">
-        </div>
-        <div class="search-field">
-          <div class="field-label">Question (optional)</div>
-          <input type="text" id="team-q" placeholder="e.g. How do they defend in the half court?">
-        </div>
-        <div style="align-self:flex-end">
-          <button class="btn" id="team-btn" onclick="runTeam()">Scout Team</button>
+      <div class="dashboard-header">
+        <div>
+          <div class="section-title">Franchise Intel</div>
+          <div class="section-subtitle">Macro-level Roster Analysis</div>
         </div>
       </div>
+      <div class="panel no-print">
+        <div class="controls-row">
+          <div class="input-group" style="max-width: 250px;">
+            <input class="input" id="team-abbr" placeholder="Abbreviation (e.g. BOS)">
+          </div>
+          <div class="input-group">
+            <input class="input" id="team-question" placeholder="Focus (Optional)">
+          </div>
+          <button class="btn" onclick="generateTeam()">Compile Intel</button>
+        </div>
+      </div>
+      <div class="loading" id="team-load"><div class="spinner"></div> AGGREGATING ROSTER DATA...</div>
       <div class="error" id="team-err"></div>
-      <div class="loading" id="team-load"><div class="spinner"></div><span id="team-load-txt">Loading team...</span></div>
-      <div class="output-wrap" id="team-out">
-        <div class="output-header">
-          <div>
-            <div class="player-name" id="team-name"></div>
-            <div class="player-meta" id="team-meta"></div>
-          </div>
-        </div>
-        <div class="stat-row" id="team-leaders"></div>
-        <div class="report-body" id="team-report"></div>
+      <div class="panel" id="team-wrapper" style="display:none;">
+         <div style="text-align: right; margin-bottom: 24px;"><button class="btn-ghost no-print" onclick="window.print()">Export PDF</button></div>
+        <pre class="report" id="team-report"></pre>
       </div>
     </div>
 
-    <!-- ROSTER PACKAGE -->
     <div class="page" id="page-roster">
-      <div class="search-wrap">
-        <div class="search-field" style="max-width:200px">
-          <div class="field-label">Team Abbreviation</div>
-          <input type="text" id="roster-abbr" placeholder="OKC, BOS, LAL...">
-        </div>
-        <div style="align-self:flex-end">
-          <button class="btn" id="roster-btn" onclick="runRoster()">⚡ Generate All Reports</button>
+       <div class="dashboard-header">
+        <div>
+          <div class="section-title">Concurrent Roster Build</div>
+          <div class="section-subtitle">15-Man Pipeline Generation</div>
         </div>
       </div>
-      <div style="margin-bottom:24px">
-        <p style="font-size:13px;color:var(--text3);line-height:1.6">Generates individual AI scouting reports for every player on the roster concurrently. <span style="color:var(--accent)">~10 seconds for 15 players.</span></p>
+      <div class="panel no-print">
+        <div class="controls-row">
+          <div class="input-group" style="max-width: 300px;">
+            <input class="input" id="roster-abbr" placeholder="Team Abbreviation (e.g. MIN)">
+          </div>
+          <button class="btn" onclick="generateRoster()">Execute Pipeline</button>
+        </div>
       </div>
+      <div class="loading" id="roster-load"><div class="spinner"></div> ORCHESTRATING MULTI-AGENT ANALYSIS...</div>
       <div class="error" id="roster-err"></div>
-      <div class="loading" id="roster-load"><div class="spinner"></div><span id="roster-load-txt">Running concurrent pipeline...</span></div>
-      <div id="roster-results" style="display:none">
-        <div class="section-header">
-          <div class="section-title" id="roster-title"></div>
-        </div>
-        <div class="roster-grid" id="roster-grid"></div>
+      <div id="roster-wrapper" style="display:none; margin-top: 24px;">
+        <div style="text-align: right; margin-bottom: 24px;"><button class="btn-ghost no-print" onclick="window.print()">Export Full Package PDF</button></div>
+        <div id="roster-reports"></div>
       </div>
     </div>
 
-    <!-- CHAT -->
     <div class="page" id="page-chat">
-      <div class="search-wrap" style="margin-bottom:20px">
-        <div class="search-field">
-          <div class="field-label">Load Player</div>
-          <input type="text" id="chat-player" placeholder="Enter player name to start session..." onkeydown="if(event.key==='Enter')loadChat()">
-        </div>
-        <div style="align-self:flex-end">
-          <button class="btn" id="chat-load-btn" onclick="loadChat()">Load</button>
+       <div class="dashboard-header no-print">
+        <div>
+          <div class="section-title">AI Analyst Desk</div>
+          <div class="section-subtitle">Context-Aware Interrogation</div>
         </div>
       </div>
-      <div class="error" id="chat-err"></div>
-      <div id="chat-ui" style="display:none">
-        <div style="margin-bottom:16px;display:flex;align-items:center;justify-content:space-between">
-          <div>
-            <div style="font-family:var(--display);font-size:28px;letter-spacing:3px" id="chat-pname"></div>
-            <div style="font-family:var(--mono);font-size:10px;color:var(--text3);letter-spacing:2px;margin-top:4px" id="chat-pmeta"></div>
-          </div>
-          <button class="btn-ghost" onclick="clearChat()">New Session</button>
-        </div>
-        <div class="chat-container">
-          <div class="chat-messages" id="chat-msgs"></div>
-          <div class="chat-input-area">
-            <input type="text" id="chat-input" placeholder="Ask anything about this player..." onkeydown="if(event.key==='Enter')sendChat()">
-            <button class="btn" id="chat-send" onclick="sendChat()">Send</button>
-          </div>
-        </div>
-      </div>
-      <div class="loading" id="chat-load"><div class="spinner"></div>Thinking...</div>
+       <div class="panel no-print" id="chat-setup-panel">
+         <div class="controls-row">
+           <div class="input-group">
+             <input class="input" id="chat-player" placeholder="Load Player Profile (e.g. Anthony Edwards)" onkeyup="autocomplete(this, 'chat')">
+             <div class="autocomp-list" id="chat-sugg"></div>
+           </div>
+           <button class="btn" onclick="startChat()">Initialize Connection</button>
+         </div>
+       </div>
+       
+       <div id="chat-wrapper" class="no-print chat-container" style="display:none;">
+         <div id="chat-messages" class="chat-messages">
+            </div>
+         <div class="chat-input-area">
+           <input class="input" style="border:none; border-bottom: 2px solid var(--panel-border);" id="chat-input" placeholder="Query the AI Analyst..." onkeyup="if(event.keyCode===13)sendChat()">
+           <button class="btn" onclick="sendChat()">Send</button>
+         </div>
+       </div>
     </div>
 
-    <!-- GAMES -->
     <div class="page" id="page-games">
-      <div class="section-header">
-        <div class="section-title">Today's Games</div>
-        <button class="btn-ghost" onclick="loadGames()">↺ Refresh</button>
-      </div>
-      <div class="loading" id="games-load"><div class="spinner"></div>Loading games...</div>
-      <div class="error" id="games-err"></div>
-      <div class="games-grid" id="games-grid"></div>
-      <div id="games-empty" style="display:none;padding:40px;text-align:center;color:var(--text3);font-family:var(--mono);font-size:12px;letter-spacing:2px">NO GAMES SCHEDULED TODAY</div>
-    </div>
-
-  </div>
-</div>
-
-<!-- MODAL -->
-<div class="modal-bg" id="modal-bg" onclick="closeModal(event)">
-  <div class="modal">
-    <div class="modal-header">
-      <div>
-        <div style="font-family:var(--display);font-size:36px;letter-spacing:3px" id="modal-name"></div>
-        <div style="font-family:var(--mono);font-size:10px;color:var(--text3);letter-spacing:2px;margin-top:6px" id="modal-meta"></div>
-      </div>
-      <button class="modal-close" onclick="closeModal()">✕</button>
-    </div>
-    <div class="modal-body">
-      <div class="stat-row" id="modal-stats" style="margin-bottom:24px"></div>
-      <div class="report-body" id="modal-report"></div>
-    </div>
-  </div>
-</div>
-
-<script>
-const API = 'http://localhost:8000/api';
-let tradeOut = [], tradeIn = [];
-let chatHistory = [], chatPlayer = null;
-
-// ── Navigation ─────────────────────────────────────────────────────────────
-const pageTitles = {
-  scout: 'SCOUT PLAYER', compare: 'HEAD-TO-HEAD COMPARE',
-  trade: 'TRADE ANALYZER', team: 'TEAM REPORT',
-  roster: 'ROSTER PACKAGE', chat: 'AI ANALYST', games: 'LIVE GAMES'
-};
-
-function goTo(page) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  document.getElementById('page-' + page).classList.add('active');
-  document.getElementById('page-title').textContent = pageTitles[page];
-  event.currentTarget.classList.add('active');
-  if (page === 'games') loadGames();
-}
-
-function getSeason() { return parseInt(document.getElementById('global-season').value); }
-
-// ── Helpers ────────────────────────────────────────────────────────────────
-function showLoad(id, txt) {
-  const el = document.getElementById(id + '-load');
-  if (txt && document.getElementById(id + '-load-txt')) document.getElementById(id + '-load-txt').textContent = txt;
-  el.classList.add('visible');
-  const err = document.getElementById(id + '-err');
-  if (err) err.classList.remove('visible');
-  const btn = document.getElementById(id + '-btn');
-  if (btn) btn.disabled = true;
-}
-
-function hideLoad(id) {
-  document.getElementById(id + '-load').classList.remove('visible');
-  const btn = document.getElementById(id + '-btn');
-  if (btn) btn.disabled = false;
-}
-
-function showErr(id, msg) {
-  const el = document.getElementById(id + '-err');
-  el.textContent = '⚠ ' + msg;
-  el.classList.add('visible');
-}
-
-function renderStats(id, stats) {
-  const fields = [
-    {k:'ppg',l:'PPG'},{k:'rpg',l:'RPG'},{k:'apg',l:'APG'},
-    {k:'fg_pct',l:'FG%',pct:true},{k:'ts_pct',l:'TS%',pct:true},{k:'gp',l:'GP',int:true}
-  ];
-  document.getElementById(id).innerHTML = fields.map(f => {
-    let v = stats[f.k];
-    const display = v == null || v === 0 && f.k !== 'gp' ? 'N/A'
-      : f.pct ? (v*100).toFixed(1)+'%'
-      : f.int ? parseInt(v)
-      : Number(v).toFixed(1);
-    return `<div class="stat-card"><div class="stat-val">${display}</div><div class="stat-lbl">${f.l}</div></div>`;
-  }).join('');
-}
-
-function renderReport(id, text) {
-  if (!text) return;
-  let html = text
-    .replace(/^## (.+)$/gm, '<h2>$1</h2>')
-    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-    .replace(/\*(.*?)\*/g, '<em>$1</em>')
-    .split('\n').filter(l => l.trim()).map(l => l.startsWith('<h2>') ? l : `<p>${l}</p>`).join('');
-  document.getElementById(id).innerHTML = html;
-}
-
-// ── Scout ──────────────────────────────────────────────────────────────────
-async function runScout(force = false) {
-  const name = document.getElementById('scout-name').value.trim();
-  const q = document.getElementById('scout-q').value.trim();
-  if (!name) return;
-  showLoad('scout');
-  try {
-    let url = `${API}/player/${encodeURIComponent(name)}?season=${getSeason()}${force?'&force=true':''}`;
-    if (q) url += `&question=${encodeURIComponent(q)}`;
-    const res = await fetch(url);
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.detail || 'Not found');
-    document.getElementById('scout-pname').textContent = data.player;
-    document.getElementById('scout-pmeta').textContent = `${data.team} · ${data.position} · ${getSeason()} SEASON`;
-    renderStats('scout-stats', data.stats);
-    renderReport('scout-report', data.report);
-    document.getElementById('scout-out').classList.add('visible');
-  } catch(e) { showErr('scout', e.message); }
-  finally { hideLoad('scout'); }
-}
-
-// ── Compare ────────────────────────────────────────────────────────────────
-async function runCompare() {
-  const a = document.getElementById('cmp-a').value.trim();
-  const b = document.getElementById('cmp-b').value.trim();
-  const ctx = document.getElementById('cmp-ctx').value.trim();
-  if (!a || !b) return;
-  showLoad('cmp');
-  try {
-    let url = `${API}/compare?player_a=${encodeURIComponent(a)}&player_b=${encodeURIComponent(b)}&season=${getSeason()}`;
-    if (ctx) url += `&context=${encodeURIComponent(ctx)}`;
-    const res = await fetch(url);
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.detail || 'Error');
-    document.getElementById('cmp-title').textContent = `${data.player_a}  vs  ${data.player_b}`;
-    const sa = data.stats_a, sb = data.stats_b;
-    const rows = [
-      ['Points',sa.ppg,sb.ppg],['Rebounds',sa.rpg,sb.rpg],['Assists',sa.apg,sb.apg],
-      ['FG%',sa.fg_pct,sb.fg_pct,true],['TS%',sa.ts_pct,sb.ts_pct,true]
-    ];
-    const fmt = (v, pct) => v == null ? 'N/A' : pct ? (v*100).toFixed(1)+'%' : Number(v).toFixed(1);
-    document.getElementById('cmp-table').innerHTML =
-      `<tr><th>STAT</th><th>${data.player_a.split(' ').pop()}</th><th>${data.player_b.split(' ').pop()}</th><th>EDGE</th></tr>` +
-      rows.map(([l,va,vb,pct])=>{
-        const aw = va > vb, bw = vb > va;
-        return `<tr><td>${l}</td><td class="${aw?'winner':''}">${fmt(va,pct)}</td><td class="${bw?'winner':''}">${fmt(vb,pct)}</td><td style="color:var(--accent);font-size:10px">${aw?'← A':bw?'B →':'TIE'}</td></tr>`;
-      }).join('');
-    renderReport('cmp-report', data.comparison);
-    document.getElementById('cmp-out').classList.add('visible');
-  } catch(e) { showErr('cmp', e.message); }
-  finally { hideLoad('cmp'); }
-}
-
-// ── Trade ──────────────────────────────────────────────────────────────────
-function addTag(side) {
-  const input = document.getElementById(side + '-input');
-  const name = input.value.trim();
-  if (!name) return;
-  if (side === 'out') tradeOut.push(name); else tradeIn.push(name);
-  input.value = '';
-  renderTags();
-}
-
-function removeTag(side, name) {
-  if (side === 'out') tradeOut = tradeOut.filter(n=>n!==name);
-  else tradeIn = tradeIn.filter(n=>n!==name);
-  renderTags();
-}
-
-function renderTags() {
-  ['out','in'].forEach(side => {
-    const list = side === 'out' ? tradeOut : tradeIn;
-    document.getElementById(side + '-tags').innerHTML = list.map(n =>
-      `<div class="tag">${n}<span class="tag-x" onclick="removeTag('${side}','${n}')">×</span></div>`
-    ).join('');
-  });
-}
-
-async function runTrade() {
-  if (!tradeOut.length || !tradeIn.length) { showErr('trade', 'Add players on both sides.'); return; }
-  const ctx = document.getElementById('trade-ctx').value.trim();
-  showLoad('trade');
-  try {
-    const res = await fetch(`${API}/trade`, {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({outgoing:tradeOut, incoming:tradeIn, season:getSeason(), context:ctx})
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.detail || 'Error');
-    document.getElementById('trade-title').textContent =
-      `${data.outgoing.join(', ')}  →  ${data.incoming.join(', ')}`;
-    renderReport('trade-report', data.analysis);
-    document.getElementById('trade-out').classList.add('visible');
-  } catch(e) { showErr('trade', e.message); }
-  finally { hideLoad('trade'); }
-}
-
-// ── Team ───────────────────────────────────────────────────────────────────
-async function runTeam() {
-  const abbr = document.getElementById('team-abbr').value.trim().toUpperCase();
-  const q = document.getElementById('team-q').value.trim();
-  if (!abbr) return;
-  showLoad('team', `Loading ${abbr} roster...`);
-  try {
-    let url = `${API}/team/${abbr}?season=${getSeason()}`;
-    if (q) url += `&question=${encodeURIComponent(q)}`;
-    const res = await fetch(url);
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.detail || 'Not found');
-    document.getElementById('team-name').textContent = data.team;
-    document.getElementById('team-meta').textContent = `${abbr} · ${data.roster_size} PLAYERS · ${getSeason()} SEASON`;
-    const leaders = data.leaders || {};
-    const leaderFields = [
-      {k:'scoring',l:'SCORING LEADER'},{k:'rebounding',l:'REBOUNDS'},{k:'assists',l:'ASSISTS'},
-      {k:'defense',l:'DEFENSE'},{k:'efficiency',l:'EFFICIENCY'}
-    ];
-    document.getElementById('team-leaders').innerHTML = leaderFields.map(f =>
-      `<div class="stat-card"><div class="stat-val" style="font-size:18px;letter-spacing:1px">${(leaders[f.k]||'N/A').split(' ').pop()}</div><div class="stat-lbl">${f.l}</div></div>`
-    ).join('');
-    renderReport('team-report', data.report);
-    document.getElementById('team-out').classList.add('visible');
-  } catch(e) { showErr('team', e.message); }
-  finally { hideLoad('team'); }
-}
-
-// ── Roster Package ─────────────────────────────────────────────────────────
-async function runRoster() {
-  const abbr = document.getElementById('roster-abbr').value.trim().toUpperCase();
-  if (!abbr) return;
-  document.getElementById('roster-results').style.display = 'none';
-  showLoad('roster', `Generating ${abbr} roster package — all players concurrent...`);
-  try {
-    const res = await fetch(`${API}/team/${abbr}/roster?season=${getSeason()}`);
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.detail || 'Not found');
-    document.getElementById('roster-title').textContent =
-      `${data.team} — ${data.players_covered} reports generated`;
-    const grid = document.getElementById('roster-grid');
-    grid.innerHTML = '';
-    const rosterStats = data.roster_stats || [];
-    Object.entries(data.reports || {}).forEach(([name, report], i) => {
-      const stat = rosterStats.find(r => r.name === name) || {};
-      const card = document.createElement('div');
-      card.className = 'roster-card';
-      card.style.animationDelay = `${i * 0.04}s`;
-      card.innerHTML = `
-        <div class="rc-name">${name}</div>
-        <div class="rc-meta">${stat.position || ''}</div>
-        <div class="rc-stats">
-          <div class="rc-stat"><div class="rc-stat-val">${Number(stat.ppg||0).toFixed(1)}</div><div class="rc-stat-lbl">PPG</div></div>
-          <div class="rc-stat"><div class="rc-stat-val">${Number(stat.rpg||0).toFixed(1)}</div><div class="rc-stat-lbl">RPG</div></div>
-          <div class="rc-stat"><div class="rc-stat-val">${Number(stat.apg||0).toFixed(1)}</div><div class="rc-stat-lbl">APG</div></div>
-          <div class="rc-stat"><div class="rc-stat-val">${stat.gp||0}</div><div class="rc-stat-lbl">GP</div></div>
-        </div>`;
-      card.onclick = () => openModal(name, stat, report);
-      grid.appendChild(card);
-    });
-    document.getElementById('roster-results').style.display = 'block';
-  } catch(e) { showErr('roster', e.message); }
-  finally { hideLoad('roster'); }
-}
-
-// ── Modal ──────────────────────────────────────────────────────────────────
-function openModal(name, stats, report) {
-  document.getElementById('modal-name').textContent = name;
-  document.getElementById('modal-meta').textContent = `${stats.position || ''} · FULL SCOUTING REPORT`;
-  renderStats('modal-stats', stats);
-  renderReport('modal-report', report);
-  document.getElementById('modal-bg').classList.add('open');
-  document.body.style.overflow = 'hidden';
-}
-
-function closeModal(e) {
-  if (!e || e.target === document.getElementById('modal-bg') || e.currentTarget.classList.contains('modal-close')) {
-    document.getElementById('modal-bg').classList.remove('open');
-    document.body.style.overflow = '';
-  }
-}
-
-// ── Chat ───────────────────────────────────────────────────────────────────
-async function loadChat() {
-  const name = document.getElementById('chat-player').value.trim();
-  if (!name) return;
-  document.getElementById('chat-load-btn').disabled = true;
-  document.getElementById('chat-load').classList.add('visible');
-  document.getElementById('chat-err').classList.remove('visible');
-  try {
-    const res = await fetch(`${API}/player/${encodeURIComponent(name)}?season=${getSeason()}`);
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.detail || 'Not found');
-    chatPlayer = data;
-    chatHistory = [];
-    document.getElementById('chat-pname').textContent = data.player;
-    document.getElementById('chat-pmeta').textContent = `${data.team} · ${data.position} · ${getSeason()} SEASON`;
-    document.getElementById('chat-msgs').innerHTML = '';
-    document.getElementById('chat-ui').style.display = 'block';
-    appendMsg('ai', `Scouting file loaded for **${data.player}**. I have their full ${getSeason()} stats. Ask me anything — trade value, fit analysis, contract situation, comparables, weaknesses, anything.`);
-  } catch(e) {
-    document.getElementById('chat-err').textContent = '⚠ ' + e.message;
-    document.getElementById('chat-err').classList.add('visible');
-  } finally {
-    document.getElementById('chat-load-btn').disabled = false;
-    document.getElementById('chat-load').classList.remove('visible');
-  }
-}
-
-function clearChat() {
-  chatHistory = [];
-  document.getElementById('chat-msgs').innerHTML = '';
-  document.getElementById('chat-ui').style.display = 'none';
-  document.getElementById('chat-player').value = '';
-  chatPlayer = null;
-}
-
-function appendMsg(role, text) {
-  const win = document.getElementById('chat-msgs');
-  const div = document.createElement('div');
-  div.className = 'msg msg-' + (role === 'user' ? 'user' : 'ai');
-  const formatted = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-  div.innerHTML = `<div class="msg-label">${role === 'user' ? 'YOU' : 'PIVOT'}</div><div class="msg-bubble">${formatted}</div>`;
-  win.appendChild(div);
-  win.scrollTop = win.scrollHeight;
-}
-
-async function sendChat() {
-  const input = document.getElementById('chat-input');
-  const msg = input.value.trim();
-  if (!msg || !chatPlayer) return;
-  input.value = '';
-  appendMsg('user', msg);
-  document.getElementById('chat-send').disabled = true;
-  document.getElementById('chat-load').classList.add('visible');
-  try {
-    const res = await fetch(`${API}/chat`, {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({player: chatPlayer.player, season: getSeason(), message: msg, history: chatHistory})
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.detail || 'Error');
-    chatHistory = data.history;
-    appendMsg('ai', data.reply);
-  } catch(e) { appendMsg('ai', '⚠ ' + e.message); }
-  finally {
-    document.getElementById('chat-send').disabled = false;
-    document.getElementById('chat-load').classList.remove('visible');
-  }
-}
-
-// ── Games ──────────────────────────────────────────────────────────────────
-async function loadGames() {
-  document.getElementById('games-load').classList.add('visible');
-  document.getElementById('games-err').classList.remove('visible');
-  document.getElementById('games-empty').style.display = 'none';
-  try {
-    const res = await fetch(`${API}/games/today`);
-    const data = await res.json();
-    const games = data.games || [];
-    const grid = document.getElementById('games-grid');
-    if (!games.length) {
-      grid.innerHTML = '';
-      document.getElementById('games-empty').style.display = 'block';
-      return;
-    }
-    grid.innerHTML = games.map(g => {
-      const home = g.home_team || {};
-      const away = g.visitor_team || {};
-      const hs = g.home_team_score;
-      const as = g.visitor_team_score;
-      const status = g.status || 'Scheduled';
-      const isLive = status.includes('Qtr') || status.includes('Half');
-      const isFinal = status === 'Final';
-      return `<div class="game-card">
-        <div class="game-status ${isFinal?'final':''}">${isLive ? '⬤ LIVE — ' : ''}${status.toUpperCase()}</div>
-        <div class="game-teams">
-          <div class="game-team">
-            <div class="game-team-name">${away.abbreviation || 'AWY'}</div>
-            <div class="game-team-score">${as || '—'}</div>
-          </div>
-          <div class="game-vs">@</div>
-          <div class="game-team">
-            <div class="game-team-name">${home.abbreviation || 'HME'}</div>
-            <div class="game-team-score">${hs || '—'}</div>
-          </div>
+       <div class="dashboard-header">
+        <div>
+          <div class="section-title">Live Data</div>
+          <div class="section-subtitle">Real-time Pipeline & Schedule</div>
         </div>
-      </div>`;
-    }).join('');
-  } catch(e) {
-    document.getElementById('games-err').textContent = '⚠ ' + e.message;
-    document.getElementById('games-err').classList.add('visible');
-  } finally {
-    document.getElementById('games-load').classList.remove('visible');
-  }
-}
+        <button class="btn-ghost no-print" onclick="loadGames()" style="display:flex; align-items:center; gap:8px;">
+          SYNC FEED
+        </button>
+      </div>
+      <div class="loading" id="games-load"><div class="spinner"></div> POLLING DATA PIPELINE...</div>
+      
+      <div class="games-grid" id="games-grid"></div>
+      
+      <div id="games-empty" style="display:none; padding: 80px 20px; text-align: center; border: 2px dashed var(--panel-border); background: var(--panel-bg);">
+        <div style="color: var(--text-muted); font-size: 14px; letter-spacing: 3px;">SYSTEM IDLE: NO GAMES SCHEDULED TODAY</div>
+      </div>
+    </div>
+    
+  </div>
 
-// ── Keyboard shortcuts ─────────────────────────────────────────────────────
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') closeModal();
-});
+  <div class="modal-bg no-print" id="modal-bg" onclick="closeModal()">
+    <div class="modal" onclick="event.stopPropagation()">
+      <div class="modal-close" onclick="closeModal()">×</div>
+      <div style="margin-bottom: 48px; text-align:center;">
+        <h2 class="section-title" id="modal-name" style="justify-content:center; font-size: 48px; margin-bottom: 12px;"></h2>
+        <div style="color: var(--accent); font-size: 16px; letter-spacing: 3px;" id="modal-meta"></div>
+      </div>
+      <div id="modal-stats"></div>
+    </div>
+  </div>
 
-// ── Init ───────────────────────────────────────────────────────────────────
-loadGames();
-</script>
+  <script>
+    const API = '/api';
+
+    function switchPage(pageId, navId, el) {
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.getElementById(`page-${pageId}`).classList.add('active');
+      
+      document.querySelectorAll('.dropbtn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.dropdown-item').forEach(item => item.classList.remove('active'));
+      if(navId) document.getElementById(navId).classList.add('active');
+      if(el) el.classList.add('active');
+      
+      if (pageId === 'games') loadGames();
+      localStorage.setItem('activePage', pageId);
+    }
+
+    // AUTOCOMPLETE LOGIC
+    let searchTimeout;
+    function autocomplete(input, id) {
+      clearTimeout(searchTimeout);
+      const q = input.value.trim();
+      const list = document.getElementById(`${id}-sugg`);
+      if (q.length < 2) { list.classList.remove('visible'); return; }
+      
+      searchTimeout = setTimeout(async () => {
+        try {
+          const res = await fetch(`${API}/players/search?q=${q}`);
+          const data = await res.json();
+          if(data.players && data.players.length > 0) {
+            list.innerHTML = data.players.map(p => `<div class="autocomp-item" onclick="selectAuto('${id}', '${p.replace(/'/g, "\\'")}')">${p}</div>`).join('');
+            list.classList.add('visible');
+          } else {
+            list.classList.remove('visible');
+          }
+        } catch(e) {}
+      }, 300);
+    }
+
+    function selectAuto(id, val) {
+      document.getElementById(`${id}-name` || id === 'chat' ? `${id}-player` : `${id}-name`).value = val;
+      document.getElementById(`${id}-sugg`).classList.remove('visible');
+    }
+
+    // MULTI-LIST INPUT
+    function handleListInput(input, listId, e) {
+      if (e.keyCode === 188 || e.keyCode === 13) {
+        e.preventDefault();
+        let val = input.value.replace(/,/g, '').trim();
+        if (val) {
+          const chip = document.createElement('div');
+          chip.classList.add('list-chip');
+          chip.innerHTML = `${val} <span onclick="this.parentNode.remove()">×</span>`;
+          document.getElementById(listId).insertBefore(chip, input);
+          input.value = '';
+        }
+      }
+    }
+
+    // DATA FETCHERS
+    async function generateScout() {
+      const name = document.getElementById('scout-name').value.trim();
+      const q = document.getElementById('scout-question').value.trim();
+      if (!name) return alert('ENTER PLAYER NAME');
+      
+      document.getElementById('scout-load').classList.add('visible');
+      document.getElementById('scout-wrapper').style.display = 'none';
+      document.getElementById('scout-err').classList.remove('visible');
+
+      try {
+        const res = await fetch(`${API}/player/${encodeURIComponent(name)}?season=2025&question=${encodeURIComponent(q)}`);
+        if (!res.ok) throw new Error(await res.text());
+        const data = await res.json();
+        const s = data.stats;
+        document.getElementById('scout-header').textContent = `${data.player} | ${data.team} // ${data.position}`;
+        document.getElementById('scout-stats').innerHTML = `
+          <div class="stat-box"><div class="stat-label">PPG</div><div class="stat-value">${s.ppg.toFixed(1)}</div></div>
+          <div class="stat-box"><div class="stat-label">RPG</div><div class="stat-value">${s.rpg.toFixed(1)}</div></div>
+          <div class="stat-box"><div class="stat-label">APG</div><div class="stat-value">${s.apg.toFixed(1)}</div></div>
+          <div class="stat-box"><div class="stat-label">FG%</div><div class="stat-value">${(s.fg_pct * 100).toFixed(1)}%</div></div>
+          <div class="stat-box"><div class="stat-label">TS%</div><div class="stat-value">${s.ts_pct ? (s.ts_pct * 100).toFixed(1) + '%' : 'N/A'}</div></div>
+        `;
+        document.getElementById('scout-report').textContent = data.report;
+        document.getElementById('scout-wrapper').style.display = 'block';
+      } catch(e) { 
+        document.getElementById('scout-err').textContent = 'ERROR: ' + e.message;
+        document.getElementById('scout-err').classList.add('visible');
+      } 
+      finally { document.getElementById('scout-load').classList.remove('visible'); }
+    }
+
+    async function generateCompare() {
+      const a = document.getElementById('comp-a').value.trim();
+      const b = document.getElementById('comp-b').value.trim();
+      const ctx = document.getElementById('comp-context').value.trim();
+      if (!a || !b) return alert('ENTER BOTH PLAYERS');
+      
+      document.getElementById('comp-load').classList.add('visible');
+      document.getElementById('comp-wrapper').style.display = 'none';
+      document.getElementById('comp-err').classList.remove('visible');
+
+      try {
+        const res = await fetch(`${API}/compare?player_a=${encodeURIComponent(a)}&player_b=${encodeURIComponent(b)}&season=2025&context=${encodeURIComponent(ctx)}`);
+        if (!res.ok) throw new Error(await res.text());
+        const data = await res.json();
+        document.getElementById('comp-report').textContent = data.comparison;
+        document.getElementById('comp-wrapper').style.display = 'block';
+      } catch(e) {
+        document.getElementById('comp-err').textContent = 'ERROR: ' + e.message;
+        document.getElementById('comp-err').classList.add('visible');
+      } 
+      finally { document.getElementById('comp-load').classList.remove('visible'); }
+    }
+
+    async function generateTrade() {
+      const outList = Array.from(document.getElementById('trade-out-list').querySelectorAll('.list-chip')).map(c => c.textContent.replace('×','').trim());
+      const inList = Array.from(document.getElementById('trade-in-list').querySelectorAll('.list-chip')).map(c => c.textContent.replace('×','').trim());
+      const ctx = document.getElementById('trade-context').value.trim();
+      if (!outList.length || !inList.length) return alert('REQUIRE PLAYERS ON BOTH SIDES');
+      
+      document.getElementById('trade-load').classList.add('visible');
+      document.getElementById('trade-wrapper').style.display = 'none';
+      document.getElementById('trade-err').classList.remove('visible');
+
+      try {
+        const res = await fetch(`${API}/trade`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({outgoing: outList, incoming: inList, season: 2025, context: ctx}) });
+        if (!res.ok) throw new Error(await res.text());
+        const data = await res.json();
+        document.getElementById('trade-report').textContent = data.analysis;
+        document.getElementById('trade-wrapper').style.display = 'block';
+      } catch(e) {
+        document.getElementById('trade-err').textContent = 'ERROR: ' + e.message;
+        document.getElementById('trade-err').classList.add('visible');
+      } finally { document.getElementById('trade-load').classList.remove('visible'); }
+    }
+
+    async function generateTeam() {
+      const abbr = document.getElementById('team-abbr').value.trim();
+      const q = document.getElementById('team-question').value.trim();
+      if(!abbr) return alert("REQUIRE ABBREVIATION");
+      
+      document.getElementById('team-load').classList.add('visible');
+      document.getElementById('team-wrapper').style.display = 'none';
+      document.getElementById('team-err').classList.remove('visible');
+
+      try {
+        const res = await fetch(`${API}/team/${encodeURIComponent(abbr)}?season=2025&question=${encodeURIComponent(q)}`);
+        if (!res.ok) throw new Error(await res.text());
+        const data = await res.json();
+        document.getElementById('team-report').textContent = data.report;
+        document.getElementById('team-wrapper').style.display = 'block';
+      } catch(e) {
+        document.getElementById('team-err').textContent = 'ERROR: ' + e.message;
+        document.getElementById('team-err').classList.add('visible');
+      } finally { document.getElementById('team-load').classList.remove('visible'); }
+    }
+
+    async function generateRoster() {
+      const abbr = document.getElementById('roster-abbr').value.trim();
+      if(!abbr) return alert("REQUIRE ABBREVIATION");
+      
+      document.getElementById('roster-load').classList.add('visible');
+      document.getElementById('roster-wrapper').style.display = 'none';
+      document.getElementById('roster-err').classList.remove('visible');
+
+      try {
+        const res = await fetch(`${API}/team/${encodeURIComponent(abbr)}/roster?season=2025`);
+        if (!res.ok) throw new Error(await res.text());
+        const data = await res.json();
+        const div = document.getElementById('roster-reports');
+        div.innerHTML = '';
+        for (const [name, report] of Object.entries(data.reports)) {
+          div.innerHTML += `<div class="panel"><h2 style="font-size:24px; color:var(--accent); margin-bottom:20px; border-bottom:2px solid var(--panel-border); padding-bottom:12px; text-transform:uppercase;">${name}</h2><pre class="report" style="background:transparent; padding:0; border:none;">${report}</pre></div>`;
+        }
+        document.getElementById('roster-wrapper').style.display = 'block';
+      } catch(e) {
+        document.getElementById('roster-err').textContent = 'ERROR: ' + e.message;
+        document.getElementById('roster-err').classList.add('visible');
+      } finally { document.getElementById('roster-load').classList.remove('visible'); }
+    }
+
+    // CHAT LOGIC
+    let chatHistory = [];
+    function startChat() {
+      const player = document.getElementById('chat-player').value.trim();
+      if (!player) return alert('ENTER PLAYER NAME');
+      
+      document.getElementById('chat-setup-panel').style.display = 'none';
+      document.getElementById('chat-wrapper').style.display = 'flex';
+      chatHistory = [];
+      document.getElementById('chat-messages').innerHTML = `<div style="color:var(--accent); text-align:center; font-size:12px; margin-bottom:16px; letter-spacing:2px;">SECURE CONNECTION ESTABLISHED: ${player.toUpperCase()}</div>`;
+      document.getElementById('chat-input').focus();
+    }
+
+    async function sendChat() {
+      const message = document.getElementById('chat-input').value.trim();
+      if (!message) return;
+      const player = document.getElementById('chat-player').value.trim();
+      const messages = document.getElementById('chat-messages');
+      
+      messages.innerHTML += `<div class="chat-bubble chat-user">${message}</div>`;
+      document.getElementById('chat-input').value = '';
+      messages.scrollTop = messages.scrollHeight;
+      
+      const loadId = 'load-' + Date.now();
+      messages.innerHTML += `<div id="${loadId}" style="align-self: flex-start; color: var(--accent); font-size: 12px; letter-spacing: 1px;">PROCESSING...</div>`;
+      messages.scrollTop = messages.scrollHeight;
+
+      try {
+        const res = await fetch(`${API}/chat`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({player, season:2025, message, history:chatHistory}) });
+        document.getElementById(loadId)?.remove();
+        const data = await res.json();
+        messages.innerHTML += `<div class="chat-bubble chat-ai">${data.reply.replace(/\n/g, '<br>')}</div>`;
+        chatHistory = data.history;
+        messages.scrollTop = messages.scrollHeight;
+      } catch(e) { document.getElementById(loadId).textContent = "CONNECTION ERROR."; }
+    }
+
+    // LIVE GAMES LOGIC
+    async function loadGames() {
+      document.getElementById('games-load').classList.add('visible');
+      document.getElementById('games-empty').style.display = 'none';
+      document.getElementById('games-grid').innerHTML = '';
+      try {
+        let res = await fetch(`${API}/games/live`);
+        let data = await res.json();
+        let games = data.games || [];
+        
+        // Fallback to today if no live games
+        if (!games.length) {
+          res = await fetch(`${API}/games/today`);
+          data = await res.json();
+          games = data.games || [];
+        }
+
+        if(!games.length) { 
+          document.getElementById('games-empty').style.display = 'block'; 
+          return; 
+        }
+        
+        document.getElementById('games-grid').innerHTML = games.map(g => {
+          const h = g.home_team || {}; 
+          const a = g.visitor_team || {};
+          const isLive = (g.status || '').includes('Qtr') || (g.status || '').includes('Half');
+          
+          const calcScore = (team) => {
+            if (g[`${team}_team_score`] !== null && g[`${team}_team_score`] !== undefined) return g[`${team}_team_score`];
+            if (g[`${team}_q1`] != null) return (g[`${team}_q1`]||0) + (g[`${team}_q2`]||0) + (g[`${team}_q3`]||0) + (g[`${team}_q4`]||0);
+            return '—';
+          };
+          
+          const vScore = calcScore('visitor');
+          const hScore = calcScore('home');
+
+          return `
+          <div class="game-card" onclick='openBoxScore(${JSON.stringify(g).replace(/'/g, "&apos;")})'>
+            <div class="game-status"><span class="${isLive ? 'live' : ''}">${isLive ? 'LIVE' : 'SCHED'}</span> <span>${g.time || g.status}</span></div>
+            <div class="game-teams">
+              <div class="team-block"><div class="team-name">${a.abbreviation||'AWY'}</div><div class="team-score ${vScore > hScore && vScore !== '—' ? 'score-high':''}">${vScore}</div></div>
+              <div style="color:var(--text-muted); font-size:14px;">VS</div>
+              <div class="team-block"><div class="team-name">${h.abbreviation||'HME'}</div><div class="team-score ${hScore > vScore && hScore !== '—' ? 'score-high':''}">${hScore}</div></div>
+            </div>
+          </div>`;
+        }).join('');
+      } catch(e) { } finally { document.getElementById('games-load').classList.remove('visible'); }
+    }
+
+    // MODAL WITH NEW SECURE ENDPOINT LOGIC
+    async function openBoxScore(game) {
+      const h = game.home_team || {}; 
+      const a = game.visitor_team || {};
+      
+      // Open modal immediately with loading state
+      document.getElementById('modal-name').textContent = `${a.full_name} VS ${h.full_name}`;
+      document.getElementById('modal-meta').textContent = `${game.time || game.status} | FETCHING SECURE DATALINK...`;
+      document.getElementById('modal-stats').innerHTML = `<div class="loading visible" style="margin: 60px auto;"><div class="spinner" style="width: 40px; height: 40px; border-width: 4px;"></div></div>`;
+      document.getElementById('modal-bg').classList.add('open');
+      document.body.style.overflow = 'hidden';
+
+      try {
+        // Fetch individual player stats using new backend route
+        const res = await fetch(`${API}/games/${game.id}/stats`);
+        const data = await res.json();
+        const stats = data.stats || [];
+
+        const hStats = stats.filter(s => s.team && s.team.id === h.id);
+        const aStats = stats.filter(s => s.team && s.team.id === a.id);
+
+        function renderTable(team, teamStats) {
+          if(!teamStats || teamStats.length === 0) {
+             return `
+              <div style="background:var(--panel-bg); border:2px solid var(--panel-border); padding:32px; text-align:center; margin-bottom:24px;">
+                <h3 style="color:var(--text-main); margin-bottom:12px; font-size:24px; text-transform:uppercase;">${team.full_name}</h3>
+                <div style="color:var(--text-muted); font-size:13px; text-transform:uppercase; letter-spacing:2px;">DATA SYNC IN PROGRESS / NO PLAYER STATS YET...</div>
+              </div>`;
+          }
+          
+          const active = teamStats.filter(p => p.min && p.min !== '00').sort((x,y) => y.pts - x.pts);
+          return `<h3 style="margin:40px 0 16px; color:var(--text-main); font-size:28px; letter-spacing:-1px;">${team.full_name}</h3>
+          <div style="border: 2px solid var(--panel-border); background: var(--panel-bg); overflow:hidden;">
+            <table>
+              <tr style="background: #111; color: var(--text-muted);">
+                <th>PLAYER</th><th>MIN</th><th style="color:var(--text-main);">PTS</th><th>REB</th><th>AST</th><th>FG</th>
+              </tr>
+              ${active.map(p => `<tr>
+                <td style="color:var(--text-main);">${p.player.first_name} ${p.player.last_name}</td>
+                <td style="color:var(--text-muted);">${p.min}</td>
+                <td style="font-size:16px; color: ${p.pts>=20 ? 'var(--accent)' : 'var(--text-main)'};">${p.pts}</td>
+                <td style="color:var(--text-muted);">${p.reb}</td><td style="color:var(--text-muted);">${p.ast}</td><td style="color:var(--text-muted);">${p.fgm}-${p.fga}</td>
+              </tr>`).join('')}
+            </table>
+          </div>`;
+        }
+
+        document.getElementById('modal-meta').textContent = `${game.time || game.status}`;
+        document.getElementById('modal-stats').innerHTML = renderTable(a, aStats) + renderTable(h, hStats);
+
+      } catch (e) {
+        document.getElementById('modal-meta').textContent = `CONNECTION ERROR`;
+        document.getElementById('modal-stats').innerHTML = `<div style="color:var(--red); text-align:center; padding: 40px; font-size:14px; text-transform:uppercase;">Failed to retrieve box score from BDL pipeline.</div>`;
+      }
+    }
+
+    function closeModal() {
+      document.getElementById('modal-bg').classList.remove('open');
+      document.body.style.overflow = 'auto';
+    }
+
+    document.addEventListener('click', (e) => {
+      if(!e.target.closest('.autocomp')) {
+        document.querySelectorAll('.autocomp-list').forEach(l => l.classList.remove('visible'));
+      }
+    });
+
+    window.addEventListener('load', () => {
+      const active = localStorage.getItem('activePage') || 'home';
+      switchPage(active);
+    });
+  </script>
 </body>
 </html>
