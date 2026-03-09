@@ -8,6 +8,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
+
+from backend.config import get_settings
 from backend.engine.resolver import find_player, find_team
 from backend.engine.bdl import get_live_games, get_player_game_log
 from backend.ai.claude import ai_analyze, ai_compare, ai_trade, ai_team, ai_chat, ai_roster_package
@@ -25,7 +27,6 @@ app.add_middleware(
     allow_credentials=False,
 )
 
-
 class TradeRequest(BaseModel):
     outgoing: list[str]
     incoming: list[str]
@@ -33,19 +34,18 @@ class TradeRequest(BaseModel):
     context: str = ""
     force: bool = False
 
-
 class ChatRequest(BaseModel):
     player: str
     season: int = 2025
     message: str
     history: list[dict] = []
 
-
-# ── Health ─────────────────────────────────────────────────────────────────
+# ── Health & Search ────────────────────────────────────────────────────────
 
 @app.get("/api/health")
 async def health():
     return {"status": "ok", "version": "3.0.0"}
+
 @app.get("/api/players/search")
 async def search_players(q: str = ""):
     if len(q) < 2:
@@ -93,7 +93,6 @@ async def get_player(
         "report": report,
     }
 
-
 @app.get("/api/player/{name}/gamelog")
 async def get_gamelog(name: str, season: int = Query(default=2025)):
     profile = await find_player(name, season)
@@ -101,7 +100,6 @@ async def get_gamelog(name: str, season: int = Query(default=2025)):
         raise HTTPException(404, f"Player '{name}' not found.")
     log = await get_player_game_log(profile.identity.player_id, season)
     return {"player": profile.identity.name, "season": season, "games": log}
-
 
 # ── Compare ────────────────────────────────────────────────────────────────
 
@@ -126,7 +124,6 @@ async def compare(
         "stats_a": {"ppg": pa.ppg, "rpg": pa.rpg, "apg": pa.apg, "fg_pct": pa.fg_pct, "ts_pct": pa.ts_pct},
         "stats_b": {"ppg": pb.ppg, "rpg": pb.rpg, "apg": pb.apg, "fg_pct": pb.fg_pct, "ts_pct": pb.ts_pct},
     }
-
 
 # ── Trade ──────────────────────────────────────────────────────────────────
 
@@ -153,7 +150,6 @@ async def trade(req: TradeRequest):
         "analysis": report,
     }
 
-
 # ── Team ───────────────────────────────────────────────────────────────────
 
 @app.get("/api/team/{abbreviation}")
@@ -175,7 +171,6 @@ async def get_team(
         "report": report,
         "leaders": {k: v.identity.name for k, v in team.leaders.items()},
     }
-
 
 @app.get("/api/team/{abbreviation}/roster")
 async def get_roster_package(
@@ -205,7 +200,6 @@ async def get_roster_package(
         ],
     }
 
-
 # ── Chat ───────────────────────────────────────────────────────────────────
 
 @app.post("/api/chat")
@@ -220,13 +214,13 @@ async def chat(req: ChatRequest):
         "history": updated_history,
     }
 
-
 # ── Live Games ─────────────────────────────────────────────────────────────
 
 @app.get("/api/games/today")
 async def today_games():
     games = await get_live_games()
     return {"games": games, "count": len(games)}
+
 @app.get("/api/games/live")
 async def live_box_scores():
     try:
@@ -242,6 +236,22 @@ async def live_box_scores():
     except Exception as e:
         raise HTTPException(500, str(e))
 
+@app.get("/api/games/{game_id}/stats")
+async def get_game_stats(game_id: int):
+    """Fetch individual player box scores for a specific game."""
+    try:
+        s = get_settings()
+        async with httpx.AsyncClient() as c:
+            r = await c.get(
+                f"{s.bdl_base_url}/stats",
+                headers={"Authorization": s.bdl_api_key},
+                params={"game_ids[]": game_id, "per_page": 100},
+                timeout=10.0,
+            )
+            data = r.json()
+        return {"stats": data.get("data", [])}
+    except Exception as e:
+        return {"stats": [], "error": str(e)}
 
 # ── Cache ──────────────────────────────────────────────────────────────────
 
@@ -254,9 +264,7 @@ async def clear_cache():
     deleted = cdel_namespace("llm:")
     return {"deleted": deleted}
 
-
 # ── Serve frontend ─────────────────────────────────────────────────────────
-# This serves the HTML at / so no more file:// issues
 
 app.mount("/static", StaticFiles(directory="frontend"), name="static")
 
