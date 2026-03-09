@@ -5,7 +5,7 @@ SYSTEM = """You are PIVOT, the most advanced NBA analytics intelligence ever bui
 
 You think like a fusion of:
 - Daryl Morey (data-driven roster construction)
-- Bob Myers (relationship and contract intelligence)  
+- Bob Myers (relationship and contract intelligence)
 - A veteran film coordinator (tactical detail)
 - A Wall Street analyst (financial and market value)
 
@@ -16,7 +16,13 @@ YOUR ANALYSIS IS ALWAYS:
 - Financially literate — you understand cap implications
 - Decisive — you make clear recommendations, not hedge everything
 
-NEVER produce generic summaries. Every output should feel like it could change a front office decision today."""
+FORMATTING RULES — STRICTLY ENFORCED:
+- Write in clean, professional prose only. No exceptions.
+- Never use markdown symbols: no #, no *, no **, no bullet points, no dashes as list items.
+- Section headers must be written in ALL CAPS followed by a colon, on their own line.
+- Each section is one or more full paragraphs. No fragmented lists.
+- Write like a professional front office memo, not a blog post.
+- Every output should feel like it could be printed and handed to a GM."""
 
 
 def analyze_prompt(p: PlayerProfile, question: str | None = None) -> str:
@@ -43,45 +49,45 @@ AST/TOV Ratio: {f"{p.stats.assist_to_turnover:.2f}" if p.stats.assist_to_turnove
 
 {f"SPECIFIC QUESTION FROM STAFF:{chr(10)}{question}" if question else ""}
 
-DELIVER THIS EXACT STRUCTURE:
+Write the report using ONLY these section headers in ALL CAPS followed by a colon. Each section is prose paragraphs only — no bullets, no markdown.
 
-## Executive Summary
-2-3 sentences. What is the single most important thing to know about this player right now?
+EXECUTIVE SUMMARY:
+Two to three sentences. The single most important thing to know about this player right now.
 
-## Offensive Profile
-How does he score? Shot creation, efficiency by zone, tendencies, weaknesses.
+OFFENSIVE PROFILE:
+How he scores. Shot creation, efficiency by zone, tendencies, and weaknesses in full sentences.
 
-## Defensive Profile  
-On-ball, off-ball, switchability, rebounding, impact metrics.
+DEFENSIVE PROFILE:
+On-ball and off-ball defense, switchability, rebounding, and floor impact written as a cohesive paragraph.
 
-## Playmaking & Basketball IQ
-Vision, decision-making, pick-and-roll reads, clutch tendencies.
+PLAYMAKING AND BASKETBALL IQ:
+Vision, decision-making, pick-and-roll reads, and clutch tendencies in prose form.
 
-## Physical Profile & Athleticism
-How his body affects his game. Age curve projection.
+PHYSICAL PROFILE AND ATHLETICISM:
+How his body affects his game and his age curve projection.
 
-## Contract & Market Value
-What would he cost on the open market? Is he overpaid/underpaid? Trade value tier.
+CONTRACT AND MARKET VALUE:
+What he would cost on the open market, whether he is overpaid or underpaid, and his trade value tier.
 
-## Fit Analysis
-What team contexts maximize his value? What systems does he thrive/struggle in?
+FIT ANALYSIS:
+What team contexts maximize his value and what systems he thrives or struggles in.
 
-## Risk Factors
-Injury history markers, age curve, efficiency concerns, character flags.
+RISK FACTORS:
+Injury history, age curve concerns, efficiency flags, and any character considerations.
 
-## Verdict
-**BUY / HOLD / SELL** — one word, then 2-3 sentences explaining the decision."""
+VERDICT:
+State BUY, HOLD, or SELL clearly in the first sentence, then provide two to three sentences explaining the recommendation decisively."""
 
 
 def compare_prompt(a: PlayerProfile, b: PlayerProfile, context: str = "") -> str:
     def row(label, va, vb, pct=False):
         fa = f"{va:.1%}" if pct else f"{va:.1f}"
         fb = f"{vb:.1f}" if not pct else f"{vb:.1%}"
-        edge = "← A" if va > vb else ("B →" if vb > va else "TIE")
+        edge = "A" if va > vb else ("B" if vb > va else "TIE")
         return f"| {label:20} | {fa:>10} | {fb:>10} | {edge} |"
 
     table = "\n".join([
-        f"| {'STAT':20} | {''+a.identity.name[:10]:>10} | {''+b.identity.name[:10]:>10} | EDGE |",
+        f"| {'STAT':20} | {a.identity.name[:10]:>10} | {b.identity.name[:10]:>10} | EDGE |",
         "|" + "-"*22 + "|" + "-"*12 + "|" + "-"*12 + "|" + "-"*8 + "|",
         row("Points", a.ppg, b.ppg),
         row("Rebounds", a.rpg, b.rpg),
@@ -96,50 +102,50 @@ def compare_prompt(a: PlayerProfile, b: PlayerProfile, context: str = "") -> str
         row("TS%", a.ts_pct or 0, b.ts_pct or 0, pct=True),
     ])
 
-    return f"""Compare {a.identity.name} vs {b.identity.name} — {a.season} season.
+    return f"""Compare {a.identity.name} vs {b.identity.name} for the {a.season} season.
 
 {table}
 
 {f"CONTEXT: {context}" if context else ""}
 
-DELIVER THIS STRUCTURE:
+Write the comparison using ONLY these section headers in ALL CAPS followed by a colon. Prose paragraphs only — no bullets, no markdown, no asterisks.
 
-## Statistical Edge
-Who wins each category and why it matters contextually.
+STATISTICAL EDGE:
+Who wins each key category and why it matters in the context of winning basketball.
 
-## Scoring Comparison
-Style, efficiency, and volume differences.
+SCORING COMPARISON:
+Style, efficiency, and volume differences between the two players written as a cohesive analysis.
 
-## Two-Way Impact
-Defensive value comparison — who makes their team better?
+TWO-WAY IMPACT:
+Defensive value comparison. Who makes their team meaningfully better on both ends?
 
-## Playmaking & IQ
-Who is the better creator and decision-maker?
+PLAYMAKING AND IQ:
+Who is the better creator and decision-maker, and how large is the gap?
 
-## Physical & Age Projection
-Body, athleticism, and trajectory differences.
+PHYSICAL AND AGE PROJECTION:
+Body, athleticism, and trajectory differences. Who has more runway?
 
-## Contract & Trade Value
-Who gives more value for the dollar right now?
+CONTRACT AND TRADE VALUE:
+Who provides more value for the dollar right now and who would command more on the trade market?
 
-## Best Fit Contexts
-When would you want Player A over B and vice versa?
+BEST FIT CONTEXTS:
+When and why would you want Player A over Player B and vice versa?
 
-## Verdict
-If you could only have one, who and why? Be decisive."""
+VERDICT:
+Name the player you would take unambiguously in the first sentence. Then deliver two to three sentences of decisive reasoning."""
 
 
 def trade_prompt(out: list[PlayerProfile], inc: list[PlayerProfile], context: str = "") -> str:
     def summarize(players):
         return "\n".join(
-            f"• {p.identity.name} ({p.identity.position}, {p.identity.team}) — "
+            f"{p.identity.name} ({p.identity.position}, {p.identity.team}) — "
             f"{p.ppg:.1f}pts / {p.rpg:.1f}reb / {p.apg:.1f}ast | "
             f"FG: {p.fg_pct:.1%} | TS: {f'{p.ts_pct:.1%}' if p.ts_pct else 'N/A'} | "
             f"{p.mpg:.0f} mpg | {p.gp} GP"
             for p in players
         )
 
-    return f"""Evaluate this NBA trade proposal:
+    return f"""Evaluate this NBA trade proposal.
 
 SENDING OUT:
 {summarize(out)}
@@ -149,30 +155,28 @@ RECEIVING:
 
 {f"FRONT OFFICE CONTEXT: {context}" if context else ""}
 
-DELIVER THIS STRUCTURE:
+Write the evaluation using ONLY these section headers in ALL CAPS followed by a colon. Prose paragraphs only — no bullets, no markdown, no asterisks.
 
-## Trade Summary
-One sentence on what each side is trying to accomplish.
+TRADE SUMMARY:
+One sentence on what each side is trying to accomplish with this deal.
 
-## Value Delta
-Who wins on raw production? Quantify the gap.
+VALUE DELTA:
+Who wins on raw production? Quantify the gap in plain language.
 
-## Role & Fit Analysis
-Do the incoming players actually fill a need? Will they fit the system?
+ROLE AND FIT ANALYSIS:
+Do the incoming players actually fill a need? Will they fit the system and culture?
 
-## Age & Timeline
-Does this trade make sense for where each team is in their window?
+AGE AND TIMELINE:
+Does this trade make sense for where each franchise is in their competitive window?
 
-## Contract Intelligence
-Cap implications, trade exceptions, future flexibility impact.
+CONTRACT INTELLIGENCE:
+Cap implications, trade exceptions, and future flexibility impact written as a paragraph.
 
-## Risk Assessment
-Injury history, fit concerns, locker room considerations.
+RISK ASSESSMENT:
+Injury history, fit concerns, and locker room considerations for both sides.
 
-## Verdict
-**ACCEPT / REJECT / COUNTER**
-Confidence level: High / Medium / Low
-One paragraph explaining the decision."""
+VERDICT:
+State ACCEPT, REJECT, or COUNTER clearly in the first sentence. Include a confidence level of High, Medium, or Low. Then deliver one decisive paragraph explaining the recommendation."""
 
 
 def team_prompt(team: TeamProfile, question: str | None = None) -> str:
@@ -198,31 +202,31 @@ Efficiency: {leaders.get('efficiency', type('', (), {'identity': type('', (), {'
 
 {f"STAFF QUESTION: {question}" if question else ""}
 
-DELIVER THIS STRUCTURE:
+Write the report using ONLY these section headers in ALL CAPS followed by a colon. Prose paragraphs only — no bullets, no markdown, no asterisks.
 
-## Team Identity
-What is the defining characteristic of how this team plays?
+TEAM IDENTITY:
+The defining characteristic of how this team plays and what they are built around.
 
-## Offensive System
-Pace, spacing, creation hierarchy, half-court sets.
+OFFENSIVE SYSTEM:
+Pace, spacing, creation hierarchy, and half-court execution written as a cohesive paragraph.
 
-## Defensive Profile
-Scheme, personnel fit, rim protection, perimeter defense.
+DEFENSIVE PROFILE:
+Scheme, personnel fit, rim protection, and perimeter defense analysis.
 
-## Roster Construction Grade
-How well does this roster fit together? What's the ceiling?
+ROSTER CONSTRUCTION GRADE:
+How well this roster fits together, what the ceiling is, and assign a letter grade with justification.
 
-## Depth Chart Analysis
-Starter quality vs bench depth. Where are the weaknesses?
+DEPTH CHART ANALYSIS:
+Starter quality versus bench depth. Where are the meaningful weaknesses?
 
-## Injury Vulnerability
-Which players are injury risks? What happens if they go down?
+INJURY VULNERABILITY:
+Which players are injury risks and what the team looks like if they go down.
 
-## Roster Gaps
-What positions/skills are missing? What type of player would elevate this team?
+ROSTER GAPS:
+What positions and skills are missing and what type of player would elevate this team.
 
-## Offseason Blueprint
-3 specific, actionable moves to improve this roster."""
+OFFSEASON BLUEPRINT:
+Three specific, actionable moves to improve this roster written as a prioritized paragraph."""
 
 
 def chat_system(p: PlayerProfile) -> str:
@@ -235,8 +239,9 @@ Scoring: {p.ppg:.1f} PPG | Rebounds: {p.rpg:.1f} | Assists: {p.apg:.1f} | Steals
 Efficiency: FG {p.fg_pct:.1%} | 3PT {p.three_pct:.1%} | FT {p.ft_pct:.1%} | TS {f"{p.ts_pct:.1%}" if p.ts_pct else "N/A"}
 Usage: {p.mpg:.0f} minutes per game
 
-Answer all questions using this data as your factual foundation.
-When speculating beyond the stats, say so explicitly."""
+Answer all questions using this data as your factual foundation. Write in clean professional prose. No markdown, no bullet points, no asterisks. When speculating beyond the stats, say so explicitly."""
+
+
 def roster_card_prompt(p: PlayerProfile) -> str:
     return f"""Generate a concise scouting card for {p.identity.name}.
 
@@ -244,10 +249,10 @@ STATS ({p.season} season, {p.gp} GP):
 {p.ppg:.1f}pts / {p.rpg:.1f}reb / {p.apg:.1f}ast / {p.spg:.1f}stl / {p.bpg:.1f}blk
 FG: {p.fg_pct:.1%} | 3PT: {p.three_pct:.1%} | FT: {p.ft_pct:.1%} | TS: {f"{p.ts_pct:.1%}" if p.ts_pct else "N/A"} | {p.mpg:.0f}mpg
 
-Deliver EXACTLY this structure, keep each section to 2 sentences max:
+Write the scouting card using ONLY these section headers in ALL CAPS followed by a colon. Two sentences maximum per section. No bullets, no markdown, no asterisks.
 
-## Role & Value
-## Offensive Skill
-## Defensive Impact
-## Verdict
-One sentence: BUY / HOLD / SELL and why."""
+ROLE AND VALUE:
+OFFENSIVE SKILL:
+DEFENSIVE IMPACT:
+VERDICT:
+State BUY, HOLD, or SELL in the first word, then one sentence of decisive reasoning."""
