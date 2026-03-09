@@ -83,7 +83,8 @@ async def search_players(name: str) -> list[dict]:
     cached = cget(key)
     if cached is not None:
         return cached
-    data = await _get("/players", {"search": name.split()[0], "per_page": 25})
+    # Search using the full string, not just the first name
+    data = await _get("/players", {"search": name, "per_page": 25})
     result = data.get("data", [])
     cset(key, result, ttl=get_settings().cache_stats_ttl_seconds)
     return result

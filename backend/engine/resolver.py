@@ -10,18 +10,35 @@ logger = logging.getLogger(__name__)
 
 async def find_player(name: str, season: int) -> Optional[PlayerProfile]:
     players = await search_players(name)
+    
+    # If the full name returns nothing (due to a typo), try just the last name
+    if not players and len(name.split()) > 1:
+        players = await search_players(name.split()[-1])
+
     if not players:
         return None
 
     name_lower = name.lower().replace("-", " ")
     matched = None
+    
+    # 1. Try Exact Match
     for p in players:
         full = f"{p.get('first_name','')} {p.get('last_name','')}".lower().replace("-", " ")
-        if all(part in full for part in name_lower.split()):
+        if name_lower == full:
             matched = p
             break
+            
+    # 2. Try Partial/Fuzzy Match
     if not matched:
-        matched = players[0]
+        for p in players:
+            full = f"{p.get('first_name','')} {p.get('last_name','')}".lower().replace("-", " ")
+            if all(part in full for part in name_lower.split()):
+                matched = p
+                break
+                
+    # 3. STRICT REJECTION: No lazy fallbacks. If we didn't match, return None.
+    if not matched:
+        return None
 
     pid = matched["id"]
     raw_stats = await get_season_averages(pid, season)
